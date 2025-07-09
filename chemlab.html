@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Titration Simulation – Interactive Workbench v2.8</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      display: flex; flex-direction: column; min-height: 100vh;
+      overflow: hidden; user-select: none;
+    }
+    .actions-header, .controls-panel, .data-table-container {
+      flex-shrink: 0;
+      background-color: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 0.75rem 1rem;
+    }
+    .controls-panel {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      align-items: center; gap: 1rem;
+    }
+    .interactive, .controls-panel button:not(:disabled) {
+      cursor: pointer;
+    }
+    /* Logging displays */
+    #initial-display, #final-display {
+      padding: 0.5rem 1rem;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-weight: 600; color: #374151;
+      white-space: nowrap;
+    }
+    .data-table-container h3 {
+      font-weight: 600; margin-bottom: 0.5rem;
+    }
+    .data-table-container table {
+      width: 100%; border-collapse: collapse; text-align: center;
+    }
+    .data-table-container th, .data-table-container td {
+      border: 1px solid #d1d5db; padding: 0.5rem;
+    }
+    .data-table-container th:first-child,
+    .data-table-container td:first-child {
+      text-align: left; background: #f9fafb;
+    }
+    .data-table-container input {
+      width: 100%; text-align: center; border: none;
+      outline: none; background: transparent;
+    }
+    .simulation-container {
+      flex-grow: 1; display: flex; align-items: flex-end;
+      padding: 2rem;
+    }
+    .workbench {
+      width: 100%; height: 450px; background: #e5e7eb;
+      border-top: 5px solid #9ca3af; position: relative;
+      display: flex; justify-content: space-around;
+      gap: 2rem; align-items: flex-end;
+      padding: 0 2rem;
+    }
+    .apparatus-item-slot {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      position: relative; height: 220px;
+    }
+    .beaker-slot { width: 50px; }
+    .flask-slot  { width: 66px; }
+    .indicator-slot { width: 50px; }
+    .pipette-slot  { width: 8px; }
+    .retort-stand-assembly { position: relative; width: 140px; height: 380px; }
+    .retort-stand-base { position: absolute; bottom: 0; left: 0;
+      width: 100%; height: 12px; background: #6b7280; border-radius: 4px;
+    }
+    .retort-stand-pole { position: absolute; bottom: 12px; left: 15px;
+      width: 12px; height: 100%; background: #9ca3af; border-radius: 4px;
+    }
+    .retort-stand-arm { position: absolute; top: 40px; left: 27px;
+      width: 120px; height: 18px; background: #d1d5db; border-radius: 0 4px 4px 0;
+    }
+    .burette {
+      position: absolute; width: 26px; height: 280px; top: -10px; left: 80px;
+      background: rgba(248,250,252,0.8);
+      border: 2px solid #9ca3af; border-top: none; border-bottom: none;
+      z-index: 10;
+    }
+    .burette-markings {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background-image:
+        repeating-linear-gradient(to bottom, transparent, transparent calc(10% - 1px), #9ca3af calc(10% - 1px), #9ca3af 10%),
+        repeating-linear-gradient(to bottom, transparent, transparent calc(2% - 1px), #cbd5e1 calc(2% - 1px), #cbd5e1 2%);
+    }
+    .burette-nozzle {
+      position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+      border-left: 10px solid transparent; border-right: 10px solid transparent;
+      border-top: 18px solid #9ca3af;
+    }
+    .burette-liquid {
+      position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(191,219,254,0.8); transition: height 0.3s ease; z-index: 5;
+    }
+    .conical-flask {
+      position: absolute; bottom: 0; left: 0; width: 66px; height: 80px;
+      transition: all 0.3s ease-in-out;
+    }
+    .conical-flask::before, .conical-flask::after {
+      content: ''; position: absolute; bottom: 0; left: 0;
+      width: 100%; height: 100%; border-radius: 0 0 8px 8px;
+      clip-path: polygon(0% 99%,100% 99%,78% 25%,78% 4%,83% 0,17% 0,22% 4%,22% 25%);
+    }
+    .conical-flask::before { background: #9ca3af; }
+    .conical-flask::after  { background: #f8fafc; transform: scale(0.96); }
+    .flask-liquid-container {
+      position: absolute; bottom: 2px; left: 2px; right: 2px; top: 2px;
+      border-radius: 0 0 8px 8px;
+      clip-path: polygon(0% 99%,100% 99%,78% 25%,78% 4%,83% 0,17% 0,22% 4%,22% 25%);
+      transform: scale(0.96); overflow: hidden; z-index: 2;
+    }
+    .flask-liquid {
+      position: absolute; bottom: 0; left: 0; width: 100%; height: 0;
+      background: #e2e8f0; transition: height 0.5s ease, background-color 0.5s ease;
+    }
+    .beaker {
+      position: relative; width: 50px; height: 60px;
+      border: 2px solid #9ca3af; border-top: none; border-radius: 0 0 6px 6px;
+      background: #f8fafc; overflow: hidden;
+    }
+    .beaker-liquid { position: absolute; bottom: 0; left: 0; right: 0;
+      height: 80%; background: #e2e8f0; border-radius: 0 0 4px 4px;
+    }
+    .beaker-markings { position: absolute; top: 20%; right: 3px; width: 5px; height: 60%;
+      background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(25% - 1px), #9ca3af calc(25% - 1px), #9ca3af 25%);
+    }
+    .beaker-label-area {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      font-size: 0.75rem; font-weight: 600; color: #4b5563;
+    }
+    .reagent-bottle {
+      position: relative; width: 50px; height: 80px; background: #f8fafc;
+      border: 2px solid #9ca3af; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .reagent-bottle-cap { position: absolute; top: -12px; left: 50%;
+      transform: translateX(-50%); width: 30px; height: 12px; background: #9ca3af; border-radius: 2px;
+    }
+    .reagent-bottle-label { font-size: 0.75rem; font-weight: 600; color: #4b5563; }
+    .pipette {
+      position: absolute; bottom: 0; left: 0; width: 8px; height: 220px;
+      background: #f8fafc; border-left: 1px solid #9ca3af; border-right: 1px solid #9ca3af;
+      transition: transform 0.3s ease;
+    }
+    .pipette-liquid { position: absolute; bottom: 0; left: 0; right: 0;
+      height: 0; background: #e2e8f0; transition: height 0.5s ease;
+    }
+    .pipette-bulge { position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%); width: 22px; height: 40px; background: #f8fafc;
+      border: 2px solid #9ca3af; border-radius: 50%; overflow: hidden;
+    }
+    .pipette-bulge-liquid { width: 100%; height: 0; background: #e2e8f0; border-radius: 50%; transition: height 0.5s ease; }
+    .pipette-tip { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+      border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 8px solid #9ca3af;
+    }
+    .drop-zone {
+      position: absolute; border: 2px dashed #a0aec0; border-radius: 0.5rem;
+      background: rgba(107,114,128,0.1); opacity: 0; pointer-events: none;
+      transition: opacity 0.2s, background-color 0.2s, border-color 0.2s; z-index: 100;
+    }
+    .drop-zone.visible { opacity: 1; pointer-events: auto; }
+    .drop-zone.visible:hover { background: rgba(59,130,246,0.2); border-color: #3b82f6; }
+  </style>
+</head>
+<body>
+
+  <header class="actions-header w-full">
+    <div id="actions-panel" class="flex items-center justify-center gap-2 h-8 text-gray-500">
+      Select an apparatus to begin.
+    </div>
+  </header>
+
+  <div class="controls-panel">
+    <!-- Dispense controls -->
+    <button id="fast-flow" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 opacity-50 cursor-not-allowed" disabled>
+      Fast Flow
+    </button>
+    <button id="slow-flow" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 opacity-50 cursor-not-allowed" disabled>
+      Slow Flow
+    </button>
+    <button id="one-drop" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 opacity-50 cursor-not-allowed" disabled>
+      One Drop
+    </button>
+
+    <!-- Concentration & reagent -->
+    <div class="flex items-center gap-1">
+      <label for="fa2-slider" class="text-gray-700">FA₂ conc:</label>
+      <input type="range" id="fa2-slider" min="0.05" max="0.2" step="0.005" value="0.05" class="w-32"/>
+      <span id="fa2-value" class="ml-1 font-medium">0.050 M</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <label for="reagent-select" class="text-gray-700">Base:</label>
+      <select id="reagent-select" class="px-2 py-1 border border-gray-300 rounded">
+        <option value="FA1">FA1 (0.10 M)</option>
+        <option value="FA3">FA3 (0.05 M)</option>
+      </select>
+    </div>
+
+    <!-- Logging & refill -->
+    <button id="log-initial" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+      Log Initial Reading
+    </button>
+    <span id="initial-display">Initial: -- cm³</span>
+    <button id="log-final" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+      Log Final Reading
+    </button>
+    <span id="final-display">Final: -- cm³</span>
+    <button id="top-up" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+      Top Up Burette
+    </button>
+  </div>
+
+  <div class="data-table-container">
+    <h3>Titration Data</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Measurement</th>
+          <th>Rough titration</th>
+          <th>1st titration</th>
+          <th>2nd titration</th>
+          <th>3rd titration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Final burette reading (cm³)</td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+        </tr>
+        <tr>
+          <td>Initial burette reading (cm³)</td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+        </tr>
+        <tr>
+          <td>Volume added (cm³)</td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+          <td><input type="text"/></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="simulation-container">
+    <div id="workbench" class="workbench">
+      <div id="beaker-slot" class="apparatus-item-slot beaker-slot">
+        <div id="beaker-item" class="beaker interactive" data-item-type="beaker">
+          <div class="beaker-liquid"></div>
+          <div class="beaker-markings"></div>
+          <div class="beaker-label-area">FA2</div>
+        </div>
+      </div>
+      <div id="pipette-beaker-zone" class="drop-zone"></div>
+      <div id="pipette-slot" class="apparatus-item-slot pipette-slot">
+        <div id="pipette-item" class="pipette interactive" data-item-type="pipette">
+          <div class="pipette-liquid"></div>
+          <div class="pipette-bulge"><div class="pipette-bulge-liquid"></div></div>
+          <div class="pipette-tip"></div>
+        </div>
+      </div>
+      <div id="pipette-flask-zone" class="drop-zone"></div>
+      <div id="flask-slot" class="apparatus-item-slot flask-slot">
+        <div id="flask-item" class="conical-flask interactive" data-item-type="flask">
+          <div class="flask-liquid-container"><div class="flask-liquid"></div></div>
+        </div>
+      </div>
+      <div id="indicator-slot" class="apparatus-item-slot indicator-slot">
+        <div id="indicator-item" class="reagent-bottle interactive" data-item-type="indicator">
+          <div class="reagent-bottle-cap"></div>
+          <div class="reagent-bottle-label">Ind</div>
+        </div>
+      </div>
+      <div id="retort-stand-assembly" class="retort-stand-assembly interactive" data-item-type="burette-stand">
+        <div class="retort-stand-base"></div>
+        <div class="retort-stand-pole"></div>
+        <div class="burette interactive" data-item-type="burette">
+          <div class="burette-liquid"></div>
+          <div class="burette-markings"></div>
+          <div class="burette-nozzle"></div>
+        </div>
+        <div class="retort-stand-arm"></div>
+      </div>
+      <div id="burette-drop-zone" class="drop-zone"></div>
+      <div id="pipette-home-zone" class="drop-zone"></div>
+      <div id="flask-home-zone" class="drop-zone"></div>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const B_MAX = 50.0;
+    let buretteVol = B_MAX, usedVol = 0, initialReading = null, finalReading = null, flowInt = null;
+
+    const colors = {
+      MO: { acid: '#ef4444', base: '#fde047' },
+      TB: { acid: '#fde047', base: '#3b82f6' },
+      PH: { acid: '#e2e8f0', base: '#f472b6' }
+    };
+    let selectedIndicator = null;
+
+    const fa2Slider     = document.getElementById('fa2-slider');
+    const fa2Value      = document.getElementById('fa2-value');
+    const reagentSelect = document.getElementById('reagent-select');
+    let fa2Conc         = parseFloat(fa2Slider.value);
+    let baseConc        = reagentSelect.value==='FA1'?0.10:0.05;
+    let endpointVol     = fa2Conc*25/baseConc;
+    let endpointReached = false;
+
+    const ctrls  = {
+      fast: document.getElementById('fast-flow'),
+      slow: document.getElementById('slow-flow'),
+      drop: document.getElementById('one-drop'),
+      logI: document.getElementById('log-initial'),
+      logF: document.getElementById('log-final'),
+      top:  document.getElementById('top-up')
+    };
+    const displays = {
+      init: document.getElementById('initial-display'),
+      fin:  document.getElementById('final-display')
+    };
+    const zones  = {
+      pipBeaker: document.getElementById('pipette-beaker-zone'),
+      pipFlask:  document.getElementById('pipette-flask-zone'),
+      pipHome:   document.getElementById('pipette-home-zone'),
+      flaskUnder:document.getElementById('burette-drop-zone'),
+      flaskHome: document.getElementById('flask-home-zone')
+    };
+    const slots  = {
+      pip:    document.getElementById('pipette-slot'),
+      beaker: document.getElementById('beaker-slot'),
+      flask:  document.getElementById('flask-slot')
+    };
+    const stand  = document.getElementById('retort-stand-assembly');
+    const wb     = document.getElementById('workbench');
+    const actions= document.getElementById('actions-panel');
+    const pipette= document.getElementById('pipette-item');
+    const flaskLiq = document.querySelector('.flask-liquid');
+
+    function updateBurette() {
+      stand.querySelector('.burette-liquid').style.height = (buretteVol/B_MAX*100)+'%';
+    }
+    function recomputeEndpoint() {
+      baseConc     = reagentSelect.value==='FA1'?0.10:0.05;
+      fa2Conc      = parseFloat(fa2Slider.value);
+      endpointVol  = fa2Conc*25/baseConc;
+      endpointReached = false;
+      if (selectedIndicator) flaskLiq.style.backgroundColor = colors[selectedIndicator].acid;
+      if (pos.flask==='under_burette') enableDispense();
+    }
+    updateBurette();
+
+    fa2Slider.addEventListener('input', e => {
+      fa2Conc = parseFloat(e.target.value);
+      fa2Value.textContent = fa2Conc.toFixed(3)+' M';
+      recomputeEndpoint();
+    });
+    reagentSelect.addEventListener('change', recomputeEndpoint);
+
+    function disableDispense() {
+      [ctrls.fast, ctrls.slow, ctrls.drop].forEach(b=>{
+        b.disabled=true;
+        b.classList.add('opacity-50','cursor-not-allowed');
+      });
+    }
+    function enableDispense() {
+      [ctrls.fast, ctrls.slow, ctrls.drop].forEach(b=>{
+        b.disabled=false;
+        b.classList.remove('opacity-50','cursor-not-allowed');
+      });
+    }
+    disableDispense();
+
+    function dispense(vol) {
+      const amt = Math.min(vol, buretteVol);
+      if (!amt || endpointReached) return;
+      buretteVol-=amt;
+      updateBurette(); checkEndpoint();
+    }
+    function checkEndpoint() {
+      if (!endpointReached && finalReading===null && usedVol>=endpointVol) {
+        endpointReached=true;
+        const col = selectedIndicator?colors[selectedIndicator].base:'#ef4444';
+        flaskLiq.style.backgroundColor = col;
+        disableDispense();
+      }
+    }
+    ctrls.fast.addEventListener('mousedown',()=>{
+      dispense(0.5); flowInt=setInterval(()=>dispense(0.5),200);
+    });
+    ['mouseup','mouseleave'].forEach(evt=>
+      ctrls.fast.addEventListener(evt,()=>clearInterval(flowInt))
+    );
+    ctrls.slow.addEventListener('mousedown',()=>{
+      dispense(0.2); flowInt=setInterval(()=>dispense(0.2),200);
+    });
+    ['mouseup','mouseleave'].forEach(evt=>
+      ctrls.slow.addEventListener(evt,()=>clearInterval(flowInt))
+    );
+    ctrls.drop.addEventListener('click',()=>dispense(0.05));
+
+    // Logging and top-up
+    ctrls.logI.addEventListener('click', () => {
+      initialReading = buretteVol.toFixed(2);
+      displays.init.textContent = `Initial: ${initialReading} cm³`;
+    });
+    ctrls.logF.addEventListener('click', () => {
+      finalReading = buretteVol.toFixed(2);
+      displays.fin.textContent = `Final: ${finalReading} cm³`;
+    });
+    ctrls.top.addEventListener('click', () => {
+      buretteVol = B_MAX;
+      updateBurette();
+      initialReading = finalReading = null;
+      displays.init.textContent = 'Initial: -- cm³';
+      displays.fin .textContent = 'Final: -- cm³';
+      usedVol = 0;
+      recomputeEndpoint();
+    });
+
+    // Interaction (selection, movement, titration steps) – unchanged except usedVol
+    let selected=null, target=null;
+    let pos={ pipette:'home', flask:'home' };
+    let state={ pipetteFilled:false, flaskFilled:false, indicatorAdded:false };
+
+    function deselectAll() {
+      if (selected) selected.classList.remove('is-selected');
+      selected=target=null; hideZones(); updateActions();
+    }
+    function selectItem(item) {
+      deselectAll(); selected=item; item.classList.add('is-selected');
+      showZones(); updateActions();
+    }
+    function handleClick(e) {
+      const itm=e.target.closest('.interactive');
+      const zone=e.target.closest('.drop-zone.visible');
+      if (itm) {
+        if (!selected) selectItem(itm);
+        else if (selected===itm) deselectAll();
+        else { target=itm; updateActions(); }
+      } else if (zone && selected) {
+        if (selected.dataset.itemType==='pipette') {
+          if (zone===zones.pipBeaker) movePipetteTo(zones.pipBeaker);
+          if (zone===zones.pipFlask)  movePipetteTo(zones.pipFlask);
+          if (zone===zones.pipHome)   movePipetteHome();
+        }
+        if (selected.dataset.itemType==='flask') {
+          if (zone===zones.flaskUnder){ moveFlask('under_burette'); enableDispense(); }
+          if (zone===zones.flaskHome) { moveFlask('home'); disableDispense(); }
+        }
+        deselectAll();
+      } else deselectAll();
+    }
+    wb.addEventListener('click', handleClick);
+
+    function updateActions() {
+      actions.innerHTML='';
+      if (pos.pipette==='over_beaker' && !state.pipetteFilled) {
+        actions.appendChild(createBtn('Draw up 25.0 cm³ of FA2',()=>{
+          document.querySelector('.pipette-liquid').style.height='95%';
+          document.querySelector('.pipette-bulge-liquid').style.height='100%';
+          state.pipetteFilled=true; updateActions();
+        }));
+      } else if (pos.pipette==='over_flask' && state.pipetteFilled && !state.flaskFilled) {
+        actions.appendChild(createBtn('Transfer 25.0 cm³ of FA2 to flask',()=>{
+          document.querySelector('.pipette-liquid').style.height='0%';
+          document.querySelector('.pipette-bulge-liquid').style.height='0%';
+          flaskLiq.style.height='30%';
+          usedVol+=25.0;
+          state.pipetteFilled=false; state.flaskFilled=true; updateActions();
+        }));
+      } else if (selected && selected.dataset.itemType==='indicator' && state.flaskFilled && !state.indicatorAdded) {
+        const ctr=document.createElement('div');
+        ctr.className='flex gap-2';
+        ['MO','TB','PH'].forEach(type=>{
+          const lbl = type==='MO'?'Methyl Orange':type==='TB'?'Thymol Blue':'Phenolphthalein';
+          const btn=createBtn(lbl,()=>{
+            selectedIndicator=type;
+            state.indicatorAdded=true;
+            flaskLiq.style.backgroundColor=colors[type].acid;
+            deselectAll();
+          });
+          ctr.appendChild(btn);
+        });
+        actions.appendChild(ctr);
+      } else if (selected) {
+        actions.innerHTML=`<p class="text-gray-600">Selected: ${selected.dataset.itemType}.</p>`;
+      } else {
+        actions.innerHTML=`<p class="text-gray-500">Select an apparatus to begin.</p>`;
+      }
+    }
+    function createBtn(txt,fn){
+      const b=document.createElement('button');
+      b.className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700';
+      b.textContent=txt; b.onclick=e=>{e.stopPropagation();fn();};
+      return b;
+    }
+
+    function showZones(){
+      if (!selected) return;
+      function posZone(z,slot,offsetY=0){
+        const tr=slot.getBoundingClientRect(), wbR=wb.getBoundingClientRect();
+        const w=Math.max(tr.width,40)+20, h=Math.max(tr.height,40)+20;
+        const left=(tr.left-wbR.left)+(tr.width/2)-(w/2);
+        const top =(tr.top -wbR.top)+(tr.height/2)-(h/2)+offsetY;
+        Object.assign(z.style,{width:w+'px',height:h+'px',left:left+'px',top:top+'px'});
+        z.classList.add('visible');
+      }
+      if (selected.dataset.itemType==='pipette') {
+        if (pos.pipette==='home' && !state.pipetteFilled)
+          posZone(zones.pipBeaker,slots.beaker,-(slots.beaker.offsetHeight+20));
+        if (pos.pipette==='over_beaker' && state.pipetteFilled && !state.flaskFilled)
+          posZone(zones.pipFlask,slots.flask,-(slots.flask.offsetHeight+20));
+        if (pos.pipette!=='home')
+          posZone(zones.pipHome, slots.pip,0);
+      }
+      if (selected.dataset.itemType==='flask') {
+        if (pos.flask==='home') {
+          const z=zones.flaskUnder, base=stand.querySelector('.retort-stand-base'),
+                bur=stand.querySelector('.burette'),
+                cx=bur.offsetLeft+bur.offsetWidth/2,
+                left=stand.offsetLeft+cx-(selected.offsetWidth/2);
+          Object.assign(z.style,{width:selected.offsetWidth+'px',height:selected.offsetHeight+'px',
+                                bottom:base.offsetHeight+3+'px',left:left+'px'});
+          z.classList.add('visible');
+        } else {
+          posZone(zones.flaskHome,slots.flask,0);
+        }
+      }
+    }
+    function hideZones(){
+      document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('visible'));
+    }
+    function movePipetteTo(zoneElem){
+      const homeR=slots.pip.getBoundingClientRect(), zR=zoneElem.getBoundingClientRect();
+      const dx=zR.left-homeR.left+(zR.width-pipette.offsetWidth)/2;
+      const dy=zR.top-homeR.top+(zR.height-pipette.offsetHeight)/2;
+      pipette.style.transform=`translate(${dx}px,${dy}px)`;
+      pos.pipette = zoneElem===zones.pipBeaker?'over_beaker':'over_flask';
+    }
+    function movePipetteHome(){
+      pipette.style.transform=''; pos.pipette='home';
+    }
+    function moveFlask(dest){
+      const fl=document.getElementById('flask-item'),
+            slot=slots.flask, base=stand.querySelector('.retort-stand-base');
+      if (dest==='under_burette'){
+        const bur=stand.querySelector('.burette'),
+              cx=bur.offsetLeft+bur.offsetWidth/2,
+              left=cx-(fl.offsetWidth/2);
+        stand.appendChild(fl);
+        Object.assign(fl.style,{position:'absolute',bottom:base.offsetHeight+3+'px',
+                                left:left+'px',transform:''});
+        pos.flask='under_burette';
+      } else {
+        slot.appendChild(fl);
+        Object.assign(fl.style,{position:'absolute',bottom:'0',left:'0',transform:''});
+        pos.flask='home';
+      }
+    }
+    updateActions();
+  });
+  </script>
+</body>
+</html>

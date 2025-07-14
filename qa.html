@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qualitative Analysis Simulation – Interactive Workbench v1.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Controls panel */
+    .controls-panel {
+      flex-shrink: 0;
+      background-color: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 0.5rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Observation display */
+    .obs-display {
+      padding: 0.5rem 1rem;
+      background: #f9fafb;
+      border: 1px solid #d1d5e1;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    /* Data table */
+    .data-table-container {
+      flex-shrink: 0;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 0.75rem 1rem 0.5rem;
+    }
+    .data-table-container h3 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .data-table-container table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+    }
+    .data-table-container th,
+    .data-table-container td {
+      border: 1px solid #d1d5e1;
+      padding: 0.5rem;
+    }
+    .data-table-container th:first-child,
+    .data-table-container td:first-child {
+      text-align: left;
+      background: #f9fafb;
+    }
+    .data-table-container input {
+      width: 100%;
+      text-align: center;
+      border: none;
+      outline: none;
+      background: transparent;
+    }
+
+    /* Simulation container */
+    .simulation-container {
+      display: flex;
+      align-items: flex-start;
+      padding: 0.25rem 2rem;
+    }
+
+    .workbench {
+      width: 100%;
+      height: 450px;
+      background: #e5e7eb;
+      border-top: 5px solid #9ca3af;
+      position: relative;
+      display: flex;
+      justify-content: space-around;
+      gap: 2rem;
+      align-items: flex-end;
+      padding: 0 2rem;
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      position: absolute;
+      border: 2px dashed #a0aec0;
+      border-radius: 0.5rem;
+      background: rgba(107,114,128,0.1);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, background-color 0.2s, border-color 0.2s;
+      z-index: 100;
+    }
+    .drop-zone.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .drop-zone.visible:hover {
+      background: rgba(59,130,246,0.2);
+      border-color: #3b82f6;
+    }
+
+    /* Apparatus slots */
+    .apparatus-item-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+      height: 220px;
+    }
+    .tube-slot { width: 40px; }
+    .reagent-slot { width: 50px; }
+  </style>
+</head>
+<body>
+
+  <header class="actions-header w-full">
+    <div id="actions-panel" class="flex items-center justify-center gap-2 h-8 text-gray-500">
+      Select a reagent or test-tube to begin.
+    </div>
+  </header>
+
+  <div class="controls-panel">
+    <label for="reagent-select" class="text-gray-700">Reagent:</label>
+    <select id="reagent-select" class="px-2 py-1 border border-gray-300 rounded">
+      <option value="NaOH">NaOH(aq)</option>
+      <option value="NH3">NH₃(aq)</option>
+      <option value="Heat">Heat</option>
+    </select>
+    <button id="add-drop" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Add Drop
+    </button>
+    <span id="obs-display" class="obs-display">Observation: –</span>
+  </div>
+
+  <div class="data-table-container">
+    <h3>Observations</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Test Tube</th>
+          <th>Reagent Added</th>
+          <th>Observation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows will be generated dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="simulation-container">
+    <div id="workbench" class="workbench">
+      <!-- Example: 5 test tubes -->
+      <div class="apparatus-item-slot tube-slot" id="tube-1">
+        <div class="test-tube interactive" data-tube-id="1">
+          <!-- inner liquid/precipitate layer -->
+          <div class="tube-liquid"></div>
+        </div>
+      </div>
+      <div class="apparatus-item-slot tube-slot" id="tube-2"></div>
+      <div class="apparatus-item-slot tube-slot" id="tube-3"></div>
+      <div class="apparatus-item-slot tube-slot" id="tube-4"></div>
+      <div class="apparatus-item-slot tube-slot" id="tube-5"></div>
+
+      <!-- Reagent bottles -->
+      <div class="apparatus-item-slot reagent-slot" id="bottle-naoh">
+        <div class="reagent-bottle interactive" data-reagent="NaOH">
+          <div class="reagent-bottle-cap"></div>
+          <div class="reagent-bottle-label">NaOH</div>
+        </div>
+      </div>
+      <div class="apparatus-item-slot reagent-slot" id="bottle-nh3">
+        <div class="reagent-bottle interactive" data-reagent="NH3">
+          <div class="reagent-bottle-cap"></div>
+          <div class="reagent-bottle-label">NH₃</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Placeholder for QA simulation JS logic
+  </script>
+</body>
+</html>

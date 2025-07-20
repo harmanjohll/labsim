@@ -2,201 +2,784 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Qualitative Analysis Simulation – Interactive Workbench v1.0</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Qualitative Analysis Lab Simulation – Correct Dropper Logic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f3f4f6;
+      background: #f3f4f6;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .controls-panel {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #fff;
+      padding: .5rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .controls-panel button, .controls-panel select {
+      cursor: pointer;
+      padding: .5rem .75rem;
+      border-radius: .375rem;
+      border: 1px solid #d1d5e1;
+    }
+    .controls-panel button {
+      border: none;
+      color: white;
+    }
+    #select-unknown { background: #3b82f6; }
+    #confirm-unknown { background: #10b981; }
+    #reset-sim { background: #ef4444; margin-left: auto; }
+    .data-table-container {
+      background: #fff;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.95rem;
+      overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; text-align: center; }
+    th, td { border: 1px solid #d1d5e1; padding: .4rem; }
+    th:first-child, td:first-child { text-align: left; background: #f9fafb; }
+    th:nth-child(2), td:nth-child(2) { text-align: left; }
+    .simulation-container {
+      flex: 1;
+      position: relative;
+      min-height: 340px;
+      background: #e7e6ea;
+      padding-bottom: 44px;
+    }
+    .bench-area {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 16px;
+      padding: 0 8px 0 8px;
+      position: relative;
+      width: 100vw;
+      min-height: 270px;
+      justify-content: flex-start;
+    }
+    .sim-bench {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 54px;
+      background: linear-gradient(180deg, #575a78 65%, #505163 100%);
+      border-top: 2px solid #35363b;
+      z-index: 1;
+      box-shadow: 0 2px 22px 0 #aaa8aa1a;
+      pointer-events: none;
+    }
+    .rack-block {
+      position: relative;
+      margin-right: 0px;
+      margin-left: 15px;
+      z-index: 10;
+    }
+    .rack-tubes {
+      display: flex;
+      flex-direction: row;
+      gap: 9px;
+      position: relative;
+      margin-bottom: 2px;
+      left: 6px;
+    }
+    .tube-slot {
+      width: 28px;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      overflow: hidden;
-      user-select: none;
-    }
-
-    /* Controls panel */
-    .controls-panel {
-      flex-shrink: 0;
-      background-color: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0.5rem 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
       align-items: center;
-      gap: 0.75rem;
-    }
-
-    /* Observation display */
-    .obs-display {
-      padding: 0.5rem 1rem;
-      background: #f9fafb;
-      border: 1px solid #d1d5e1;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      color: #374151;
-      white-space: nowrap;
-    }
-
-    /* Data table */
-    .data-table-container {
-      flex-shrink: 0;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0.75rem 1rem 0.5rem;
-    }
-    .data-table-container h3 {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    .data-table-container table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
-    }
-    .data-table-container th,
-    .data-table-container td {
-      border: 1px solid #d1d5e1;
-      padding: 0.5rem;
-    }
-    .data-table-container th:first-child,
-    .data-table-container td:first-child {
-      text-align: left;
-      background: #f9fafb;
-    }
-    .data-table-container input {
-      width: 100%;
-      text-align: center;
-      border: none;
-      outline: none;
-      background: transparent;
-    }
-
-    /* Simulation container */
-    .simulation-container {
-      display: flex;
-      align-items: flex-start;
-      padding: 0.25rem 2rem;
-    }
-
-    .workbench {
-      width: 100%;
-      height: 450px;
-      background: #e5e7eb;
-      border-top: 5px solid #9ca3af;
       position: relative;
-      display: flex;
-      justify-content: space-around;
-      gap: 2rem;
-      align-items: flex-end;
-      padding: 0 2rem;
     }
-
-    /* Drop zone */
-    .drop-zone {
+    .tube-drop-zone {
+      width: 32px;
+      height: 110px;
       position: absolute;
+      top: -119px;
+      left: -4px;
       border: 2px dashed #a0aec0;
-      border-radius: 0.5rem;
-      background: rgba(107,114,128,0.1);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s, background-color 0.2s, border-color 0.2s;
-      z-index: 100;
-    }
-    .drop-zone.visible {
+      border-radius: 11px;
+      background: rgba(107,114,128,.01);
       opacity: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      transition: box-shadow .2s, opacity .2s;
       pointer-events: auto;
     }
-    .drop-zone.visible:hover {
-      background: rgba(59,130,246,0.2);
-      border-color: #3b82f6;
+    .tube-drop-zone:hover {
+      box-shadow: 0 0 0 3px #60a5fa44;
+      border-color: #60a5fa;
+      opacity: 0.40;
     }
-
-    /* Apparatus slots */
-    .apparatus-item-slot {
+    .test-tube {
+      width: 20px;
+      height: 107px;
+      background: #f8fafc;
+      border: 2px solid #8a8d94;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      position: relative;
+      overflow: hidden;
+      z-index: 10;
+      margin-top: 0px;
+      margin-bottom: 0;
+      box-shadow: 0 4px 14px -5px #64636319;
+    }
+    .tube-liquid, .ppt-layer {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 0; transition: all .28s;
+    }
+    .tube-liquid { background: transparent; z-index: 2; border-top: 1px solid #dadfe6; box-shadow: 0, -1px 4px #24242455 inset; }
+    .ppt-layer { opacity: 0; background: transparent; z-index: 3; border-top: 2px solid #dadfe6; box-shadow: 0, -1px 4px #24242455 inset;}
+    .svg-rack {
+      position: absolute;
+      left: 2px; bottom: -9px;
+      width: 184px; height: 58px;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .bench-reagents {
+      display: flex;
+      flex-direction: row;
+      gap: 16px;
+      align-items: flex-end;
+      margin-left: 10px;
+      margin-right: 0;
+      position: relative;
+      z-index: 20;
+    }
+    .reagent-slot {
+      width: 60px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
       position: relative;
-      height: 220px;
     }
-    .tube-slot { width: 40px; }
-    .reagent-slot { width: 50px; }
+    .reagent-bottle {
+      width: 49px; height: 92px;
+      background: #f8fafc; border: 2px solid #9ca3af; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative; margin-bottom: 1px;
+      transition: box-shadow 0.14s;
+      box-shadow: 0 4px 9px -7px #97979720;
+    }
+    .reagent-bottle.selected { box-shadow: 0 2px 8px 0 #60a5fa22; border-color: #2563eb;}
+    .reagent-bottle-cap {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      width: 30px; height: 10px; background: #9ca3af; border-radius: 2px;
+    }
+    .reagent-bottle-label {
+      font-size: .85rem; font-weight: 600; color: #374151;
+      position: absolute; left: 50%; top: 51%; transform: translate(-50%,-50%);
+      background: rgba(255,255,255,0.94);
+      width: 84%; text-align: center; line-height: 1.15;
+      border-radius: 4px; padding: 0.08em 0.1em 0.07em 0.1em; pointer-events: none;
+      letter-spacing: -0.5px;
+      white-space: pre-line;
+    }
+    .bottle-dropper {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      bottom: 80px; width: 32px; height: 110px; z-index: 10; display: none; pointer-events: auto;
+      transition: bottom 0.35s cubic-bezier(.4,1.6,.6,1);
+      cursor: pointer;
+    }
+    .bottle-dropper.visible { display: block; bottom: 118px; }
+    .dynamic-dropper {
+      width: 32px; height: 110px;
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 22;
+      transition: left 0.08s, top 0.08s;
+      opacity: 1
+      filter: none
+    }
+    .sink-container {
+      position: relative;
+      margin-left: 8px;
+      width: 70px;
+      z-index: 25;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    }
+    .sink-container svg {
+      cursor: pointer;
+    }
+    .sink-label {
+      font-size: .83rem; color: #515354; font-weight: 500;
+      margin-top: 6px; letter-spacing: 0.03em;
+    }
+    .action-btns {
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      gap: 7px;
+      align-items: center;
+      background: rgba(255,255,255,0.97);
+      padding: 0.35em 0.8em 0.22em 0.8em;
+      border-radius: 7px;
+      box-shadow: 0 2px 10px #b4b7d230;
+      border: 1.2px solid #d1d5db;
+      position: absolute;
+      min-width: 108px;
+      pointer-events: auto;
+    }
+    .action-btn {
+      background: #3b82f6; color: #fff; border: none; padding: 5px 14px; font-size: 1.01rem; border-radius: 7px;
+      cursor: pointer;
+      margin-bottom: 0px;
+      display: block;
+    }
+    .action-btn:last-child { margin-bottom: 0;}
+    @media (max-width: 900px) {
+      .bench-area { flex-direction: column; gap: 12px; min-height: 240px; }
+      .bench-reagents { margin-left: 0; }
+      .sink-container { margin-left: 0; }
+    }
+    @media (max-width: 540px) {
+      .bench-area { gap: 5px; }
+      .bench-reagents { gap: 6px; }
+      .svg-rack { width: 140px; }
+    }
   </style>
 </head>
 <body>
-
-  <header class="actions-header w-full">
-    <div id="actions-panel" class="flex items-center justify-center gap-2 h-8 text-gray-500">
-      Select a reagent or test-tube to begin.
-    </div>
-  </header>
-
   <div class="controls-panel">
-    <label for="reagent-select" class="text-gray-700">Reagent:</label>
-    <select id="reagent-select" class="px-2 py-1 border border-gray-300 rounded">
-      <option value="NaOH">NaOH(aq)</option>
-      <option value="NH3">NH₃(aq)</option>
-      <option value="Heat">Heat</option>
+    <button id="select-unknown">Select Unknown</button>
+    <select id="unknown-select" hidden>
+      <option value="FB6">FB6 (CuSO₄)</option>
+      <option value="FB7">FB7 (FeSO₄)</option>
+      <option value="FB8">FB8 (ZnCl₂)</option>
+      <option value="FB9">FB9 (FeCl₃)</option>
     </select>
-    <button id="add-drop" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-      Add Drop
-    </button>
-    <span id="obs-display" class="obs-display">Observation: –</span>
+    <button id="confirm-unknown" hidden>Confirm</button>
+    <button id="reset-sim">Reset</button>
   </div>
-
   <div class="data-table-container">
     <h3>Observations</h3>
     <table>
-      <thead>
-        <tr>
-          <th>Test Tube</th>
-          <th>Reagent Added</th>
-          <th>Observation</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Rows will be generated dynamically -->
-      </tbody>
+      <thead><tr><th>Tube</th><th>Procedure</th><th>Observation</th></tr></thead>
+      <tbody id="obs-table-body"></tbody>
     </table>
   </div>
-
   <div class="simulation-container">
-    <div id="workbench" class="workbench">
-      <!-- Example: 5 test tubes -->
-      <div class="apparatus-item-slot tube-slot" id="tube-1">
-        <div class="test-tube interactive" data-tube-id="1">
-          <!-- inner liquid/precipitate layer -->
-          <div class="tube-liquid"></div>
+    <div class="bench-area">
+      <!-- RACK/TUBES -->
+      <div class="rack-block">
+        <div class="rack-tubes">
+          <!-- 5 test tubes -->
+          <div class="tube-slot">
+            <div class="tube-drop-zone" data-tube="1"></div>
+            <div class="test-tube" data-tube="1"><div class="tube-liquid"></div><div class="ppt-layer"></div></div>
+          </div>
+          <div class="tube-slot">
+            <div class="tube-drop-zone" data-tube="2"></div>
+            <div class="test-tube" data-tube="2"><div class="tube-liquid"></div><div class="ppt-layer"></div></div>
+          </div>
+          <div class="tube-slot">
+            <div class="tube-drop-zone" data-tube="3"></div>
+            <div class="test-tube" data-tube="3"><div class="tube-liquid"></div><div class="ppt-layer"></div></div>
+          </div>
+          <div class="tube-slot">
+            <div class="tube-drop-zone" data-tube="4"></div>
+            <div class="test-tube" data-tube="4"><div class="tube-liquid"></div><div class="ppt-layer"></div></div>
+          </div>
+          <div class="tube-slot">
+            <div class="tube-drop-zone" data-tube="5"></div>
+            <div class="test-tube" data-tube="5"><div class="tube-liquid"></div><div class="ppt-layer"></div></div>
+          </div>
+        </div>
+        <!-- SVG rack under tubes -->
+        <svg class="svg-rack" viewBox="0 0 184 58" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <!-- Wood base -->
+          <rect x="0" y="13" width="184" height="36" rx="8" fill="url(#woodgrain-dark)" />
+          <!-- Holes for tubes -->
+          <ellipse cx="20" cy="30" rx="13" ry="7" fill="#000" opacity="0.15"/>
+          <ellipse cx="48" cy="30" rx="13" ry="7" fill="#000" opacity="0.15"/>
+          <ellipse cx="76" cy="30" rx="13" ry="7" fill="#000" opacity="0.15"/>
+          <ellipse cx="104" cy="30" rx="13" ry="7" fill="#000" opacity="0.15"/>
+          <ellipse cx="132" cy="30" rx="13" ry="7" fill="#000" opacity="0.15"/>
+          <!-- Top edge -->
+          <rect x="0" y="13" width="184" height="7" rx="4" fill="#946424" opacity="0.34"/>
+          <defs>
+            <linearGradient id="woodgrain-dark" x1="0" y1="0" x2="184" y2="70" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#8B5C2B"/>
+            <stop offset="0.05" stop-color="#744119"/>
+            <stop offset="0.26" stop-color="#6B3815"/>
+            <stop offset="0.6" stop-color="#532A10"/>
+            <stop offset="1" stop-color="#382010"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <!-- REAGENT BOTTLES -->
+      <div class="bench-reagents">
+        <div class="reagent-slot">
+          <div id="bottle-naoh" class="reagent-bottle" data-reagent="NaOH (aq)">
+            <div class="reagent-bottle-cap"></div>
+            <span class="reagent-bottle-label">NaOH<br>(aq)</span>
+            <svg class="bottle-dropper" id="dropper-naoh" viewBox="0 0 38 100">
+              <rect x="15" y="36" width="8" height="48" rx="4" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.2"/>
+              <polygon points="16.5,82 21.5,82 19,94" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.1"/>
+              <ellipse cx="19" cy="94" rx="2" ry="1" fill="#60a5fa"/>
+              <ellipse cx="19" cy="28" rx="10" ry="15" fill="#bb2d3b"/>
+            </svg>
+          </div>
+        </div>
+        <div class="reagent-slot">
+          <div id="bottle-nh3" class="reagent-bottle" data-reagent="NH3 (aq)">
+            <div class="reagent-bottle-cap"></div>
+            <span class="reagent-bottle-label">NH₃<br>(aq)</span>
+            <svg class="bottle-dropper" id="dropper-nh3" viewBox="0 0 38 100">
+              <rect x="15" y="36" width="8" height="48" rx="4" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.2"/>
+              <polygon points="16.5,82 21.5,82 19,94" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.1"/>
+              <ellipse cx="19" cy="94" rx="2" ry="1" fill="#60a5fa"/>
+              <ellipse cx="19" cy="28" rx="10" ry="15" fill="#bb2d3b"/>
+            </svg>
+          </div>
+        </div>
+        <div class="reagent-slot">
+          <div id="bottle-hno3" class="reagent-bottle" data-reagent="HNO3 (aq)">
+            <div class="reagent-bottle-cap"></div>
+            <span class="reagent-bottle-label">HNO₃<br>(aq)</span>
+            <svg class="bottle-dropper" id="dropper-hno3" viewBox="0 0 38 100">
+              <rect x="15" y="36" width="8" height="48" rx="4" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.2"/>
+              <polygon points="16.5,82 21.5,82 19,94" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.1"/>
+              <ellipse cx="19" cy="94" rx="2" ry="1" fill="#60a5fa"/>
+              <ellipse cx="19" cy="28" rx="10" ry="15" fill="#bb2d3b"/>
+            </svg>
+          </div>
+        </div>
+        <div class="reagent-slot">
+          <div id="bottle-agn03" class="reagent-bottle" data-reagent="AgNO3 (aq)">
+            <div class="reagent-bottle-cap"></div>
+            <span class="reagent-bottle-label">AgNO₃<br>(aq)</span>
+            <svg class="bottle-dropper" id="dropper-agn03" viewBox="0 0 38 100">
+              <rect x="15" y="36" width="8" height="48" rx="4" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.2"/>
+              <polygon points="16.5,82 21.5,82 19,94" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.1"/>
+              <ellipse cx="19" cy="94" rx="2" ry="1" fill="#60a5fa"/>
+              <ellipse cx="19" cy="28" rx="10" ry="15" fill="#bb2d3b"/>
+            </svg>
+          </div>
+        </div>
+        <!-- UNKNOWN BOTTLE, will show after selection -->
+        <div class="reagent-slot">
+          <div id="bottle-unknown" class="reagent-bottle" data-reagent="Unknown" hidden>
+            <div class="reagent-bottle-cap"></div>
+            <span id="unknown-label" class="reagent-bottle-label">FB6</span>
+            <svg class="bottle-dropper" id="dropper-unknown" viewBox="0 0 38 100">
+              <rect x="15" y="36" width="8" height="48" rx="4" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.2"/>
+              <polygon points="16.5,82 21.5,82 19,94" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.1"/>
+              <ellipse cx="19" cy="94" rx="2" ry="1" fill="#60a5fa"/>
+              <ellipse cx="19" cy="28" rx="10" ry="15" fill="#bb2d3b"/>
+            </svg>
+          </div>
         </div>
       </div>
-      <div class="apparatus-item-slot tube-slot" id="tube-2"></div>
-      <div class="apparatus-item-slot tube-slot" id="tube-3"></div>
-      <div class="apparatus-item-slot tube-slot" id="tube-4"></div>
-      <div class="apparatus-item-slot tube-slot" id="tube-5"></div>
-
-      <!-- Reagent bottles -->
-      <div class="apparatus-item-slot reagent-slot" id="bottle-naoh">
-        <div class="reagent-bottle interactive" data-reagent="NaOH">
-          <div class="reagent-bottle-cap"></div>
-          <div class="reagent-bottle-label">NaOH</div>
-        </div>
+      <!-- SINK/TAP (furthest right) -->
+      <div class="sink-container">
+        <svg width="54" height="82" viewBox="0 0 54 82" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- basin -->
+          <ellipse cx="27" cy="68" rx="24" ry="9" fill="#e3e4ea" stroke="#b7bac3" stroke-width="1.7"/>
+          <rect x="8" y="46" width="38" height="22" rx="10" fill="#f4f7fb" stroke="#babec6" stroke-width="1.5"/>
+          <rect x="18" y="66" width="16" height="5" rx="2" fill="#d3dae3"/>
+          <!-- tap body -->
+          <rect x="23" y="6" width="8" height="34" rx="4" fill="#bfc1ca" stroke="#9296a3" stroke-width="1.1"/>
+          <!-- tap head -->
+          <ellipse cx="27" cy="6.3" rx="6" ry="4" fill="#dbdde5" stroke="#b7bac3" stroke-width="1"/>
+          <!-- spout -->
+          <rect x="28" y="14" width="18" height="7" rx="3.5" fill="#bfc1ca" stroke="#9296a3" stroke-width="1.1"/>
+          <rect x="44" y="15.8" width="5" height="25" rx="2.5" fill="#bfc1ca" stroke="#9296a3" stroke-width="1.1"/>
+          <ellipse cx="47" cy="41.5" rx="2.5" ry="2" fill="#bfc1ca" stroke="#9296a3" stroke-width="0.8"/>
+          <ellipse cx="47" cy="41.5" rx="1.6" ry="1.1" fill="#c4c7d1" opacity="0.7"/>
+        </svg>
+        <span class="sink-label">Sink</span>
+        <button id="wash-btn" class="action-btn" style="margin-top:5px;display:none;">Wash Apparatus</button>
       </div>
-      <div class="apparatus-item-slot reagent-slot" id="bottle-nh3">
-        <div class="reagent-bottle interactive" data-reagent="NH3">
-          <div class="reagent-bottle-cap"></div>
-          <div class="reagent-bottle-label">NH₃</div>
-        </div>
+      <div class="sim-bench"></div>
+      <!-- Floating action buttons -->
+      <div class="action-btns" id="actions-holder">
+        <button id="btn-drops" class="action-btn">Add 1–2 drops</button>
+        <button id="btn-excess" class="action-btn">Add excess</button>
+        <button id="btn-transfer" class="action-btn" style="display:none;">Transfer</button>
       </div>
     </div>
   </div>
-
   <script>
-    // Placeholder for QA simulation JS logic
+    document.addEventListener('DOMContentLoaded', () => {
+      // Bottle, dropper, and tube logic
+      const selectBtn = document.getElementById('select-unknown');
+      const unknownSelect = document.getElementById('unknown-select');
+      const confirmBtn = document.getElementById('confirm-unknown');
+      const unknownBottle = document.getElementById('bottle-unknown');
+      const unknownLabel = document.getElementById('unknown-label');
+      const bottles = document.querySelectorAll('.reagent-bottle');
+      let selectedReagent = null;
+      let selectedTube = null;
+      const bottleDroppers = {
+        'NaOH (aq)': document.getElementById('dropper-naoh'),
+        'NH3 (aq)': document.getElementById('dropper-nh3'),
+        'HNO3 (aq)': document.getElementById('dropper-hno3'),
+        'AgNO3 (aq)': document.getElementById('dropper-agn03'),
+        'Unknown': document.getElementById('dropper-unknown')
+      };
+      let currentDropper = null, currentZone = null;
+      const actionBtns = document.getElementById('actions-holder');
+      const btnDrops = document.getElementById('btn-drops');
+      const btnExcess = document.getElementById('btn-excess');
+      const btnTransfer = document.getElementById('btn-transfer');
+      let transferTargetTube = null;
+      let chemistryState = {}; // { tube#: [ {reagent, amount} ] }
+
+      // Only one bottle's dropper visible at a time
+      function hideBottleDroppers() {
+        document.querySelectorAll('.bottle-dropper').forEach(d => {
+          d.classList.remove('visible');
+          // Return all droppers to correct bottles if not held over a tube
+          if (d.classList.contains('dynamic-dropper')) return;
+          const parentId = d.id.replace('dropper-', 'bottle-');
+          const bottle = document.getElementById(parentId);
+          if (bottle && !bottle.contains(d)) bottle.appendChild(d);
+        });
+      }
+      function showBottleDropper(b) {
+        hideBottleDroppers();
+        const r = b.dataset.reagent;
+        if (bottleDroppers[r]) bottleDroppers[r].classList.add('visible');
+      }
+
+      // --- Bottle selection ---
+      bottles.forEach(bottle => {
+        bottle.onclick = () => {
+          // Return any "floating" dropper back to correct bottle
+          if(currentDropper && currentZone) {
+            actionBtns.style.display = 'none';
+            const bottleId = currentDropper.id.replace('dropper-', 'bottle-');
+            const bottleElm = document.getElementById(bottleId);
+            if (bottleElm) bottleElm.appendChild(currentDropper);
+            currentDropper.classList.remove('dynamic-dropper');
+            currentDropper.classList.add('bottle-dropper','visible');
+            currentDropper = null; currentZone = null; transferTargetTube = null;
+          }
+          bottles.forEach(x => x.classList.remove('selected'));
+          bottle.classList.add('selected');
+          showBottleDropper(bottle);
+          selectedReagent = bottle;
+        };
+      });
+
+      // --- Tube placeholder (move dropper above tube) ---
+      document.querySelectorAll('.tube-drop-zone').forEach(zone => {
+        zone.onclick = () => {
+          if (selectedReagent) {
+            selectedTube = zone.dataset.tube;
+            const reagentType = selectedReagent.dataset.reagent;
+            const dropper = bottleDroppers[reagentType];
+            if (!dropper) return;
+            // Return any floating dropper to correct bottle
+            if(currentDropper && currentDropper !== dropper && currentZone){
+              actionBtns.style.display = 'none';
+              const bottleId = currentDropper.id.replace('dropper-', 'bottle-');
+              const bottleElm = document.getElementById(bottleId);
+              if (bottleElm) bottleElm.appendChild(currentDropper);
+            }
+            dropper.classList.remove('bottle-dropper','visible');
+            dropper.classList.add('dynamic-dropper');
+            // Place dropper into placeholder
+            zone.appendChild(dropper);
+            dropper.style.opacity=1;
+            dropper.style.filter = "none";
+            currentDropper = dropper; currentZone = zone;
+            showActionBtnsFor(reagentType, zone);
+            transferTargetTube = selectedTube;
+          }
+        };
+      });
+
+      // --- Action buttons above placeholder ---
+      function showActionBtnsFor(reagent, zone) {
+        if (reagent === "Unknown") {
+          btnTransfer.style.display = "block";
+          btnDrops.style.display = "none";
+          btnExcess.style.display = "none";
+        } else if (reagent === "HNO3 (aq)" || reagent === "AgNO3 (aq)") {
+          btnTransfer.style.display = "none";
+          btnDrops.style.display = "block";
+          btnExcess.style.display = "none";
+        } else {
+          btnTransfer.style.display = "none";
+          btnDrops.style.display = "block";
+          btnExcess.style.display = "block";
+        }
+        // Move floating action panel above current zone
+        if (zone) {
+          const zoneRect = zone.getBoundingClientRect();
+          const benchRect = document.querySelector('.bench-area').getBoundingClientRect();
+          // Offset for good visibility (centered above placeholder)
+          actionBtns.style.left = (zoneRect.left - benchRect.left - 18) + "px";
+          actionBtns.style.top = (zoneRect.top - benchRect.top - 60) + "px";
+          actionBtns.style.display = 'flex';
+        }
+      }
+      // Hide floating panel
+      function hideActions() { actionBtns.style.display = 'none'; }
+
+      // --- Chemistry logic for unknowns (as in your working logic) ---
+      function applyChemistry(tubeNum, reagent, amount) {
+        if (!chemistryState[tubeNum]) chemistryState[tubeNum] = [];
+        chemistryState[tubeNum].push({ reagent, amount });
+
+        const tube = document.querySelector('.test-tube[data-tube="'+tubeNum+'"]');
+        const liquid = tube.querySelector('.tube-liquid');
+        const ppt = tube.querySelector('.ppt-layer');
+        let fa = unknownLabel.textContent;
+        let obs = '', pptColor = '', pptVisible = false, liqColor = '', liqHeight = 0.20*107;
+
+        // --- Solution color (unknown transferred) ---
+        const faColors = {
+          'FB6': '#4491e3', // blue (CuSO4)
+          'FB7': '#7db57c', // pale green (FeSO4)
+          'FB8': '#e8eef7', // colorless (ZnCl2)
+          'FB9': '#ead244'  // yellow (FeCl3)
+        };
+
+        // --- Cation/anion logic ---
+        // CATIONS
+        if (fa === "FB6") { // CuSO4
+          if (reagent === "NaOH (aq)" && amount === "few") {
+            pptVisible = true; pptColor = "#2563eb";
+            obs = "Blue precipitate formed.";
+          }
+          if (reagent === "NaOH (aq)" && amount === "excess") {
+            pptVisible = true; pptColor = "#2563eb";
+            obs = "Blue ppt remains, insoluble in excess.";
+            liqHeight = 0.70*107;
+	    liqColor = "#6aa8eb";
+          }
+          if (reagent === "NH3 (aq)" && amount === "few") {
+            pptVisible = true; pptColor = "#2563eb";
+            obs = "Blue ppt formed.";
+          }
+          if (reagent === "NH3 (aq)" && amount === "excess") {
+            pptVisible = false;
+            obs = "Precipitate dissolves, deep blue solution formed.";
+            liqColor = "#2d4cc6";
+            liqHeight = 0.70*107;
+          }
+        }
+        if (fa === "FB7") { // FeSO4
+          if (reagent === "NaOH (aq)" && amount === "few") {
+            pptVisible = true; pptColor = "#94a466";
+            obs = "Green ppt formed.";
+          }
+          if (reagent === "NaOH (aq)" && amount === "excess") {
+            pptVisible = true; pptColor = "#94a466";
+            obs = "Green ppt remains, insoluble in excess.";
+            liqHeight = 0.70*107;
+	    liqColor = "#b8deb8";
+          }
+          if (reagent === "NH3 (aq)" && amount === "few") {
+            pptVisible = true; pptColor = "#94a466";
+            obs = "Green ppt formed.";
+          }
+          if (reagent === "NH3 (aq)" && amount === "excess") {
+            pptVisible = true; pptColor = "#94a466";
+            obs = "Green ppt remains, insoluble in excess.";
+            liqHeight = 0.70*107;
+	    liqColor = "#b8deb8";
+          }
+        }
+        if (fa === "FB8") { // ZnCl2
+          if (reagent === "NaOH (aq)" && amount === "few") {
+            pptVisible = true; pptColor = "#f7fafd";
+            obs = "White ppt formed.";
+          }
+          if (reagent === "NaOH (aq)" && amount === "excess") {
+            pptVisible = false;
+            obs = "White ppt dissolves in excess NaOH (aq), giving a colourless solution.";
+            liqHeight = 0.70*107;
+          }
+          if (reagent === "NH3 (aq)" && amount === "few") {
+            pptVisible = true; pptColor = "#f7fafd";
+            obs = "White ppt formed.";
+          }
+          if (reagent === "NH3 (aq)" && amount === "excess") {
+            pptVisible = false;
+            obs = "White ppt dissolves in excess NH₃ (aq), giving a colourless solution.";
+            liqHeight = 0.70*107;
+          }
+        }
+        if (fa === "FB9") { // FeCl3
+          if (reagent === "NaOH (aq)" && amount === "few") {
+            pptVisible = true; pptColor = "#c0a826";
+            obs = "Brown ppt formed.";
+          }
+          if (reagent === "NaOH (aq)" && amount === "excess") {
+            pptVisible = true; pptColor = "#c0a826";
+            obs = "Brown ppt remains, insoluble in excess.";
+            liqHeight = 0.70*107;
+	    liqColor = "#e6d46a";
+          }
+          if (reagent === "NH3 (aq)" && amount === "few") {
+            pptVisible = true; pptColor = "#c0a826";
+            obs = "Brown ppt formed.";
+          }
+          if (reagent === "NH3 (aq)" && amount === "excess") {
+            pptVisible = true; pptColor = "#c0a826";
+            obs = "Brown ppt remains, insoluble in excess.";
+            liqHeight = 0.70*107;
+	    liqColor = "#e6d46a";
+          }
+        }
+        // ANIONS, only testable from FB8 (ZnCl2) and FB9 (FeCl3)
+        // Add HNO3(aq) then AgNO3(aq)
+        let prevActions = chemistryState[tubeNum] || [];
+        let addedHNO3 = prevActions.some(x=>x.reagent==="HNO3 (aq)");
+        if ((fa === "FB8" || fa === "FB9") && addedHNO3 && reagent === "AgNO3 (aq)" && amount === "few") {
+          if (fa === "FB8") { // ZnCl2 (Cl-)
+            pptVisible = true; pptColor = "#f8faff";
+            obs = "White ppt formed (Cl⁻ present).";
+          }
+          if (fa === "FB9") { // FeCl3 (Cl-)
+            pptVisible = true; pptColor = "#f8faff";
+            obs = "White ppt formed (Cl⁻ present) in yellow solution.";
+          }
+        }
+        // Show solution color for transferred unknown (first step)
+        if (reagent === "Unknown") {
+          liqColor = faColors[fa] || "#e8eef7";
+        }
+        // Update test tube visuals
+        if (pptVisible) {
+          ppt.style.opacity = 1;
+          ppt.style.height = (0.13*107) + "px";
+          ppt.style.background = pptColor;
+	  ppt.style.borderTop = "2px solid " + pptColor;
+        } else {
+          ppt.style.opacity = 0;
+          ppt.style.height = 0;
+          ppt.style.background = "transparent";
+	  ppt.style.borderTop = "none";
+        }
+        if (reagent === "Unknown" || liqColor) {
+          liquid.style.height = (liqHeight) + 'px';
+          liquid.style.background = liqColor || faColors[fa] || "#e8eef7";
+        }
+        addObservation(tubeNum, reagent, amount, obs);
+      }
+      // --- Add observation to table ---
+      function addObservation(tube, reagent, amount, obs) {
+        let fa = unknownLabel.textContent;
+        let proc = "";
+        if (reagent === "Unknown") {
+          proc = `About 1 cm³ of ${fa} was placed in TT${tube}.`;
+        } else {
+          if (amount === "few") {
+            proc = `1–2 drops of ${reagent} was added to ${fa} in TT${tube}.`;
+          } else if (amount === "excess") {
+            proc = `Excess ${reagent} was added to ${fa} in TT${tube}.`;
+          }
+        }
+        if (!obs) obs = "—";
+        const row = `<tr>
+          <td>TT${tube}</td>
+          <td>${proc}</td>
+          <td>${obs}</td>
+        </tr>`;
+        const tbody = document.getElementById('obs-table-body');
+        tbody.innerHTML += row;
+      }
+
+      // --- Action buttons logic ---
+      btnDrops.onclick = () => {
+        if (transferTargetTube && selectedReagent) {
+          applyChemistry(transferTargetTube, selectedReagent.dataset.reagent, "few");
+          hideActions();
+        }
+      };
+      btnExcess.onclick = () => {
+        if (transferTargetTube && selectedReagent) {
+          applyChemistry(transferTargetTube, selectedReagent.dataset.reagent, "excess");
+          hideActions();
+        }
+      };
+      btnTransfer.onclick = () => {
+        if (transferTargetTube && selectedReagent) {
+          applyChemistry(transferTargetTube, "Unknown", "", "");
+          hideActions();
+        }
+      };
+
+      // --- Unknown bottle selection logic ---
+      selectBtn.onclick = () => {
+        unknownSelect.hidden = false;
+        confirmBtn.hidden = false;
+        selectBtn.disabled = true;
+      };
+      confirmBtn.onclick = () => {
+        unknownBottle.hidden = false;
+        unknownLabel.textContent = unknownSelect.value;
+        unknownSelect.hidden = true;
+        confirmBtn.hidden = true;
+      };
+
+      // --- Reset simulation logic ---
+      document.getElementById('reset-sim').onclick = () => {
+        document.querySelectorAll('.dynamic-dropper').forEach(d=>{
+          const bottleId = d.id.replace('dropper-','bottle-');
+          let bottle = document.getElementById(bottleId);
+          if (bottle) bottle.appendChild(d);
+          d.classList.remove('dynamic-dropper');
+          d.classList.add('bottle-dropper','visible');
+        });
+        hideBottleDroppers();
+        document.querySelectorAll('.reagent-bottle').forEach(b=>b.classList.remove('selected'));
+        currentDropper = null; currentZone = null;
+        document.querySelectorAll('.tube-liquid').forEach(l=>{l.style.height='0'; l.style.background='transparent';});
+        document.querySelectorAll('.ppt-layer').forEach(p=>{p.style.opacity='0'; p.style.background='transparent';});
+        unknownBottle.hidden = true;
+        unknownLabel.textContent = 'FB6';
+        unknownSelect.value = 'FB6';
+        unknownSelect.hidden = true;
+        confirmBtn.hidden = true;
+        selectBtn.disabled = false;
+        document.getElementById('obs-table-body').innerHTML = '';
+        chemistryState = {};
+        hideActions();
+      };
+
+      // --- Sink / Wash Apparatus logic ---
+      const sinkSVG = document.querySelector('.sink-container svg');
+      const washBtn = document.getElementById('wash-btn');
+      sinkSVG.addEventListener('click',()=>{
+        washBtn.style.display = "block";
+      });
+      washBtn.addEventListener('click',()=>{
+        document.querySelectorAll('.tube-liquid').forEach(l=>{l.style.height='0'; l.style.background='transparent';});
+        document.querySelectorAll('.ppt-layer').forEach(p=>{p.style.opacity='0'; p.style.background='transparent';});
+        chemistryState = {};
+        washBtn.style.display = "none";
+        // Add row for each tube indicating "Apparatus washed"
+        //for(let i=1;i<=5;i++) {
+          addObservation("All", "Washed","","All test tubes washed, dried and returned to rack.");
+        //}
+      });
+      document.body.addEventListener('click',e=>{
+        if (!sinkSVG.contains(e.target) && !washBtn.contains(e.target)) {
+          washBtn.style.display = "none";
+        }
+      },true);
+      document.body.addEventListener('mousedown',e=>{
+        if (!actionBtns.contains(e.target) && (!currentZone || !currentZone.contains(e.target))) {
+          hideActions();
+        }
+      });
+    });
   </script>
 </body>
 </html>

@@ -256,6 +256,9 @@
       <option value="FB7">FB7 (FeSO₄)</option>
       <option value="FB8">FB8 (ZnCl₂)</option>
       <option value="FB9">FB9 (FeCl₃)</option>
+      <option value="FB10">FB10 (CaI₂)</option>
+      <option value="FB11">FB11 (Al₂(SO₄)₃)</option>
+      <option value="FB12">FB12 (Pb(NO₃)₂)</option>
     </select>
     <button id="confirm-unknown" hidden>Confirm</button>
     <button id="reset-sim">Reset</button>
@@ -367,6 +370,18 @@
             </svg>
           </div>
         </div>
+	<div class="reagent-slot">
+  	  <div id="bottle-bacl2" class="reagent-bottle" data-reagent="BaCl2 (aq)">
+    	    <div class="reagent-bottle-cap"></div>
+    	    <span class="reagent-bottle-label">BaCl₂<br>(aq)</span>
+    	    <svg class="bottle-dropper" id="dropper-bacl2" viewBox="0 0 38 100">
+      	      <rect x="15" y="36" width="8" height="48" rx="4" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.2"/>
+      	      <polygon points="16.5,82 21.5,82 19,94" fill="#f3f4f6" stroke="#a3a3a3" stroke-width="1.1"/>
+      	      <ellipse cx="19" cy="94" rx="2" ry="1" fill="#60a5fa"/>
+      	      <ellipse cx="19" cy="28" rx="10" ry="15" fill="#bb2d3b"/>
+    	    </svg>
+  	  </div>
+	</div>
         <!-- UNKNOWN BOTTLE, will show after selection -->
         <div class="reagent-slot">
           <div id="bottle-unknown" class="reagent-bottle" data-reagent="Unknown" hidden>
@@ -426,6 +441,7 @@
         'NH3 (aq)': document.getElementById('dropper-nh3'),
         'HNO3 (aq)': document.getElementById('dropper-hno3'),
         'AgNO3 (aq)': document.getElementById('dropper-agn03'),
+        'BaCl2 (aq)': document.getElementById('dropper-bacl2'),
         'Unknown': document.getElementById('dropper-unknown')
       };
       let currentDropper = null, currentZone = null;
@@ -545,7 +561,10 @@
           'FB6': '#4491e3', // blue (CuSO4)
           'FB7': '#7db57c', // pale green (FeSO4)
           'FB8': '#e8eef7', // colorless (ZnCl2)
-          'FB9': '#ead244'  // yellow (FeCl3)
+          'FB9': '#ead244',  // yellow (FeCl3)
+	  'FB10': '#e8eef7', // colorless (CaI2)
+  	  'FB11': '#e8eef7', // colorless (Al2(SO4)3)
+  	  'FB12': '#e8eef7'  // colorless (Pb(NO3)2)
         };
 
         // --- Cation/anion logic ---
@@ -636,6 +655,76 @@
 	    liqColor = "#e6d46a";
           }
         }
+	// --- CaI2: Ca2+ (FB10) ---
+	if (fa === "FB10") {
+  	// Cation (Ca2+)
+ 	  if (reagent === "NaOH (aq)" && amount === "few") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt formed.";
+  	  }
+  	  if (reagent === "NaOH (aq)" && amount === "excess") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt remains, insoluble in excess.";
+    	    liqHeight = 0.70*107;
+    	    liqColor = "#f5f5fa";
+  	  }
+  	  if (reagent === "NH3 (aq)" && amount === "few") {
+    	    pptVisible = false;
+    	    obs = "No ppt or only very slight white ppt.";
+  	  }
+  	  if (reagent === "NH3 (aq)" && amount === "excess") {
+    	    pptVisible = false;
+    	    obs = "No ppt or only very slight white ppt.";
+  	  }
+	}
+
+	// --- Al2(SO4)3: Al3+ (FB11) ---
+	if (fa === "FB11") {
+  	  if (reagent === "NaOH (aq)" && amount === "few") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt formed.";
+  	  }
+  	  if (reagent === "NaOH (aq)" && amount === "excess") {
+    	    pptVisible = false;
+    	    obs = "White ppt dissolves in excess (gives colourless solution).";
+    	    liqHeight = 0.70*107;
+  	  }
+  	  if (reagent === "NH3 (aq)" && amount === "few") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt formed.";
+  	  }
+  	  if (reagent === "NH3 (aq)" && amount === "excess") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt remains, insoluble in excess.";
+    	    liqHeight = 0.70*107;
+    	    liqColor = "#f5f5fa";
+  	  }
+	}
+
+	// --- Pb(NO3)2: Pb2+ (FB12) ---
+	if (fa === "FB12") {
+  	  if (reagent === "NaOH (aq)" && amount === "few") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt formed.";
+  	  }
+  	  if (reagent === "NaOH (aq)" && amount === "excess") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt remains, insoluble in excess.";
+    	    liqHeight = 0.70*107;
+    	    liqColor = "#f5f5fa";
+  	  }
+  	  if (reagent === "NH3 (aq)" && amount === "few") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt formed.";
+  	  }
+  	  if (reagent === "NH3 (aq)" && amount === "excess") {
+    	    pptVisible = true; pptColor = "#f9fafb";
+    	    obs = "White ppt remains, insoluble in excess.";
+    	    liqHeight = 0.70*107;
+    	    liqColor = "#f5f5fa";
+  	  }
+	}
+
         // ANIONS, only testable from FB8 (ZnCl2) and FB9 (FeCl3)
         // Add HNO3(aq) then AgNO3(aq)
         let prevActions = chemistryState[tubeNum] || [];
@@ -650,6 +739,32 @@
             obs = "White ppt formed (Cl⁻ present) in yellow solution.";
           }
         }
+	// ANIONS for FB10 (I-), FB11 (SO4 2-), FB12 (NO3-)
+	if ((fa === "FB10" || fa === "FB11" || fa === "FB12") && addedHNO3 && reagent === "AgNO3 (aq)" && amount === "few") {
+  	  if (fa === "FB10") { // CaI2 (I-)
+    	    pptVisible = true; pptColor = "#fcf7b7";
+    	    obs = "Pale yellow ppt formed (I⁻ present).";
+  	  }
+  	  if (fa === "FB11") { // Al2(SO4)3 (SO4 2-) — no reaction
+    	    pptVisible = false;
+    	    obs = "No ppt (SO₄²⁻ does not react).";
+  	  }
+  	  if (fa === "FB12") { // Pb(NO3)2 (NO3-)
+    	    pptVisible = false;
+    	    obs = "No ppt (NO₃⁻ does not react).";
+  	  }
+	}
+	// BaCl2 for SO4 2- (only positive for FB11)
+	if ((fa === "FB11" || fa === "FB10" || fa === "FB12") && addedHNO3 && reagent === "BaCl2 (aq)" && amount === "few") {
+  	  if (fa === "FB11") { // Al2(SO4)3 (SO4 2-)
+    	    pptVisible = true; pptColor = "#f8faff";
+    	    obs = "White ppt formed (SO₄²⁻ present).";
+  	  }
+  	  else { // CaI2, Pb(NO3)2
+    	    pptVisible = false;
+    	    obs = "No ppt formed.";
+  	  }
+	}
         // Show solution color for transferred unknown (first step)
         if (reagent === "Unknown") {
           liqColor = faColors[fa] || "#e8eef7";

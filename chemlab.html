@@ -13,170 +13,109 @@
       display: flex; flex-direction: column; min-height: 100vh;
       overflow: hidden; user-select: none;
     }
-
-    /* Controls panel */
     .controls-panel {
       flex-shrink: 0;
-      background-color: #fff;
-      border-bottom: 1px solid #e5e7eb;
+      background: #fff; border-bottom: 1px solid #e5e7eb;
       padding: 0.5rem 1rem;
       display: flex; flex-wrap: wrap;
       justify-content: center; align-items: center;
       gap: 0.75rem;
     }
-
-    /* Initial & Final displays */
-    #initial-display,
-    #final-display {
-      padding: 0.5rem 1rem;
-      background: #f9fafb;
-      border: 1px solid #d1d5e1;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      color: #374151;
-      white-space: nowrap;
+    #initial-display, #final-display {
+      padding: 0.5rem 1rem; background: #f9fafb;
+      border: 1px solid #d1d5e1; border-radius: 0.5rem;
+      font-weight: 600; color: #374151; white-space: nowrap;
     }
-
-    /* Data table */
     .data-table-container {
-      flex-shrink: 0;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
+      flex-shrink: 0; background: #fff; border-bottom: 1px solid #e5e7eb;
       padding: 0.75rem 1rem 0.5rem;
     }
-    .data-table-container h3 {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
+    .data-table-container h3 { font-weight: 600; margin-bottom: 0.5rem; }
     .data-table-container table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
+      width: 100%; border-collapse: collapse; text-align: center;
     }
     .data-table-container th,
     .data-table-container td {
-      border: 1px solid #d1d5e1;
-      padding: 0.5rem;
+      border: 1px solid #d1d5e1; padding: 0.5rem;
     }
     .data-table-container th:first-child,
     .data-table-container td:first-child {
-      text-align: left;
-      background: #f9fafb;
+      text-align: left; background: #f9fafb;
     }
     .data-table-container input {
-      width: 100%;
-      text-align: center;
-      border: none;
-      outline: none;
-      background: transparent;
+      width:100%; text-align:center; border:none; outline:none; background:transparent;
     }
 
-    /* Simulation container */
     .simulation-container {
-      display: flex;
-      align-items: flex-start;  /* pin bench to top */
-      padding: 0.25rem 2rem;
+      display: flex; align-items: flex-start; padding: 0.25rem 2rem;
     }
-
     .workbench {
-      width: 100%;
-      height: 450px;
-      background: #e5e7eb;
-      border-top: 5px solid #9ca3af;
-      position: relative;
-      display: flex;
-      justify-content: space-around;
-      gap: 2rem;
-      align-items: flex-end;
-      padding: 0 2rem;
+      width:100%; height:450px; background:#e5e7eb; border-top:5px solid #9ca3af;
+      position:relative; display:flex; justify-content:space-around;
+      gap:2rem; align-items:flex-end; padding:0 2rem;
     }
 
-    /* Clickable cursor */
     .interactive,
-    .controls-panel button:not(:disabled) {
-      cursor: pointer;
+    .controls-panel button:not(:disabled) { cursor: pointer; }
+
+    @media (max-width:768px) {
+      .controls-panel { flex-direction:column; align-items:stretch; gap:0.5rem; }
+      .simulation-container { padding:0.25rem 1rem; }
+      .workbench { gap:1rem; padding:0 1rem; justify-content:flex-start; overflow-x:auto; }
     }
 
-    /* Responsive tweaks */
-    @media (max-width: 768px) {
-      .controls-panel {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.5rem;
-      }
-      .simulation-container {
-        padding: 0.25rem 1rem;
-      }
-      .workbench {
-        gap: 1rem;
-        padding: 0 1rem;
-        justify-content: flex-start;
-        overflow-x: auto;
-      }
+    /* Apparatus */
+    .apparatus-item-slot { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; position:relative; height:220px; }
+    .beaker-slot { width:50px; }
+    .flask-slot  { width:66px; }
+    .indicator-slot { width:50px; }
+    .pipette-slot  { width:8px; }
+    .retort-stand-assembly { position:relative; width:140px; height:380px; }
+    .retort-stand-base { position:absolute; bottom:0; left:0; width:100%; height:12px; background:#6b7280; border-radius:4px; }
+    .retort-stand-pole { position:absolute; bottom:12px; left:15px; width:12px; height:100%; background:#9ca3af; border-radius:4px; }
+    .retort-stand-arm { position:absolute; top:40px; left:27px; width:120px; height:18px; background:#d1d5db; border-radius:0 4px 4px 0; }
+    .burette { position:absolute; width:26px; height:280px; top:-10px; left:80px; background:rgba(248,250,252,0.8); border:2px solid #9ca3af; border-top:none; border-bottom:none; z-index:10; }
+    .burette-markings { position:absolute; top:0; left:0; width:100%; height:100%; background-image:
+      repeating-linear-gradient(to bottom, transparent, transparent calc(10% - 1px), #9ca3af calc(10% - 1px), #9ca3af 10%),
+      repeating-linear-gradient(to bottom, transparent, transparent calc(2% - 1px), #cbd5e1 calc(2% - 1px), #cbd5e1 2%); }
+    .burette-nozzle { position:absolute; bottom:-18px; left:50%; transform:translateX(-50%); border-left:10px solid transparent; border-right:10px solid transparent; border-top:18px solid #9ca3af; }
+    .burette-liquid { position:absolute; bottom:0; left:0; width:100%; height:100%; background:rgba(191,219,254,0.8); transition:height 0.3s ease; z-index:5; }
+
+    .conical-flask { position:absolute; bottom:0; left:0; width:66px; height:80px; transition:all 0.3s ease-in-out; }
+    .conical-flask::before, .conical-flask::after {
+      content:''; position:absolute; bottom:0; left:0; width:100%; height:100%; border-radius:0 0 8px 8px;
+      clip-path:polygon(0% 99%,100% 99%,78% 25%,78% 4%,83% 0,17% 0,22% 4%,22% 25%);
     }
-
-    /* Apparatus styles */
-    .apparatus-item-slot {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      position: relative;
-      height: 220px;
+    .conical-flask::before { background:#9ca3af; }
+    .conical-flask::after  { background:#f8fafc; transform:scale(0.96); }
+    .flask-liquid-container {
+      position:absolute; bottom:2px; left:2px; right:2px; top:2px; border-radius:0 0 8px 8px;
+      clip-path:polygon(0% 99%,100% 99%,78% 25%,78% 4%,83% 0,17% 0,22% 4%,22% 25%); transform:scale(0.96); overflow:hidden; z-index:2;
     }
-    .beaker-slot { width: 50px; }
-    .flask-slot  { width: 66px; }
-    .indicator-slot { width: 50px; }
-    .pipette-slot  { width: 8px; }
+    .flask-liquid { position:absolute; bottom:0; left:0; width:100%; height:0; background:#e2e8f0; transition:height 0.5s ease, background-color 0.5s ease; }
 
-    .retort-stand-assembly { position: relative; width: 140px; height: 380px; }
-    .retort-stand-base { position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: #6b7280; border-radius: 4px; }
-    .retort-stand-pole { position: absolute; bottom: 12px; left: 15px; width: 12px; height: 100%; background: #9ca3af; border-radius: 4px; }
-    .retort-stand-arm { position: absolute; top: 40px; left: 27px; width: 120px; height: 18px; background: #d1d5db; border-radius: 0 4px 4px 0; }
+    .beaker { position:relative; width:50px; height:60px; border:2px solid #9ca3af; border-top:none; border-radius:0 0 6px 6px; background:#f8fafc; overflow:hidden; }
+    .beaker-liquid { position:absolute; bottom:0; left:0; right:0; height:80%; background:#e2e8f0; border-radius:0 0 4px 4px; }
+    .beaker-markings { position:absolute; top:20%; right:3px; width:5px; height:60%; background-image:repeating-linear-gradient(to bottom, transparent, transparent calc(25% - 1px), #9ca3af calc(25% - 1px), #9ca3af 25%); }
+    .beaker-label-area { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:0.75rem; font-weight:600; color:#4b5563; }
 
-    .burette { position: absolute; width: 26px; height: 280px; top: -10px; left: 80px; background: rgba(248,250,252,0.8); border: 2px solid #9ca3af; border-top: none; border-bottom: none; z-index: 10; }
-    .burette-markings { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(10% - 1px), #9ca3af calc(10% - 1px), #9ca3af 10%), repeating-linear-gradient(to bottom, transparent, transparent calc(2% - 1px), #cbd5e1 calc(2% - 1px), #cbd5e1 2%); }
-    .burette-nozzle { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 18px solid #9ca3af; }
-    .burette-liquid { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(191,219,254,0.8); transition: height 0.3s ease; z-index: 5; }
+    .reagent-bottle { position:relative; width:50px; height:80px; background:#f8fafc; border:2px solid #9ca3af; border-radius:4px; display:flex; align-items:center; justify-content:center; }
+    .reagent-bottle-cap { position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:30px; height:12px; background:#9ca3af; border-radius:2px; }
+    .reagent-bottle-label { font-size:0.75rem; font-weight:600; color:#4b5563; }
 
-    .conical-flask { position: absolute; bottom: 0; left: 0; width: 66px; height: 80px; transition: all 0.3s ease-in-out; }
-    .conical-flask::before, .conical-flask::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; border-radius: 0 0 8px 8px; clip-path: polygon(0% 99%,100% 99%,78% 25%,78% 4%,83% 0,17% 0,22% 4%,22% 25%); }
-    .conical-flask::before { background: #9ca3af; }
-    .conical-flask::after  { background: #f8fafc; transform: scale(0.96); }
-    .flask-liquid-container { position: absolute; bottom: 2px; left: 2px; right: 2px; top: 2px; border-radius: 0 0 8px 8px; clip-path: polygon(0% 99%,100% 99%,78% 25%,78% 4%,83% 0,17% 0,22% 4%,22% 25%); transform: scale(0.96); overflow: hidden; z-index: 2; }
-    .flask-liquid { position: absolute; bottom: 0; left: 0; width: 100%; height: 0; background: #e2e8f0; transition: height 0.5s ease, background-color 0.5s ease; }
-
-    .beaker { position: relative; width: 50px; height: 60px; border: 2px solid #9ca3af; border-top: none; border-radius: 0 0 6px 6px; background: #f8fafc; overflow: hidden; }
-    .beaker-liquid { position: absolute; bottom: 0; left: 0; right: 0; height: 80%; background: #e2e8f0; border-radius: 0 0 4px 4px; }
-    .beaker-markings { position: absolute; top: 20%; right: 3px; width: 5px; height: 60%; background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(25% - 1px), #9ca3af calc(25% - 1px), #9ca3af 25%); }
-    .beaker-label-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 0.75rem; font-weight: 600; color: #4b5563; }
-
-    .reagent-bottle { position: relative; width: 50px; height: 80px; background: #f8fafc; border: 2px solid #9ca3af; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
-    .reagent-bottle-cap { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: #9ca3af; border-radius: 2px; }
-    .reagent-bottle-label { font-size: 0.75rem; font-weight: 600; color: #4b5563; }
-
-    .pipette { position: absolute; bottom: 0; left: 0; width: 8px; height: 220px; background: #f8fafc; border-left: 1px solid #9ca3af; border-right: 1px solid #9ca3af; transition: transform 0.3s ease; }
-    .pipette-liquid { position: absolute; bottom: 0; left: 0; right: 0; height: 0; background: #e2e8f0; transition: height 0.5s ease; }
-    .pipette-bulge { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 22px; height: 40px; background: #f8fafc; border: 2px solid #9ca3af; border-radius: 50%; overflow: hidden; }
-    .pipette-bulge-liquid { width: 100%; height: 0; background: #e2e8f0; border-radius: 50%; transition: height 0.5s ease; }
-    .pipette-tip { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 8px solid #9ca3af; }
+    .pipette { position:absolute; bottom:0; left:0; width:8px; height:220px; background:#f8fafc; border-left:1px solid #9ca3af; border-right:1px solid #9ca3af; transition:transform 0.3s ease; }
+    .pipette-liquid { position:absolute; bottom:0; left:0; right:0; height:0; background:#e2e8f0; transition:height 0.5s ease; }
+    .pipette-bulge { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:22px; height:40px; background:#f8fafc; border:2px solid #9ca3af; border-radius:50%; overflow:hidden; }
+    .pipette-bulge-liquid { width:100%; height:0; background:#e2e8f0; border-radius:50%; transition:height 0.5s ease; }
+    .pipette-tip { position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); border-left:4px solid transparent; border-right:4px solid transparent; border-top:8px solid #9ca3af; }
 
     .drop-zone {
-      position: absolute;
-      border: 2px dashed #a0aec0;
-      border-radius: 0.5rem;
-      background: rgba(107,114,128,0.1);
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s, background-color 0.2s, border-color 0.2s;
-      z-index: 100;
+      position:absolute; border:2px dashed #a0aec0; border-radius:0.5rem;
+      background:rgba(107,114,128,0.1); opacity:0; pointer-events:none;
+      transition:opacity 0.2s, background-color 0.2s, border-color 0.2s; z-index:100;
     }
-    .drop-zone.visible {
-      opacity: 1; pointer-events: auto;
-    }
-    .drop-zone.visible:hover {
-      background: rgba(59,130,246,0.2);
-      border-color: #3b82f6;
-    }
+    .drop-zone.visible { opacity:1; pointer-events:auto; }
+    .drop-zone.visible:hover { background:rgba(59,130,246,0.2); border-color:#3b82f6; }
   </style>
 </head>
 <body>
@@ -246,24 +185,15 @@
       <tbody>
         <tr>
           <td>Initial burette reading (cm³)</td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
+          <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
         <tr>
           <td>Final burette reading (cm³)</td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
+          <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
         <tr>
           <td>Volume added (cm³)</td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
-          <td><input type="text"/></td>
+          <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
       </tbody>
     </table>
@@ -317,17 +247,17 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const B_MAX = 50.00, VA = 25.0;
-    let buretteVol        = B_MAX;
-    let initialReadingVal = null;
-    let flowInt           = null;
-    let endpointReached   = false;
+    let buretteVol = B_MAX,
+        initialReadingVal = null,
+        flowInt = null,
+        endpointReached = false;
 
     let state = {
-      pipetteFilled:   false,
-      flaskFilled:     false,
-      indicatorAdded:  false,
-      pipetteRinsed:   false,
-      showRinseWarning:false
+      pipetteFilled: false,
+      flaskFilled: false,
+      indicatorAdded: false,
+      pipetteRinsed: false,
+      showRinseWarning: false
     };
 
     const colors = {
@@ -338,27 +268,27 @@
     let selectedIndicator = null;
 
     const ctrls = {
-      fast:  document.getElementById('fast-flow'),
-      slow:  document.getElementById('slow-flow'),
-      drop:  document.getElementById('one-drop'),
-      logI:  document.getElementById('log-initial'),
-      logF:  document.getElementById('log-final'),
-      top:   document.getElementById('top-up'),
+      fast: document.getElementById('fast-flow'),
+      slow: document.getElementById('slow-flow'),
+      drop: document.getElementById('one-drop'),
+      logI: document.getElementById('log-initial'),
+      logF: document.getElementById('log-final'),
+      top: document.getElementById('top-up'),
       reset: document.getElementById('reset-experiment')
     };
     const displays = {
       init: document.getElementById('initial-display'),
-      fin:  document.getElementById('final-display')
+      fin: document.getElementById('final-display')
     };
-    const fa2Slider     = document.getElementById('fa2-slider'),
-          fa2Value      = document.getElementById('fa2-value'),
+    const fa2Slider = document.getElementById('fa2-slider'),
+          fa2Value = document.getElementById('fa2-value'),
           reagentSelect = document.getElementById('reagent-select');
 
-    const stand    = document.getElementById('retort-stand-assembly'),
-          wb       = document.getElementById('workbench'),
-          actions  = document.getElementById('actions-panel'),
-          pipette  = document.getElementById('pipette-item'),
-          flaskLiq = document.querySelector('.flask-liquid');
+    const stand = document.getElementById('retort-stand-assembly'),
+          wb    = document.getElementById('workbench'),
+          actions = document.getElementById('actions-panel'),
+          pipette = document.getElementById('pipette-item'),
+          flaskLiq= document.querySelector('.flask-liquid');
 
     const zones = {
       pipBeaker:  document.getElementById('pipette-beaker-zone'),
@@ -373,26 +303,27 @@
       flask:  document.getElementById('flask-slot')
     };
 
-    let fa2Conc    = parseFloat(fa2Slider.value),
-        baseConc   = reagentSelect.value==='FA1'?0.10:0.05,
-        endpointVol= fa2Conc * VA / baseConc;
+    let fa2Conc  = parseFloat(fa2Slider.value),
+        baseConc = reagentSelect.value==='FA1'?0.10:0.05,
+        endpointVol = fa2Conc * VA / baseConc;
 
     function updateBurette() {
-      stand.querySelector('.burette-liquid').style.height = (buretteVol/B_MAX*100)+'%';
+      stand.querySelector('.burette-liquid').style.height = (buretteVol/B_MAX*100) + '%';
       displays.fin.textContent = `Burette: ${buretteVol.toFixed(2)} cm³`;
     }
     function recomputeEndpoint() {
-      fa2Conc     = parseFloat(fa2Slider.value);
-      baseConc    = reagentSelect.value==='FA1'?0.10:0.05;
+      fa2Conc = parseFloat(fa2Slider.value);
+      baseConc= reagentSelect.value==='FA1'?0.10:0.05;
       endpointVol = fa2Conc * VA / baseConc;
       endpointReached = false;
-      if (selectedIndicator) flaskLiq.style.backgroundColor = colors[selectedIndicator].acid;
+      if (selectedIndicator)
+        flaskLiq.style.backgroundColor = colors[selectedIndicator].acid;
     }
 
     updateBurette();
     fa2Slider.addEventListener('input', e=>{
       fa2Conc = parseFloat(e.target.value);
-      fa2Value.textContent = fa2Conc.toFixed(3)+' M';
+      fa2Value.textContent = fa2Conc.toFixed(3) + ' M';
       recomputeEndpoint();
     });
     reagentSelect.addEventListener('change', recomputeEndpoint);
@@ -423,36 +354,35 @@
       const delivered = initialReadingVal - buretteVol;
       if (!endpointReached && delivered >= endpointVol) {
         endpointReached = true;
-        const col = selectedIndicator?colors[selectedIndicator].base:'#ef4444';
-        flaskLiq.style.backgroundColor = col;
+        flaskLiq.style.backgroundColor = selectedIndicator ? colors[selectedIndicator].base : '#ef4444';
       }
     }
 
-    // Fast/slow/drop
+    // Fast / Slow / Drop
     ctrls.fast.addEventListener('mousedown', ()=>{
       dispense(0.5);
-      flowInt = setInterval(()=>dispense(0.5),200);
+      flowInt = setInterval(()=>dispense(0.5), 200);
     });
     ['mouseup','mouseleave'].forEach(evt=>
-      ctrls.fast.addEventListener(evt,()=>clearInterval(flowInt))
+      ctrls.fast.addEventListener(evt, ()=>clearInterval(flowInt))
     );
     ctrls.slow.addEventListener('mousedown', ()=>{
       dispense(0.2);
-      flowInt = setInterval(()=>dispense(0.2),200);
+      flowInt = setInterval(()=>dispense(0.2), 200);
     });
     ['mouseup','mouseleave'].forEach(evt=>
-      ctrls.slow.addEventListener(evt,()=>clearInterval(flowInt))
+      ctrls.slow.addEventListener(evt, ()=>clearInterval(flowInt))
     );
     ctrls.drop.addEventListener('click', ()=>dispense(0.05));
 
-    // Log initial
+    // Log initial reading
     ctrls.logI.addEventListener('click', ()=>{
       initialReadingVal = buretteVol;
       displays.init.textContent = `Initial: ${initialReadingVal.toFixed(2)} cm³`;
       if (pos.flask==='under_burette') enableDispense();
     });
 
-    // Top‐up (reverse Fast Flow)
+    // Top-Up as reverse fast-flow
     function topUp(vol) {
       const amt = Math.min(vol, B_MAX - buretteVol);
       if (!amt) return;
@@ -461,13 +391,13 @@
     }
     ctrls.top.addEventListener('mousedown', ()=>{
       topUp(0.5);
-      flowInt = setInterval(()=>topUp(0.5),200);
+      flowInt = setInterval(()=>topUp(0.5), 200);
     });
     ['mouseup','mouseleave'].forEach(evt=>
-      ctrls.top.addEventListener(evt,()=>clearInterval(flowInt))
+      ctrls.top.addEventListener(evt, ()=>clearInterval(flowInt))
     );
 
-    // Reset (do NOT refill)
+    // Reset experiment (does not refill)
     ctrls.reset.addEventListener('click', ()=>{
       movePipetteHome();
       moveFlask('home');
@@ -481,7 +411,7 @@
       disableDispense();
     });
 
-    // Interaction logic (select, zones, move, actions) – identical to v3.5
+    // Apparatus interaction (select/move/actions)
     let selected = null, target = null;
     let pos = { pipette:'home', flask:'home' };
 
@@ -493,10 +423,8 @@
     }
     function selectItem(item) {
       deselectAll();
-      selected = item;
-      item.classList.add('is-selected');
-      showZones();
-      updateActions();
+      selected = item; item.classList.add('is-selected');
+      showZones(); updateActions();
     }
     function handleClick(e) {
       const itm = e.target.closest('.interactive'),
@@ -508,12 +436,12 @@
       } else if (zone && selected) {
         if (selected.dataset.itemType==='pipette') {
           if (zone===zones.pipBeaker) movePipetteTo(zones.pipBeaker);
-          if (zone===zones.pipFlask)  movePipetteTo(zones.pipFlask);
-          if (zone===zones.pipHome)   movePipetteHome();
+          if (zone===zones.pipFlask ) movePipetteTo(zones.pipFlask);
+          if (zone===zones.pipHome  ) movePipetteHome();
         }
         if (selected.dataset.itemType==='flask') {
           if (zone===zones.flaskUnder) moveFlask('under_burette');
-          if (zone===zones.flaskHome)  { moveFlask('home'); disableDispense(); }
+          if (zone===zones.flaskHome ) { moveFlask('home'); disableDispense(); }
         }
         deselectAll();
       } else {
@@ -562,7 +490,7 @@
       if (selected && selected.dataset.itemType==='indicator' && state.flaskFilled && !state.indicatorAdded) {
         const ctr=document.createElement('div'); ctr.className='flex gap-2';
         ['MO','TB','PH'].forEach(type=>{
-          const lbl = type==='MO'?'Methyl Orange': type==='TB'?'Thymol Blue':'Phenolphthalein';
+          const lbl= type==='MO'?'Methyl Orange': type==='TB'?'Thymol Blue':'Phenolphthalein';
           const btn=createBtn(lbl, ()=>{
             selectedIndicator=type; state.indicatorAdded=true;
             flaskLiq.style.backgroundColor=colors[type].acid; deselectAll();
@@ -572,7 +500,7 @@
         actions.appendChild(ctr);
         return;
       }
-      // Default message
+      // Default
       if (selected) {
         actions.innerHTML=`<p class="text-gray-600">Selected: ${selected.dataset.itemType}.</p>`;
       } else {
@@ -580,11 +508,10 @@
       }
     }
 
-    function createBtn(text, onClick) {
+    function createBtn(txt, fn) {
       const b=document.createElement('button');
       b.className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700';
-      b.textContent=text;
-      b.onclick=e=>{ e.stopPropagation(); onClick(); };
+      b.textContent=txt; b.onclick=e=>{ e.stopPropagation(); fn(); };
       return b;
     }
 
@@ -598,29 +525,29 @@
         Object.assign(z.style,{width:w+'px',height:h+'px',left:left+'px',top:top+'px'});
         z.classList.add('visible');
       }
-      // Pipette
+      // Pipette zones
       if (selected.dataset.itemType==='pipette') {
         if (pos.pipette==='home' && !state.pipetteFilled)
           posZone(zones.pipBeaker, slots.beaker, -slots.beaker.offsetHeight-10);
         if (pos.pipette==='over_beaker') {
-          posZone(zones.pipHome,      slots.pip, 0);
+          posZone(zones.pipHome, slots.pip, 0);
           if (state.pipetteFilled && !state.flaskFilled)
             posZone(zones.pipFlask, slots.flask, -slots.flask.offsetHeight-10);
         }
         if (pos.pipette==='over_flask')
           posZone(zones.pipHome, slots.pip, 0);
       }
-      // Flask
+      // Flask zones
       if (selected.dataset.itemType==='flask') {
         if (pos.flask==='home') {
           const z    = zones.flaskUnder;
           const base = stand.querySelector('.retort-stand-base');
           const bur  = stand.querySelector('.burette');
-          const cx   = bur.offsetLeft+bur.offsetWidth/2;
-          const left = stand.offsetLeft+cx-(selected.offsetWidth/2);
+          const cx   = bur.offsetLeft + bur.offsetWidth/2;
+          const left = stand.offsetLeft + cx - (selected.offsetWidth/2);
           Object.assign(z.style,{
-            width:  selected.offsetWidth+'px',
-            height: selected.offsetHeight+'px',
+            width: selected.offsetWidth+'px',
+            height:selected.offsetHeight+'px',
             bottom: base.offsetHeight+3+'px',
             left:   left+'px'
           });
@@ -636,11 +563,12 @@
     }
 
     function movePipetteTo(zoneElem) {
-      const homeR=slots.pip.getBoundingClientRect(), zR=zoneElem.getBoundingClientRect();
-      const dx = zR.left-homeR.left + (zR.width-pipette.offsetWidth)/2;
-      const dy = zR.top -homeR.top  + (zR.height-pipette.offsetHeight)/2;
-      pipette.style.transform=`translate(${dx}px,${dy}px)`;
-      pos.pipette = (zoneElem===zones.pipBeaker) ? 'over_beaker' : 'over_flask';
+      const homeR=slots.pip.getBoundingClientRect(),
+            zR   = zoneElem.getBoundingClientRect();
+      const dx = zR.left - homeR.left + (zR.width - pipette.offsetWidth)/2;
+      const dy = zR.top  - homeR.top  + (zR.height - pipette.offsetHeight)/2;
+      pipette.style.transform = `translate(${dx}px,${dy}px)`;
+      pos.pipette = (zoneElem===zones.pipBeaker)?'over_beaker':'over_flask';
     }
     function movePipetteHome() {
       pipette.style.transform=''; pos.pipette='home';
@@ -652,8 +580,8 @@
             base = stand.querySelector('.retort-stand-base');
       if (dest==='under_burette') {
         const bur  = stand.querySelector('.burette'),
-              cx   = bur.offsetLeft+bur.offsetWidth/2,
-              left = cx-(fl.offsetWidth/2);
+              cx   = bur.offsetLeft + bur.offsetWidth/2,
+              left = cx - (fl.offsetWidth/2);
         stand.appendChild(fl);
         Object.assign(fl.style,{
           position:'absolute',
@@ -667,14 +595,14 @@
         Object.assign(fl.style,{
           position:'absolute',
           bottom:'0',
-          left:  '0',
+          left:'0',
           transform:''
         });
         pos.flask='home';
       }
     }
 
-    // Initial launch
+    // Kick off
     recomputeEndpoint();
     updateActions();
   });

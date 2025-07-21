@@ -184,11 +184,11 @@
       </thead>
       <tbody>
         <tr>
-          <td>Initial burette reading (cm³)</td>
+          <td>Final burette reading (cm³)</td>
           <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
         <tr>
-          <td>Final burette reading (cm³)</td>
+          <td>Initial burette reading (cm³)</td>
           <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
         <tr>
@@ -247,7 +247,7 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const B_MAX = 50.00, VA = 25.0;
-    let buretteVol = B_MAX,
+    let buretteVol = 0,
         initialReadingVal = null,
         flowInt = null,
         endpointReached = false;
@@ -344,9 +344,9 @@
 
     function dispense(vol) {
       if (initialReadingVal === null) return;
-      const amt = Math.min(vol, buretteVol);
+      const amt = Math.min(vol, B_MAX - buretteVol);
       if (!amt) return;
-      buretteVol -= amt;
+      buretteVol += amt;
       updateBurette();
       checkEndpoint();
     }

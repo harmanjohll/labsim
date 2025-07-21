@@ -184,11 +184,11 @@
       </thead>
       <tbody>
         <tr>
-          <td>Initial burette reading (cm³)</td>
+          <td>Final burette reading (cm³)</td>
           <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
         <tr>
-          <td>Final burette reading (cm³)</td>
+          <td>Initial burette reading (cm³)</td>
           <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
         <tr>
@@ -308,9 +308,15 @@
         endpointVol = fa2Conc * VA / baseConc;
 
     function updateBurette() {
-      stand.querySelector('.burette-liquid').style.height = (buretteVol/B_MAX*100) + '%';
-      displays.fin.textContent = `Burette: ${buretteVol.toFixed(2)} cm³`;
-    }
+  // visual drain stays the same:
+  stand.querySelector('.burette-liquid')
+       .style.height = (buretteVol / B_MAX * 100) + '%';
+
+  // invert only the displayed number:
+  const displayed = (B_MAX - buretteVol).toFixed(2);
+  displays.fin.textContent = `Burette: ${displayed} cm³`;
+}
+
     function recomputeEndpoint() {
       fa2Conc = parseFloat(fa2Slider.value);
       baseConc= reagentSelect.value==='FA1'?0.10:0.05;
@@ -378,7 +384,8 @@
     // Log initial reading
     ctrls.logI.addEventListener('click', ()=>{
       initialReadingVal = buretteVol;
-      displays.init.textContent = `Initial: ${initialReadingVal.toFixed(2)} cm³`;
+      const displayedInit = (B_MAX - initialReadingVal).toFixed(2);
+      displays.init.textContent = `Initial: ${displayedInit} cm³`;
       if (pos.flask==='under_burette') enableDispense();
     });
 

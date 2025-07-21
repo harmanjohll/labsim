@@ -308,14 +308,8 @@
         endpointVol = fa2Conc * VA / baseConc;
 
     function updateBurette() {
-    // 1) Visual fill‐level stays as “remaining volume”
-    stand
-      .querySelector('.burette-liquid')
-      .style.height = (buretteVol / B_MAX * 100) + '%';
-
-    // 2) Compute “delivered” and update the text
-    const delivered = (B_MAX - buretteVol).toFixed(2);
-    displays.fin.textContent = `Burette: ${delivered} cm³`;
+      stand.querySelector('.burette-liquid').style.height = (buretteVol/B_MAX*100) + '%';
+      displays.fin.textContent = Burette: ${buretteVol.toFixed(2)} cm³;
     }
     function recomputeEndpoint() {
       fa2Conc = parseFloat(fa2Slider.value);

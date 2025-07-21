@@ -755,16 +755,10 @@
   	  }
 	}
 	// BaCl2 for SO4 2- (only positive for FB11)
-	if ((fa === "FB11" || fa === "FB10" || fa === "FB12") && addedHNO3 && reagent === "BaCl2 (aq)" && amount === "few") {
-  	  if (fa === "FB11") { // Al2(SO4)3 (SO4 2-)
-    	    pptVisible = true; pptColor = "#f8faff";
-    	    obs = "White ppt formed (SO₄²⁻ present).";
-  	  }
-  	  else { // CaI2, Pb(NO3)2
-    	    pptVisible = false;
-    	    obs = "No ppt formed.";
-  	  }
-	}
+	if ((fa === "FB11" || fa === "FB6" || fa === "FB7") && addedHNO3 && reagent === "BaCl2 (aq)" && amount === "few") {
+	    pptVisible = true; pptColor = "#f8faff";
+    	    obs = "White ppt formed (SO₄²⁻ present).";  	  
+	   }
         // Show solution color for transferred unknown (first step)
         if (reagent === "Unknown") {
           liqColor = faColors[fa] || "#e8eef7";

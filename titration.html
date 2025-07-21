@@ -184,11 +184,11 @@
       </thead>
       <tbody>
         <tr>
-          <td>Final burette reading (cm³)</td>
+          <td>Initial burette reading (cm³)</td>
           <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
         <tr>
-          <td>Initial burette reading (cm³)</td>
+          <td>Final burette reading (cm³)</td>
           <td><input/></td><td><input/></td><td><input/></td><td><input/></td>
         </tr>
         <tr>
@@ -247,7 +247,7 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const B_MAX = 50.00, VA = 25.0;
-    let buretteVol = 0,
+    let buretteVol = B_MAX,
         initialReadingVal = null,
         flowInt = null,
         endpointReached = false;
@@ -309,7 +309,7 @@
 
     function updateBurette() {
       stand.querySelector('.burette-liquid').style.height = (buretteVol/B_MAX*100) + '%';
-      displays.fin.textContent = `Burette: ${buretteVol.toFixed(2)} cm³`;
+      displays.fin.textContent = Burette: ${buretteVol.toFixed(2)} cm³;
     }
     function recomputeEndpoint() {
       fa2Conc = parseFloat(fa2Slider.value);
@@ -344,9 +344,9 @@
 
     function dispense(vol) {
       if (initialReadingVal === null) return;
-      const amt = Math.min(vol, B_MAX - buretteVol);
+      const amt = Math.min(vol, buretteVol);
       if (!amt) return;
-      buretteVol += amt;
+      buretteVol -= amt;
       updateBurette();
       checkEndpoint();
     }
@@ -378,7 +378,7 @@
     // Log initial reading
     ctrls.logI.addEventListener('click', ()=>{
       initialReadingVal = buretteVol;
-      displays.init.textContent = `Initial: ${initialReadingVal.toFixed(2)} cm³`;
+      displays.init.textContent = Initial: ${initialReadingVal.toFixed(2)} cm³;
       if (pos.flask==='under_burette') enableDispense();
     });
 
@@ -502,9 +502,9 @@
       }
       // Default
       if (selected) {
-        actions.innerHTML=`<p class="text-gray-600">Selected: ${selected.dataset.itemType}.</p>`;
+        actions.innerHTML=<p class="text-gray-600">Selected: ${selected.dataset.itemType}.</p>;
       } else {
-        actions.innerHTML=`<p class="text-gray-500">Select an apparatus to begin.</p>`;
+        actions.innerHTML=<p class="text-gray-500">Select an apparatus to begin.</p>;
       }
     }
 
@@ -567,7 +567,7 @@
             zR   = zoneElem.getBoundingClientRect();
       const dx = zR.left - homeR.left + (zR.width - pipette.offsetWidth)/2;
       const dy = zR.top  - homeR.top  + (zR.height - pipette.offsetHeight)/2;
-      pipette.style.transform = `translate(${dx}px,${dy}px)`;
+      pipette.style.transform = translate(${dx}px,${dy}px);
       pos.pipette = (zoneElem===zones.pipBeaker)?'over_beaker':'over_flask';
     }
     function movePipetteHome() {

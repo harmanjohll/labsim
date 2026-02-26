@@ -323,10 +323,18 @@
           </div>
         </div>
 
-        <div class="practical-card card card-coming-soon">
+        <a href="physics/pendulum/index.html" class="practical-card card">
           <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
-            <span class="coming-soon-badge">Coming Soon</span>
-            <span style="font-size:2.5rem; position:relative; z-index:1;">&#9203;</span>
+            <svg width="80" height="90" viewBox="0 0 80 90" fill="none" style="position:relative;z-index:1;">
+              <rect x="15" y="12" width="50" height="5" rx="2" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="40" cy="14" r="3" fill="#b0b5c0"/>
+              <line x1="40" y1="14" x2="58" y2="64" stroke="#b0b5c0" stroke-width="1.5"/>
+              <circle cx="58" cy="66" r="8" fill="url(#bg)" stroke="#6b7280" stroke-width="1"/>
+              <line x1="40" y1="14" x2="40" y2="76" stroke="#b0b5c0" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.4"/>
+              <defs>
+                <radialGradient id="bg" cx="45%" cy="40%"><stop offset="0%" stop-color="#d4d7e0"/><stop offset="100%" stop-color="#6b7280"/></radialGradient>
+              </defs>
+            </svg>
           </div>
           <div class="card-body">
             <div class="flex items-center gap-2 mb-2">
@@ -335,7 +343,7 @@
             <h3 class="card-title">Pendulum &amp; Oscillations</h3>
             <p class="card-desc">
               Investigate the relationship between pendulum length
-              and period. Plot graphs and determine g.
+              and period. Plot T² vs L and determine g.
             </p>
             <div class="card-meta">
               <span class="text-xs text-dim">Difficulty</span>
@@ -346,7 +354,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </a>
 
       </div>
     </section>

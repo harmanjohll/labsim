@@ -871,5 +871,11 @@ document.addEventListener('DOMContentLoaded', () => {
       el.classList.remove('visible');
       setTimeout(() => el.remove(), 300);
     }, 2500);
+    // Audio feedback
+    if (typeof LabAudio !== 'undefined') {
+      if (type === 'success') LabAudio.success();
+      else if (type === 'warn') LabAudio.warn();
+      else LabAudio.click();
+    }
   }
 });

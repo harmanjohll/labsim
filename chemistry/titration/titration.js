@@ -422,8 +422,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const pRect = pipette.getBoundingClientRect();
     const tRect = target.getBoundingClientRect();
 
+    // Centre horizontally over target
     const dx = tRect.left + tRect.width / 2 - (pRect.left + pRect.width / 2);
-    const dy = tRect.top - 30 - pRect.top;
+    // Position pipette tip (bottom) just above the target opening (top)
+    const gap = 12;
+    const dy = (tRect.top - gap) - pRect.bottom;
 
     pipette.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
     pipette.style.transform = `translate(${dx}px, ${dy}px)`;

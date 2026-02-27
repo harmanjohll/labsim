@@ -15,11 +15,11 @@ var CHEMISTRY_DATA = {
   unknowns: {
     FB6:  { formula: 'CuSO₄',       cation: 'Cu2+', anion: 'SO42-', solutionColor: '#4491e3', colorName: 'blue' },
     FB7:  { formula: 'FeSO₄',       cation: 'Fe2+', anion: 'SO42-', solutionColor: '#7db57c', colorName: 'pale green' },
-    FB8:  { formula: 'ZnCl₂',       cation: 'Zn2+', anion: 'Cl-',   solutionColor: '#dce4f0', colorName: 'colourless' },
+    FB8:  { formula: 'ZnCl₂',       cation: 'Zn2+', anion: 'Cl-',   solutionColor: 'rgba(200, 220, 240, 0.15)', colorName: 'colourless' },
     FB9:  { formula: 'FeCl₃',       cation: 'Fe3+', anion: 'Cl-',   solutionColor: '#d4a830', colorName: 'yellow/brown' },
-    FB10: { formula: 'CaI₂',        cation: 'Ca2+', anion: 'I-',    solutionColor: '#dce4f0', colorName: 'colourless' },
-    FB11: { formula: 'Al₂(SO₄)₃',   cation: 'Al3+', anion: 'SO42-', solutionColor: '#dce4f0', colorName: 'colourless' },
-    FB12: { formula: 'Pb(NO₃)₂',    cation: 'Pb2+', anion: 'NO3-',  solutionColor: '#dce4f0', colorName: 'colourless' },
+    FB10: { formula: 'CaI₂',        cation: 'Ca2+', anion: 'I-',    solutionColor: 'rgba(200, 220, 240, 0.15)', colorName: 'colourless' },
+    FB11: { formula: 'Al₂(SO₄)₃',   cation: 'Al3+', anion: 'SO42-', solutionColor: 'rgba(200, 220, 240, 0.15)', colorName: 'colourless' },
+    FB12: { formula: 'Pb(NO₃)₂',    cation: 'Pb2+', anion: 'NO3-',  solutionColor: 'rgba(200, 220, 240, 0.15)', colorName: 'colourless' },
   },
 
 
@@ -101,7 +101,7 @@ var CHEMISTRY_DATA = {
         observation: 'White precipitate formed.',
       },
       NaOH_excess: {
-        ppt: false, solutionColor: '#dce4f0',
+        ppt: false, solutionColor: 'rgba(200, 220, 240, 0.15)',
         observation: 'White precipitate dissolves in excess NaOH(aq) — colourless solution formed. Zn(OH)₂ is amphoteric.',
       },
       NH3_few: {
@@ -109,7 +109,7 @@ var CHEMISTRY_DATA = {
         observation: 'White precipitate formed.',
       },
       NH3_excess: {
-        ppt: false, solutionColor: '#dce4f0',
+        ppt: false, solutionColor: 'rgba(200, 220, 240, 0.15)',
         observation: 'White precipitate dissolves in excess NH₃(aq) — colourless solution formed. [Zn(NH₃)₄]²⁺ complex.',
       },
       flame: null,
@@ -121,7 +121,7 @@ var CHEMISTRY_DATA = {
         observation: 'White precipitate formed.',
       },
       NaOH_excess: {
-        ppt: true, pptColor: '#f5f5f8', solutionColor: '#eceff5',
+        ppt: true, pptColor: '#f5f5f8', solutionColor: 'rgba(220, 225, 235, 0.25)',
         observation: 'White precipitate remains — insoluble in excess NaOH(aq).',
       },
       NH3_few: {
@@ -141,7 +141,7 @@ var CHEMISTRY_DATA = {
         observation: 'White precipitate formed.',
       },
       NaOH_excess: {
-        ppt: false, solutionColor: '#dce4f0',
+        ppt: false, solutionColor: 'rgba(200, 220, 240, 0.15)',
         observation: 'White precipitate dissolves in excess NaOH(aq) — colourless solution formed. Al(OH)₃ is amphoteric.',
       },
       NH3_few: {
@@ -149,7 +149,7 @@ var CHEMISTRY_DATA = {
         observation: 'White precipitate formed.',
       },
       NH3_excess: {
-        ppt: true, pptColor: '#f0f2f5', solutionColor: '#eceff5',
+        ppt: true, pptColor: '#f0f2f5', solutionColor: 'rgba(220, 225, 235, 0.25)',
         observation: 'White precipitate remains — insoluble in excess NH₃(aq).',
       },
       flame: null,
@@ -162,7 +162,7 @@ var CHEMISTRY_DATA = {
       },
       NaOH_excess: {
         /* CORRECTED: Pb(OH)₂ is amphoteric — dissolves in excess NaOH */
-        ppt: false, solutionColor: '#dce4f0',
+        ppt: false, solutionColor: 'rgba(200, 220, 240, 0.15)',
         observation: 'White precipitate dissolves in excess NaOH(aq) — colourless solution formed. Pb(OH)₂ is amphoteric, forming [Pb(OH)₄]²⁻.',
       },
       NH3_few: {
@@ -170,7 +170,7 @@ var CHEMISTRY_DATA = {
         observation: 'White precipitate formed.',
       },
       NH3_excess: {
-        ppt: true, pptColor: '#f0f2f5', solutionColor: '#eceff5',
+        ppt: true, pptColor: '#f0f2f5', solutionColor: 'rgba(220, 225, 235, 0.25)',
         observation: 'White precipitate remains — insoluble in excess NH₃(aq).',
       },
       flame: null,

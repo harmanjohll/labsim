@@ -95,13 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
     state.unknownKey = key;
     state.unknownData = data.unknowns[key];
 
+    const cn = state.unknownData.colorName;
+
     dom.unknownChooser.style.display = 'none';
     dom.unknownInfo.style.display = '';
     dom.unknownBadge.textContent = key;
-    dom.unknownBadge.style.background = state.unknownData.solutionColor === '#dce4f0'
+    dom.unknownBadge.style.background = cn === 'colourless'
       ? 'var(--color-primary)' : state.unknownData.solutionColor;
-
-    const cn = state.unknownData.colorName;
     dom.unknownHint.textContent = cn === 'colourless'
       ? 'The solution is colourless. Identify the cation and anion.'
       : `The solution is ${cn}. Identify the cation and anion.`;
@@ -110,11 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.btnCheckId.disabled = false;
     markProcedure('observe');
 
-    // Update unknown bottle label
+    // Update unknown bottle label and fill colour
     const unknownBottle = document.querySelector('[data-bottle="Unknown"]');
     if (unknownBottle) {
       const lbl = unknownBottle.querySelector('.bottle-label');
       if (lbl) lbl.innerHTML = key + '<br><span style="font-weight:400;opacity:0.7;">sample</span>';
+      const fill = unknownBottle.querySelector('.bottle-fill');
+      if (fill) fill.style.background = cn === 'colourless'
+        ? 'rgba(200, 220, 240, 0.35)' : state.unknownData.solutionColor;
     }
 
     addObservation('—', `${key} solution examined.`,
@@ -231,8 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
     bottle.className = 'reagent-bottle';
     bottle.dataset.bottle = key;
 
-    const cap = document.createElement('div');
-    cap.className = 'bottle-cap';
+    // Dropper top: rubber bulb + glass stem
+    const dropper = document.createElement('div');
+    dropper.className = 'bottle-dropper';
+    const bulb = document.createElement('div');
+    bulb.className = 'bottle-dropper-bulb';
+    const stem = document.createElement('div');
+    stem.className = 'bottle-dropper-stem';
+    dropper.appendChild(bulb);
+    dropper.appendChild(stem);
 
     const fill = document.createElement('div');
     fill.className = 'bottle-fill';
@@ -242,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lbl.className = 'bottle-label';
     lbl.innerHTML = label + (sub ? `<br><span style="font-weight:400;opacity:0.7;">${sub}</span>` : '');
 
-    bottle.appendChild(cap);
+    bottle.appendChild(dropper);
     bottle.appendChild(fill);
     bottle.appendChild(lbl);
     slot.appendChild(bottle);

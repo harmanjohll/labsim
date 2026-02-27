@@ -1,5 +1,6 @@
 /* ============================================================
-   Titration Practical — Logic
+   Titration Practical — Logic (v2)
+   Click-to-move apparatus, guided mode, concordance, calculations
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,108 +8,82 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Constants ──
   const BURETTE_MAX = 50.00;
   const PIPETTE_VOL = 25.0;
-  const CONCORDANT_THRESHOLD = 0.10; // cm³
+  const CONCORDANT_THRESHOLD = 0.10;
 
   // ── Indicator Data ──
   const INDICATORS = {
-    MO: {
-      name: 'Methyl Orange',
-      acidColor: '#ef4444',
-      baseColor: '#fde047',
-      nearEndpoint: '#f59e0b',
-    },
-    PH: {
-      name: 'Phenolphthalein',
-      acidColor: 'rgba(220, 230, 245, 0.5)',
-      baseColor: '#ec4899',
-      nearEndpoint: '#fbcfe8',
-    },
-    TB: {
-      name: 'Thymol Blue',
-      acidColor: '#fde047',
-      baseColor: '#3b82f6',
-      nearEndpoint: '#86efac',
-    },
+    MO: { name: 'Methyl Orange', acidColor: '#ef4444', baseColor: '#fde047', nearEndpoint: '#f59e0b' },
+    PH: { name: 'Phenolphthalein', acidColor: 'rgba(220,230,245,0.5)', baseColor: '#ec4899', nearEndpoint: '#fbcfe8' },
+    TB: { name: 'Thymol Blue', acidColor: '#fde047', baseColor: '#3b82f6', nearEndpoint: '#86efac' },
   };
 
   // ── Guided Steps ──
   const STEPS = [
     {
-      id: 'rinse-burette',
-      title: 'Rinse the burette',
-      desc: 'Rinse the burette with a small amount of the base solution (FA1).',
-      why: 'Rinsing with the solution it will contain (not water) prevents dilution of the base, which would cause systematic error in your titre values.',
-      actions: [{ label: 'Rinse with FA1', id: 'do-rinse-burette' }],
+      id: 'rinse-burette', title: 'Rinse the burette',
+      desc: 'Click the burette, then click "Rinse with FA1" to rinse it with the base solution.',
+      why: 'Rinsing with the solution it will contain (not water) prevents dilution, which would cause systematic error.',
+      target: 'burette', action: 'rinse-burette',
     },
     {
-      id: 'fill-burette',
-      title: 'Fill the burette',
-      desc: 'Fill the burette with base solution to the 0.00 cm³ mark, then top up to remove any air bubbles below the tap.',
-      why: 'The burette must be filled completely so that you can record an accurate initial reading. Air bubbles below the stopcock will give a false volume.',
-      actions: [{ label: 'Fill Burette', id: 'do-fill-burette' }],
+      id: 'fill-burette', title: 'Fill the burette',
+      desc: 'Click the burette to fill it with base solution to the 0.00 cm³ mark.',
+      why: 'The burette must be filled completely so you can record an accurate initial reading. Air bubbles below the stopcock give a false volume.',
+      target: 'burette', action: 'fill-burette',
     },
     {
-      id: 'rinse-pipette',
-      title: 'Rinse the pipette',
-      desc: 'Rinse the pipette with the acid solution FA2.',
-      why: 'Same principle as the burette: residual water would dilute FA2 and cause an inaccurate volume of acid to be transferred.',
-      actions: [{ label: 'Rinse with FA2', id: 'do-rinse-pipette' }],
+      id: 'rinse-pipette', title: 'Rinse the pipette',
+      desc: 'Click the pipette, then click the beaker to rinse the pipette with FA2.',
+      why: 'Residual water would dilute FA2, causing an inaccurate volume of acid to be transferred.',
+      target: 'pipette', action: 'rinse-pipette',
     },
     {
-      id: 'draw-pipette',
-      title: 'Draw 25.0 cm³ of FA2',
-      desc: 'Using the pipette filler, draw exactly 25.0 cm³ of the acid FA2 from the beaker.',
-      why: 'The pipette delivers a precise fixed volume. Read the bottom of the meniscus at the calibration mark, with your eye at the same level to avoid parallax error.',
-      actions: [{ label: 'Draw 25.0 cm³', id: 'do-draw-pipette' }],
+      id: 'draw-pipette', title: 'Draw 25.0 cm³ of FA2',
+      desc: 'Click the pipette, then click the beaker to draw exactly 25.0 cm³ of acid.',
+      why: 'The pipette delivers a precise fixed volume. Read the bottom of the meniscus at the calibration mark to avoid parallax error.',
+      target: 'pipette', action: 'draw-pipette',
     },
     {
-      id: 'transfer',
-      title: 'Transfer to conical flask',
-      desc: 'Transfer the acid from the pipette into the conical flask. Touch the tip to the inner wall and allow it to drain — do not blow out the last drop.',
-      why: 'The pipette is calibrated to deliver its stated volume when drained by gravity. Blowing out the residual drop would deliver more than 25.0 cm³.',
-      actions: [{ label: 'Transfer to Flask', id: 'do-transfer' }],
+      id: 'transfer', title: 'Transfer acid to conical flask',
+      desc: 'Click the pipette, then click the conical flask to transfer the acid.',
+      why: 'The pipette is calibrated to deliver its stated volume by gravity. Do not blow out the last drop.',
+      target: 'pipette', action: 'transfer',
     },
     {
-      id: 'add-indicator',
-      title: 'Add 2–3 drops of indicator',
-      desc: 'Choose an indicator and add 2–3 drops to the acid in the conical flask.',
-      why: 'The indicator changes colour at (or near) the equivalence point, allowing you to detect when neutralisation is complete. Use only 2–3 drops — too much indicator can affect the titre.',
-      actions: [], // dynamically populated
+      id: 'add-indicator', title: 'Add indicator',
+      desc: 'Click the indicator bottle, then choose an indicator to add 2–3 drops to the flask.',
+      why: 'The indicator changes colour at the equivalence point. Use only 2–3 drops — too much can affect the titre.',
+      target: 'indicator', action: 'add-indicator',
     },
     {
-      id: 'place-flask',
-      title: 'Place flask under burette',
-      desc: 'Place a white tile on the bench below the burette, then place the conical flask on top of it.',
-      why: 'The white tile provides contrast so that you can detect the first permanent colour change more easily — especially important near the endpoint.',
-      actions: [{ label: 'Place Flask', id: 'do-place-flask' }],
+      id: 'place-flask', title: 'Place flask under burette',
+      desc: 'Click the conical flask to move it under the burette on a white tile.',
+      why: 'The white tile provides contrast so you can detect the first permanent colour change more easily.',
+      target: 'flask', action: 'place-flask',
     },
     {
-      id: 'record-initial',
-      title: 'Record initial burette reading',
-      desc: 'Read the burette scale at the bottom of the meniscus and record the initial reading.',
-      why: 'Always read at the bottom of the meniscus with your eye level at the liquid surface. Recording the initial reading before dispensing is essential for calculating the titre.',
-      actions: [{ label: 'Log Initial Reading', id: 'do-log-initial' }],
+      id: 'record-initial', title: 'Record initial burette reading',
+      desc: 'Click "Log Initial" to record the starting burette reading.',
+      why: 'Always read at the bottom of the meniscus with your eye level. Recording the initial reading before dispensing is essential.',
+      target: null, action: 'log-initial',
     },
     {
-      id: 'titrate',
-      title: 'Titrate',
-      desc: 'Open the stopcock to add base to the flask. Use fast flow initially, then slow to drops near the endpoint. Swirl continuously.',
-      why: 'Swirling ensures thorough mixing so the indicator responds uniformly. Near the endpoint, a brief colour flash appears then disappears on swirling — switch to half-drops at this point.',
-      actions: [],
+      id: 'titrate', title: 'Titrate',
+      desc: 'Use Fast Flow initially, then Slow Flow near the endpoint, then Half Drop. Swirl continuously.',
+      why: 'Near the endpoint, a brief colour flash appears then disappears on swirling — switch to half-drops at this point.',
+      target: null, action: 'titrate',
     },
     {
-      id: 'record-final',
-      title: 'Record final burette reading',
-      desc: 'The endpoint has been reached — the colour change is now permanent. Record the final burette reading.',
-      why: 'The titre (volume of base added) = final reading − initial reading. Record to 2 decimal places (nearest 0.05 cm³).',
-      actions: [{ label: 'Log Final Reading', id: 'do-log-final' }],
+      id: 'record-final', title: 'Record final burette reading',
+      desc: 'The endpoint is reached — the colour change is permanent. Click "Log Final" to record.',
+      why: 'Titre = final reading − initial reading. Record to 2 decimal places (nearest 0.05 cm³).',
+      target: null, action: 'log-final',
     },
     {
-      id: 'repeat',
-      title: 'Repeat for concordant results',
-      desc: 'Reset the flask and repeat the titration until you obtain at least two titre values that agree within 0.10 cm³.',
-      why: 'Concordant results demonstrate reliability and precision. Only concordant titres are averaged for the final calculation. The rough titration gives you an estimate of where the endpoint lies.',
-      actions: [{ label: 'Start Next Titration', id: 'do-repeat' }],
+      id: 'repeat', title: 'Repeat for concordant results',
+      desc: 'Click "Next Titration" to repeat until you have two titres within 0.10 cm³.',
+      why: 'Concordant results show reliability. Only concordant titres are averaged. The rough titration estimates where the endpoint lies.',
+      target: null, action: 'repeat',
     },
   ];
 
@@ -116,9 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const state = {
     step: 0,
     guideOpen: true,
+    picked: null, // apparatus currently picked up: 'pipette', 'flask', 'indicator'
     buretteRinsed: false,
     buretteFilled: false,
-    buretteVolume: 0, // volume of liquid in burette (0 = empty, 50 = full)
+    buretteVolume: 0,
     pipetteRinsed: false,
     pipetteFilled: false,
     flaskFilled: false,
@@ -127,15 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
     flaskPlaced: false,
     initialReading: null,
     endpointReached: false,
-    titrating: false,
-    run: 0, // 0=rough, 1,2,3
-    results: [], // [{initial, final, titre}]
+    run: 0,
+    results: [],
     acidConc: 0.10,
     baseConc: 0.10,
     endpointVol: 0,
   };
 
-  // ── DOM References ──
+  // ── DOM ──
   const $ = id => document.getElementById(id);
   const dom = {
     stepsBar: $('steps-bar'),
@@ -176,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     baseSelect: $('base-select'),
     concordantMsg: $('concordant-msg'),
     calcWorkspace: $('calc-workspace'),
+    toast: $('toast-container'),
   };
 
   // ── Initialization ──
@@ -183,9 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderStepsBar();
   updateGuide();
   updateVisuals();
-  positionFlaskZone();
 
-  // ── Configuration Handlers ──
+  // ══════════════════════════════════════
+  // CONFIG
+  // ══════════════════════════════════════
+
   dom.acidSlider.addEventListener('input', () => {
     state.acidConc = parseFloat(dom.acidSlider.value);
     dom.acidDisplay.textContent = state.acidConc.toFixed(3) + ' M';
@@ -201,7 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
     state.endpointReached = false;
   }
 
-  // ── Step Bar ──
+  // ══════════════════════════════════════
+  // STEP BAR
+  // ══════════════════════════════════════
+
   function renderStepsBar() {
     dom.stepsBar.innerHTML = '';
     STEPS.forEach((s, i) => {
@@ -218,12 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
       dot.title = s.title;
       dom.stepsBar.appendChild(dot);
     });
-    // Scroll active step into view
     const active = dom.stepsBar.querySelector('.step-dot.active');
     if (active) active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
   }
 
-  // ── Guide Panel ──
+  // ══════════════════════════════════════
+  // GUIDE PANEL
+  // ══════════════════════════════════════
+
   function updateGuide() {
     const step = STEPS[state.step];
     if (!step) return;
@@ -238,32 +221,29 @@ document.addEventListener('DOMContentLoaded', () => {
       dom.guideWhy.style.display = 'none';
     }
 
-    // Actions
     dom.guideActions.innerHTML = '';
 
+    // Add indicator choices for the indicator step
     if (step.id === 'add-indicator') {
-      // Show indicator choices
       Object.entries(INDICATORS).forEach(([key, ind]) => {
         const btn = document.createElement('button');
         btn.className = 'btn btn-ghost btn-sm';
-        btn.textContent = ind.name;
+        btn.innerHTML = `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${ind.acidColor};margin-right:6px;vertical-align:middle;border:1px solid rgba(0,0,0,0.15);"></span>${ind.name}`;
         btn.addEventListener('click', () => selectIndicator(key));
         dom.guideActions.appendChild(btn);
       });
     } else if (step.id === 'titrate') {
-      // No actions in guide — use the burette controls
       const note = document.createElement('span');
       note.className = 'text-sm text-muted';
-      note.textContent = 'Use the burette controls below the workbench.';
+      note.textContent = 'Use the controls below the workbench.';
       dom.guideActions.appendChild(note);
-    } else {
-      step.actions.forEach(a => {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-primary btn-sm';
-        btn.textContent = a.label;
-        btn.addEventListener('click', () => handleAction(a.id));
-        dom.guideActions.appendChild(btn);
-      });
+    }
+
+    // Highlight target apparatus
+    document.querySelectorAll('.apparatus').forEach(a => a.classList.remove('guide-target'));
+    if (step.target) {
+      const target = document.getElementById(step.target) || document.querySelector(`[data-item="${step.target}"]`);
+      if (target) target.classList.add('guide-target');
     }
   }
 
@@ -275,87 +255,265 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Action Handlers ──
-  function handleAction(actionId) {
-    switch (actionId) {
-      case 'do-rinse-burette':
-        state.buretteRinsed = true;
-        advanceStep();
-        break;
+  // ══════════════════════════════════════
+  // CLICK-TO-MOVE APPARATUS SYSTEM
+  // ══════════════════════════════════════
 
-      case 'do-fill-burette':
+  // When you click an apparatus, it becomes "picked up".
+  // Valid target zones glow. Click a target to perform the action.
+  // For some items (burette, flask placement), single-click triggers directly.
+
+  dom.workbench.addEventListener('click', (e) => {
+    const item = e.target.closest('[data-item]');
+    if (!item) {
+      // Clicked empty space — cancel pick
+      cancelPick();
+      return;
+    }
+
+    const type = item.dataset.item;
+
+    // ── BURETTE click ──
+    if (type === 'burette') {
+      if (!state.buretteRinsed) {
+        state.buretteRinsed = true;
+        toast('Burette rinsed with FA1.');
+        if (state.step === 0) advanceStep();
+        return;
+      }
+      if (!state.buretteFilled) {
         state.buretteFilled = true;
         state.buretteVolume = BURETTE_MAX;
         updateVisuals();
-        advanceStep();
-        break;
-
-      case 'do-rinse-pipette':
-        state.pipetteRinsed = true;
-        advanceStep();
-        break;
-
-      case 'do-draw-pipette':
-        state.pipetteFilled = true;
-        dom.pipetteLiquid.style.height = '90%';
-        dom.pipetteBulgeLiquid.style.height = '100%';
-        advanceStep();
-        break;
-
-      case 'do-transfer':
-        state.pipetteFilled = false;
-        state.flaskFilled = true;
-        dom.pipetteLiquid.style.height = '0';
-        dom.pipetteBulgeLiquid.style.height = '0';
-        dom.flaskLiquid.style.height = '30%';
-        dom.flaskLiquid.style.backgroundColor = 'rgba(180, 210, 255, 0.4)';
-        advanceStep();
-        break;
-
-      case 'do-place-flask':
-        placeFlask();
-        advanceStep();
-        break;
-
-      case 'do-log-initial':
-        logInitialReading();
-        break;
-
-      case 'do-log-final':
-        logFinalReading();
-        break;
-
-      case 'do-repeat':
-        startNextTitration();
-        break;
+        toast('Burette filled to 0.00 cm³.');
+        if (state.step === 1) advanceStep();
+        return;
+      }
+      return;
     }
+
+    // ── PIPETTE click ──
+    if (type === 'pipette') {
+      if (state.picked === 'pipette') {
+        cancelPick();
+        return;
+      }
+      pickUp('pipette');
+      return;
+    }
+
+    // ── BEAKER click (target for pipette) ──
+    if (type === 'beaker') {
+      if (state.picked === 'pipette') {
+        if (!state.pipetteRinsed) {
+          // Rinse pipette
+          state.pipetteRinsed = true;
+          animatePipetteTo(dom.beaker, () => {
+            toast('Pipette rinsed with FA2.');
+            returnPipette();
+            if (state.step === 2) advanceStep();
+          });
+        } else if (!state.pipetteFilled) {
+          // Draw from beaker
+          animatePipetteTo(dom.beaker, () => {
+            state.pipetteFilled = true;
+            dom.pipetteLiquid.style.height = '90%';
+            dom.pipetteBulgeLiquid.style.height = '100%';
+            toast('Drew 25.0 cm³ of FA2.');
+            returnPipette();
+            if (state.step === 3) advanceStep();
+          });
+        } else {
+          toast('Pipette is already full.');
+          cancelPick();
+        }
+        return;
+      }
+      return;
+    }
+
+    // ── FLASK click ──
+    if (type === 'flask') {
+      // If pipette is picked and flask not filled yet → transfer
+      if (state.picked === 'pipette' && state.pipetteFilled && !state.flaskFilled) {
+        animatePipetteTo(dom.flask, () => {
+          state.pipetteFilled = false;
+          state.flaskFilled = true;
+          dom.pipetteLiquid.style.height = '0';
+          dom.pipetteBulgeLiquid.style.height = '0';
+          dom.flaskLiquid.style.height = '30%';
+          dom.flaskLiquid.style.backgroundColor = 'rgba(180,210,255,0.4)';
+          toast('25.0 cm³ of FA2 transferred to flask.');
+          returnPipette();
+          if (state.step === 4) advanceStep();
+        });
+        return;
+      }
+
+      // If flask has indicator and not placed → move under burette
+      if (state.indicatorAdded && !state.flaskPlaced) {
+        placeFlask();
+        if (state.step === 6) advanceStep();
+        return;
+      }
+
+      // If nothing applicable
+      if (!state.flaskFilled) {
+        toast('Fill the flask with acid first (use pipette → beaker → flask).', 'info');
+      } else if (!state.indicatorAdded) {
+        toast('Add indicator to the flask first.', 'info');
+      }
+      return;
+    }
+
+    // ── INDICATOR click ──
+    if (type === 'indicator') {
+      if (!state.flaskFilled) {
+        toast('Transfer acid to the flask first.', 'warn');
+        return;
+      }
+      if (state.indicatorAdded) {
+        toast('Indicator already added.', 'info');
+        return;
+      }
+      // Show indicator choices in guide — or show popup at indicator bottle
+      showIndicatorPopup();
+      return;
+    }
+  });
+
+  function pickUp(item) {
+    cancelPick();
+    state.picked = item;
+    const el = document.querySelector(`[data-item="${item}"]`);
+    if (el) {
+      el.classList.add('picked');
+    }
+    // Show valid targets
+    if (item === 'pipette') {
+      dom.beaker.classList.add('valid-target');
+      if (state.pipetteFilled && !state.flaskFilled) {
+        dom.flask.classList.add('valid-target');
+      }
+    }
+    toast(getPickMessage(item), 'info');
   }
 
-  // ── Indicator Selection ──
+  function getPickMessage(item) {
+    if (item === 'pipette') {
+      if (!state.pipetteRinsed) return 'Click the beaker to rinse the pipette with FA2.';
+      if (!state.pipetteFilled) return 'Click the beaker to draw 25.0 cm³ of FA2.';
+      if (state.pipetteFilled && !state.flaskFilled) return 'Click the conical flask to transfer acid.';
+      return 'Pipette selected.';
+    }
+    return '';
+  }
+
+  function cancelPick() {
+    state.picked = null;
+    document.querySelectorAll('.apparatus').forEach(a => {
+      a.classList.remove('picked', 'valid-target');
+    });
+  }
+
+  // ── Pipette animation ──
+  function animatePipetteTo(target, onComplete) {
+    const pipette = dom.pipette;
+    const pRect = pipette.getBoundingClientRect();
+    const tRect = target.getBoundingClientRect();
+
+    const dx = tRect.left + tRect.width / 2 - (pRect.left + pRect.width / 2);
+    const dy = tRect.top - 30 - pRect.top;
+
+    pipette.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
+    pipette.style.transform = `translate(${dx}px, ${dy}px)`;
+    pipette.style.zIndex = '100';
+
+    setTimeout(() => {
+      if (onComplete) onComplete();
+    }, 550);
+  }
+
+  function returnPipette() {
+    const pipette = dom.pipette;
+    pipette.style.transition = 'transform 0.4s cubic-bezier(0.16,1,0.3,1)';
+    pipette.style.transform = '';
+    pipette.style.zIndex = '';
+    cancelPick();
+  }
+
+
+  // ══════════════════════════════════════
+  // INDICATOR POPUP
+  // ══════════════════════════════════════
+
+  function showIndicatorPopup() {
+    closePopups();
+    const popup = document.createElement('div');
+    popup.className = 'indicator-popup';
+    popup.id = 'ind-popup';
+
+    const title = document.createElement('h4');
+    title.textContent = 'Choose indicator';
+    popup.appendChild(title);
+
+    Object.entries(INDICATORS).forEach(([key, ind]) => {
+      const choice = document.createElement('div');
+      choice.className = 'indicator-choice';
+      choice.innerHTML = `
+        <div class="indicator-swatch">
+          <div class="indicator-swatch-acid" style="background:${ind.acidColor}"></div>
+          <div class="indicator-swatch-base" style="background:${ind.baseColor}"></div>
+        </div>
+        <span class="indicator-choice-name">${ind.name}</span>
+      `;
+      choice.addEventListener('click', () => {
+        selectIndicator(key);
+        closePopups();
+      });
+      popup.appendChild(choice);
+    });
+
+    const indRect = dom.indicator.getBoundingClientRect();
+    const wbRect = dom.workbench.getBoundingClientRect();
+    popup.style.left = (indRect.left - wbRect.left - 50) + 'px';
+    popup.style.top = (indRect.top - wbRect.top - 140) + 'px';
+    dom.workbench.appendChild(popup);
+  }
+
+  function closePopups() {
+    document.querySelectorAll('.indicator-popup').forEach(p => p.remove());
+  }
+
   function selectIndicator(type) {
     state.indicatorType = type;
     state.indicatorAdded = true;
     const ind = INDICATORS[type];
     dom.flaskLiquid.style.backgroundColor = ind.acidColor;
     dom.indicator.querySelector('.indicator-label').textContent = ind.name.split(' ')[0];
-    advanceStep();
+    toast(`${ind.name} added to flask.`);
+
+    // Show flask is now ready to place
+    dom.flask.classList.add('valid-target');
+    setTimeout(() => dom.flask.classList.remove('valid-target'), 2000);
+
+    if (state.step === 5) advanceStep();
   }
 
-  // ── Flask Placement ──
-  function positionFlaskZone() {
-    const bur = dom.burette;
-    const zone = dom.flaskZone;
-    const stand = dom.standAssembly;
-    const base = stand.querySelector('.retort-base');
-    zone.style.bottom = (base.offsetHeight + 2) + 'px';
-    zone.style.left = (bur.offsetLeft + bur.offsetWidth / 2 - 40) + 'px';
-  }
+  // ══════════════════════════════════════
+  // FLASK PLACEMENT
+  // ══════════════════════════════════════
 
   function placeFlask() {
     state.flaskPlaced = true;
     const stand = dom.standAssembly;
     const bur = dom.burette;
     const base = stand.querySelector('.retort-base');
+
+    // Calculate target position for the flask under the burette
+    const burRect = bur.getBoundingClientRect();
+    const flaskRect = dom.flask.getBoundingClientRect();
+    const wbRect = dom.workbench.getBoundingClientRect();
 
     // Show white tile
     dom.whiteTile.style.display = '';
@@ -364,22 +522,23 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.whiteTile.style.left = (bur.offsetLeft + bur.offsetWidth / 2 - 45) + 'px';
     dom.whiteTile.style.zIndex = '5';
 
-    // Move flask into stand assembly
+    // Animate flask to position under burette
     dom.flask.classList.add('placed');
     stand.appendChild(dom.flask);
     dom.flask.style.bottom = (base.offsetHeight + 14) + 'px';
     dom.flask.style.left = (bur.offsetLeft + bur.offsetWidth / 2 - 38) + 'px';
 
-    // Hide zone, show controls
-    dom.flaskZone.style.display = 'none';
+    // Show controls
     dom.buretteControls.style.display = '';
+    dom.flaskZone.style.display = 'none';
     updateBuretteDisplay();
+    cancelPick();
+    toast('Flask placed on white tile under burette.');
   }
 
   function unplaceFlask() {
     state.flaskPlaced = false;
     dom.flask.classList.remove('placed');
-    // Move back to workbench
     dom.workbench.appendChild(dom.flask);
     dom.flask.style.bottom = '';
     dom.flask.style.left = '';
@@ -388,19 +547,17 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.buretteControls.style.display = 'none';
   }
 
-  // ── Burette Logic ──
+
+  // ══════════════════════════════════════
+  // BURETTE LOGIC
+  // ══════════════════════════════════════
+
   let flowInterval = null;
 
-  function getBuretteReading() {
-    return BURETTE_MAX - state.buretteVolume;
-  }
-
-  function updateBuretteDisplay() {
-    dom.buretteReading.textContent = getBuretteReading().toFixed(2) + ' cm³';
-  }
+  function getBuretteReading() { return BURETTE_MAX - state.buretteVolume; }
+  function updateBuretteDisplay() { dom.buretteReading.textContent = getBuretteReading().toFixed(2) + ' cm³'; }
 
   function updateVisuals() {
-    // Burette liquid height
     dom.buretteLiquid.style.height = (state.buretteVolume / BURETTE_MAX * 100) + '%';
     updateBuretteDisplay();
   }
@@ -414,14 +571,12 @@ document.addEventListener('DOMContentLoaded', () => {
     state.buretteVolume -= amt;
     updateVisuals();
     checkEndpoint();
-
-    // Drip animation
     triggerDrip();
   }
 
   function triggerDrip() {
     dom.buretteDrip.classList.remove('falling');
-    void dom.buretteDrip.offsetWidth; // reflow
+    void dom.buretteDrip.offsetWidth;
     dom.buretteDrip.style.opacity = '1';
     dom.buretteDrip.classList.add('falling');
     setTimeout(() => {
@@ -432,17 +587,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function checkEndpoint() {
     if (!state.indicatorType) return;
-    const delivered = (state.initialReading !== null)
-      ? (BURETTE_MAX - state.initialReading) - (BURETTE_MAX - (state.buretteVolume + (BURETTE_MAX - state.initialReading - (BURETTE_MAX - state.buretteVolume))))
-      : 0;
-
-    // Simpler: delivered = initialBuretteVolume - currentBuretteVolume
-    const initialVol = state.initialReading; // this stores the buretteVolume at time of logging
+    const initialVol = state.initialReading;
     const deliveredVol = initialVol - state.buretteVolume;
     const ind = INDICATORS[state.indicatorType];
-
-    // Near endpoint: flash color briefly
     const ratio = deliveredVol / state.endpointVol;
+
+    // Near endpoint flash
     if (ratio > 0.85 && ratio < 1.0) {
       dom.flaskLiquid.style.backgroundColor = ind.nearEndpoint;
       setTimeout(() => {
@@ -452,20 +602,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 300);
     }
 
-    // Endpoint reached
+    // Endpoint
     if (deliveredVol >= state.endpointVol && !state.endpointReached) {
       state.endpointReached = true;
       dom.flaskLiquid.style.backgroundColor = ind.baseColor;
       stopFlow();
       enableFlowButtons(false);
-
-      // Auto advance to record final
-      if (state.step === 8) { // titrate step
-        advanceStep();
-      }
+      toast('Endpoint reached! The colour change is permanent.', 'success');
+      if (state.step === 8) advanceStep();
     }
 
-    // Increase flask liquid height slightly as base is added
     const fillRatio = Math.min(deliveredVol / 30, 1);
     dom.flaskLiquid.style.height = (30 + fillRatio * 25) + '%';
   }
@@ -477,16 +623,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function stopFlow() {
-    if (flowInterval) {
-      clearInterval(flowInterval);
-      flowInterval = null;
-    }
+    if (flowInterval) { clearInterval(flowInterval); flowInterval = null; }
   }
 
   function enableFlowButtons(enabled) {
-    [dom.btnFast, dom.btnSlow, dom.btnDrop].forEach(b => {
-      b.disabled = !enabled;
-    });
+    [dom.btnFast, dom.btnSlow, dom.btnDrop].forEach(b => b.disabled = !enabled);
   }
 
   // Fast flow
@@ -525,28 +666,22 @@ document.addEventListener('DOMContentLoaded', () => {
     topupInterval = setInterval(() => topUp(0.5), 150);
   });
   ['mouseup', 'mouseleave'].forEach(evt =>
-    dom.btnTopup.addEventListener(evt, () => { clearInterval(topupInterval); })
+    dom.btnTopup.addEventListener(evt, () => clearInterval(topupInterval))
   );
 
-  // Log initial reading
-  dom.btnLogInitial.addEventListener('click', () => handleAction('do-log-initial'));
-
-  function logInitialReading() {
+  // Log initial
+  dom.btnLogInitial.addEventListener('click', () => {
     state.initialReading = state.buretteVolume;
     const reading = getBuretteReading();
-    const inputId = `initial-${state.run}`;
-    const input = document.getElementById(inputId);
+    const input = document.getElementById(`initial-${state.run}`);
     if (input) input.value = reading.toFixed(2);
-
     enableFlowButtons(true);
+    toast(`Initial reading: ${reading.toFixed(2)} cm³`);
+    if (state.step === 7) advanceStep();
+  });
 
-    if (state.step === 7) advanceStep(); // advance from record-initial to titrate
-  }
-
-  // Log final reading
-  dom.btnLogFinal.addEventListener('click', () => handleAction('do-log-final'));
-
-  function logFinalReading() {
+  // Log final
+  dom.btnLogFinal.addEventListener('click', () => {
     const finalReading = getBuretteReading();
     const initialReading = parseFloat(document.getElementById(`initial-${state.run}`)?.value || '0');
     const titre = finalReading - initialReading;
@@ -556,22 +691,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (finalInput) finalInput.value = finalReading.toFixed(2);
     if (titreInput) titreInput.value = titre.toFixed(2);
 
-    state.results.push({ initial: initialReading, final: finalReading, titre: titre, run: state.run });
-
+    state.results.push({ initial: initialReading, final: finalReading, titre, run: state.run });
     enableFlowButtons(false);
     checkConcordance();
+    toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titre.toFixed(2)} cm³`);
+    if (state.step === 9) advanceStep();
+  });
 
-    if (state.step === 9) advanceStep(); // advance to repeat step
-  }
 
-  // ── Concordance Check ──
+  // ══════════════════════════════════════
+  // CONCORDANCE
+  // ══════════════════════════════════════
+
   function checkConcordance() {
-    if (state.results.length < 2) {
-      dom.concordantMsg.style.display = 'none';
-      return;
-    }
+    if (state.results.length < 2) { dom.concordantMsg.style.display = 'none'; return; }
 
-    // Check all non-rough titres
     const accurateTitres = state.results.filter(r => r.run > 0).map(r => r.titre);
     let concordantPair = null;
 
@@ -587,62 +721,59 @@ document.addEventListener('DOMContentLoaded', () => {
     if (concordantPair) {
       const avg = (concordantPair[0] + concordantPair[1]) / 2;
       dom.concordantMsg.className = 'concordant-msg success';
-      dom.concordantMsg.innerHTML = `Concordant results found: ${concordantPair[0].toFixed(2)} and ${concordantPair[1].toFixed(2)} cm³ (within ${CONCORDANT_THRESHOLD} cm³).<br>Average titre = <strong>${avg.toFixed(2)} cm³</strong>`;
+      dom.concordantMsg.innerHTML = `Concordant: ${concordantPair[0].toFixed(2)} and ${concordantPair[1].toFixed(2)} cm³.<br>Average titre = <strong>${avg.toFixed(2)} cm³</strong>`;
       showCalculations(avg);
-
-      // Highlight concordant cells
       highlightConcordant(concordantPair);
     } else {
       dom.concordantMsg.className = 'concordant-msg info';
-      dom.concordantMsg.textContent = 'No concordant results yet. Keep titrating for results within ' + CONCORDANT_THRESHOLD + ' cm³ of each other.';
+      dom.concordantMsg.textContent = `No concordant results yet. Need two titres within ${CONCORDANT_THRESHOLD} cm³.`;
     }
   }
 
   function highlightConcordant(pair) {
-    // Remove existing highlights
     document.querySelectorAll('.data-table td.concordant').forEach(td => td.classList.remove('concordant'));
-
     state.results.forEach(r => {
       if (pair.includes(r.titre)) {
-        const cells = [
-          document.getElementById(`final-${r.run}`)?.parentElement,
-          document.getElementById(`initial-${r.run}`)?.parentElement,
-          document.getElementById(`titre-${r.run}`)?.parentElement,
-        ];
-        cells.forEach(c => { if (c) c.classList.add('concordant'); });
+        ['final', 'initial', 'titre'].forEach(prefix => {
+          const td = document.getElementById(`${prefix}-${r.run}`)?.parentElement;
+          if (td) td.classList.add('concordant');
+        });
       }
     });
   }
 
-  // ── Calculations ──
   function showCalculations(avgTitre) {
     const molesBase = (state.baseConc * avgTitre) / 1000;
-    const molesAcid = molesBase; // 1:1 for NaOH + HCl
-    const calcConc = (molesAcid / (PIPETTE_VOL / 1000));
+    const molesAcid = molesBase;
+    const calcConc = molesAcid / (PIPETTE_VOL / 1000);
 
     dom.calcWorkspace.innerHTML = `
       <span class="calc-label">Average titre (concordant)</span>
       <div class="calc-line">${avgTitre.toFixed(2)} cm³</div>
-
-      <span class="calc-label">Moles of base (NaOH) added</span>
-      <div class="calc-line">n = c × V = ${state.baseConc.toFixed(2)} × ${avgTitre.toFixed(2)}/1000</div>
-      <div class="calc-line">= ${molesBase.toFixed(6)} mol</div>
-
+      <span class="calc-label">Moles of NaOH added</span>
+      <div class="calc-line">n = c × V = ${state.baseConc.toFixed(2)} × ${avgTitre.toFixed(2)}/1000 = ${molesBase.toFixed(6)} mol</div>
       <span class="calc-label">Mole ratio NaOH : acid = 1 : 1</span>
       <div class="calc-line">Moles of acid = ${molesAcid.toFixed(6)} mol</div>
-
       <span class="calc-label">Concentration of FA2</span>
       <div class="calc-line">c = n / V = ${molesAcid.toFixed(6)} / ${(PIPETTE_VOL / 1000).toFixed(4)}</div>
       <div class="calc-result">Concentration of FA2 = ${calcConc.toFixed(4)} mol dm⁻³</div>
     `;
   }
 
-  // ── Repeat / Next Titration ──
+
+  // ══════════════════════════════════════
+  // REPEAT / NEXT TITRATION
+  // ══════════════════════════════════════
+
+  // Button in guide actions for "repeat" step
+  dom.guideActions.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (btn?.dataset.action === 'next-titration') startNextTitration();
+  });
+
   function startNextTitration() {
     if (state.run >= 3) {
-      dom.guideTitle.textContent = 'All titrations complete';
-      dom.guideDesc.textContent = 'You have completed all four titrations. Check your data table and calculations.';
-      dom.guideActions.innerHTML = '';
+      toast('All four titrations complete.', 'info');
       return;
     }
 
@@ -655,54 +786,48 @@ document.addEventListener('DOMContentLoaded', () => {
     state.endpointReached = false;
     state.endpointVol = (state.acidConc * PIPETTE_VOL) / state.baseConc;
 
-    // Reset flask visual
-    dom.flaskLiquid.style.height = '0';
-    dom.flaskLiquid.style.backgroundColor = 'transparent';
-    unplaceFlask();
-    enableFlowButtons(false);
-
-    // Jump back to rinse-pipette step (burette stays filled)
-    state.step = 2; // rinse pipette
-    renderStepsBar();
-    updateGuide();
-  }
-
-  // ── Full Reset ──
-  dom.btnReset.addEventListener('click', () => {
-    stopFlow();
-
-    // Reset state
-    Object.assign(state, {
-      step: 0,
-      buretteRinsed: false,
-      buretteFilled: false,
-      buretteVolume: 0,
-      pipetteRinsed: false,
-      pipetteFilled: false,
-      flaskFilled: false,
-      indicatorType: null,
-      indicatorAdded: false,
-      flaskPlaced: false,
-      initialReading: null,
-      endpointReached: false,
-      titrating: false,
-      run: 0,
-      results: [],
-    });
-    computeEndpoint();
-
-    // Reset visuals
-    dom.pipetteLiquid.style.height = '0';
-    dom.pipetteBulgeLiquid.style.height = '0';
     dom.flaskLiquid.style.height = '0';
     dom.flaskLiquid.style.backgroundColor = 'transparent';
     dom.indicator.querySelector('.indicator-label').textContent = 'Indicator';
     unplaceFlask();
     enableFlowButtons(false);
+
+    state.step = 2; // back to rinse-pipette
+    renderStepsBar();
+    updateGuide();
+    toast(`Starting titration ${state.run === 1 ? '1st' : state.run === 2 ? '2nd' : '3rd'} accurate.`);
+  }
+
+
+  // ══════════════════════════════════════
+  // RESET
+  // ══════════════════════════════════════
+
+  dom.btnReset.addEventListener('click', () => {
+    stopFlow();
+    Object.assign(state, {
+      step: 0, picked: null,
+      buretteRinsed: false, buretteFilled: false, buretteVolume: 0,
+      pipetteRinsed: false, pipetteFilled: false, flaskFilled: false,
+      indicatorType: null, indicatorAdded: false, flaskPlaced: false,
+      initialReading: null, endpointReached: false, run: 0, results: [],
+    });
+    computeEndpoint();
+
+    dom.pipetteLiquid.style.height = '0';
+    dom.pipetteBulgeLiquid.style.height = '0';
+    dom.flaskLiquid.style.height = '0';
+    dom.flaskLiquid.style.backgroundColor = 'transparent';
+    dom.pipette.style.transform = '';
+    dom.pipette.style.zIndex = '';
+    dom.indicator.querySelector('.indicator-label').textContent = 'Indicator';
+    unplaceFlask();
+    enableFlowButtons(false);
     dom.buretteControls.style.display = 'none';
     dom.beakerLiquid.style.height = '75%';
+    cancelPick();
+    closePopups();
 
-    // Reset data table
     for (let i = 0; i < 4; i++) {
       ['final', 'initial', 'titre'].forEach(prefix => {
         const input = document.getElementById(`${prefix}-${i}`);
@@ -715,48 +840,33 @@ document.addEventListener('DOMContentLoaded', () => {
     updateVisuals();
     renderStepsBar();
     updateGuide();
-    positionFlaskZone();
-    dom.flaskZone.style.display = 'none';
   });
 
-  // ── Guide Toggle ──
+
+  // ══════════════════════════════════════
+  // GUIDE TOGGLE
+  // ══════════════════════════════════════
+
   dom.btnToggleGuide.addEventListener('click', () => {
     state.guideOpen = !state.guideOpen;
     dom.guidePanel.style.display = state.guideOpen ? '' : 'none';
   });
 
-  // ── Apparatus Click Interaction ──
-  // For non-guided free interaction, clicking apparatus triggers context actions
-  dom.workbench.addEventListener('click', (e) => {
-    const item = e.target.closest('[data-item]');
-    if (!item) return;
 
-    const type = item.dataset.item;
+  // ══════════════════════════════════════
+  // TOAST
+  // ══════════════════════════════════════
 
-    // Quick interaction: clicking flask when it's at home and conditions met → place it
-    if (type === 'flask' && !state.flaskPlaced && state.indicatorAdded) {
-      placeFlask();
-      if (state.step === 6) advanceStep();
-      return;
-    }
-
-    // Clicking burette → show flask zone if flask not placed
-    if (type === 'burette' && !state.flaskPlaced && state.indicatorAdded) {
-      dom.flaskZone.style.display = '';
-      positionFlaskZone();
-    }
-  });
-
-  // Flask zone click
-  dom.flaskZone.addEventListener('click', () => {
-    if (state.indicatorAdded && !state.flaskPlaced) {
-      placeFlask();
-      if (state.step === 6) advanceStep();
-    }
-  });
-
-  // ── Window Resize ──
-  window.addEventListener('resize', () => {
-    if (!state.flaskPlaced) positionFlaskZone();
-  });
+  function toast(message, type) {
+    if (!dom.toast) return;
+    const el = document.createElement('div');
+    el.className = `toast toast-${type || 'info'}`;
+    el.textContent = message;
+    dom.toast.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('visible'));
+    setTimeout(() => {
+      el.classList.remove('visible');
+      setTimeout(() => el.remove(), 300);
+    }, 2500);
+  }
 });

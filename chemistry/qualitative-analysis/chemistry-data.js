@@ -6,7 +6,7 @@
    objects below — no rendering code changes needed.
    ============================================================ */
 
-const CHEMISTRY_DATA = {
+var CHEMISTRY_DATA = {
 
   /* ── Unknown salts ──
      Each unknown maps to a cation, anion, solution colour, and display info.

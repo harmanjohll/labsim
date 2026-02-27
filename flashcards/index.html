@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards – LabSim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="flashcards.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">LabSim</a> <span class="sep">/</span>
+        <span>Flashcards</span>
+      </nav>
+    </div>
+  </header>
+
+  <div class="fc-layout container">
+
+    <!-- Deck picker -->
+    <aside class="fc-sidebar panel" id="sidebar">
+      <div class="panel-header">Decks</div>
+      <div class="panel-body">
+        <div class="deck-list" id="deck-list"></div>
+        <div class="fc-stats" id="fc-stats">
+          <div class="stat-row"><span class="stat-label">Cards studied</span><span class="stat-value" id="stat-studied">0</span></div>
+          <div class="stat-row"><span class="stat-label">Streak</span><span class="stat-value" id="stat-streak">0</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Card area -->
+    <main class="fc-main">
+      <div class="fc-progress" id="fc-progress" hidden>
+        <div class="fc-progress-bar" id="fc-progress-bar"></div>
+        <span class="fc-progress-text" id="fc-progress-text">0 / 0</span>
+      </div>
+
+      <div class="fc-card-area" id="card-area">
+        <div class="fc-placeholder" id="placeholder">
+          <div class="placeholder-icon">&#127183;</div>
+          <h2>Choose a deck to begin</h2>
+          <p>Select a topic from the left to start reviewing flashcards.</p>
+        </div>
+
+        <div class="fc-card" id="fc-card" hidden>
+          <div class="fc-card-inner" id="fc-card-inner">
+            <div class="fc-card-front">
+              <div class="fc-card-category" id="card-category"></div>
+              <div class="fc-card-question" id="card-question"></div>
+              <div class="fc-card-hint">Click or press Space to reveal answer</div>
+            </div>
+            <div class="fc-card-back">
+              <div class="fc-card-category" id="card-category-back"></div>
+              <div class="fc-card-answer" id="card-answer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rating buttons -->
+      <div class="fc-rating" id="fc-rating" hidden>
+        <p class="fc-rating-prompt">How well did you know this?</p>
+        <div class="fc-rating-buttons">
+          <button class="btn fc-rate fc-rate-hard" data-rating="hard">Hard</button>
+          <button class="btn fc-rate fc-rate-ok" data-rating="ok">OK</button>
+          <button class="btn fc-rate fc-rate-easy" data-rating="easy">Easy</button>
+        </div>
+      </div>
+
+      <!-- Session summary -->
+      <div class="fc-summary card" id="fc-summary" hidden>
+        <h3>Session Complete!</h3>
+        <div class="summary-stats">
+          <div class="summary-stat">
+            <span class="summary-num" id="sum-total">0</span>
+            <span class="summary-label">Cards</span>
+          </div>
+          <div class="summary-stat easy">
+            <span class="summary-num" id="sum-easy">0</span>
+            <span class="summary-label">Easy</span>
+          </div>
+          <div class="summary-stat ok">
+            <span class="summary-num" id="sum-ok">0</span>
+            <span class="summary-label">OK</span>
+          </div>
+          <div class="summary-stat hard">
+            <span class="summary-num" id="sum-hard">0</span>
+            <span class="summary-label">Hard</span>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-review-hard">Review Hard Cards</button>
+        <button class="btn btn-ghost btn-sm" id="btn-new-deck">Choose Another Deck</button>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="../shared/lab-audio.js"></script>
+  <script src="flashcards-data.js"></script>
+  <script src="flashcards.js"></script>
+</body>
+</html>

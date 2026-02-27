@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nature of Science – LabSim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="nos.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">LabSim</a> <span class="sep">/</span>
+        <span>Nature of Science</span>
+      </nav>
+    </div>
+  </header>
+
+  <div class="nos-layout container">
+
+    <!-- Sidebar navigation -->
+    <aside class="nos-sidebar panel" id="sidebar">
+      <div class="panel-header">Topics</div>
+      <div class="panel-body">
+        <nav class="nos-nav" id="nos-nav" aria-label="Topic navigation">
+          <button class="nos-nav-item active" data-section="variables">
+            <span class="nos-nav-icon">&#x1F4CA;</span>
+            <span>Variables</span>
+          </button>
+          <button class="nos-nav-item" data-section="errors">
+            <span class="nos-nav-icon">&#x1F3AF;</span>
+            <span>Errors &amp; Accuracy</span>
+          </button>
+          <button class="nos-nav-item" data-section="fair-test">
+            <span class="nos-nav-icon">&#x2696;&#xFE0F;</span>
+            <span>Fair Testing</span>
+          </button>
+          <button class="nos-nav-item" data-section="planning">
+            <span class="nos-nav-icon">&#x1F4DD;</span>
+            <span>Planning</span>
+          </button>
+          <button class="nos-nav-item" data-section="evaluation">
+            <span class="nos-nav-icon">&#x1F50D;</span>
+            <span>Evaluation</span>
+          </button>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="nos-main" id="nos-main">
+
+      <!-- Variables Section -->
+      <section class="nos-section" id="sec-variables">
+        <div class="nos-section-header">
+          <h2>Variables</h2>
+          <p class="nos-intro" id="variables-intro"></p>
+        </div>
+
+        <div class="nos-var-cards" id="var-cards"></div>
+
+        <div class="nos-exercise-area">
+          <h3>Practice: Identify the Variables</h3>
+          <div class="nos-exercise-card card" id="var-exercise">
+            <div class="exercise-scenario" id="var-scenario"></div>
+            <div class="exercise-inputs">
+              <div class="exercise-field">
+                <label for="input-iv">Independent Variable (IV)</label>
+                <input type="text" id="input-iv" class="nos-input" placeholder="What is being changed?">
+              </div>
+              <div class="exercise-field">
+                <label for="input-dv">Dependent Variable (DV)</label>
+                <input type="text" id="input-dv" class="nos-input" placeholder="What is being measured?">
+              </div>
+              <div class="exercise-field">
+                <label for="input-cv">Control Variables (list any two)</label>
+                <input type="text" id="input-cv" class="nos-input" placeholder="What must stay the same?">
+              </div>
+            </div>
+            <div class="exercise-actions">
+              <button class="btn btn-primary btn-sm" id="btn-check-vars">Check Answer</button>
+              <button class="btn btn-ghost btn-sm" id="btn-next-var">Next Scenario</button>
+            </div>
+            <div class="exercise-feedback" id="var-feedback" hidden></div>
+          </div>
+          <div class="exercise-progress" id="var-progress"></div>
+        </div>
+      </section>
+
+      <!-- Errors Section -->
+      <section class="nos-section" id="sec-errors" hidden>
+        <div class="nos-section-header">
+          <h2>Errors &amp; Accuracy</h2>
+          <p class="nos-intro" id="errors-intro"></p>
+        </div>
+
+        <div class="nos-concept-grid" id="error-concepts"></div>
+
+        <div class="nos-quiz-area">
+          <h3>Quick Quiz</h3>
+          <div class="nos-quiz-card card" id="error-quiz">
+            <div class="quiz-question" id="err-question"></div>
+            <div class="quiz-options" id="err-options"></div>
+            <div class="quiz-feedback" id="err-feedback" hidden></div>
+            <div class="quiz-actions">
+              <button class="btn btn-ghost btn-sm" id="btn-next-err">Next Question</button>
+            </div>
+          </div>
+          <div class="quiz-score" id="err-score"></div>
+        </div>
+      </section>
+
+      <!-- Fair Testing Section -->
+      <section class="nos-section" id="sec-fair-test" hidden>
+        <div class="nos-section-header">
+          <h2>Fair Testing</h2>
+          <p class="nos-intro" id="fair-intro"></p>
+        </div>
+
+        <div class="nos-principles" id="fair-principles"></div>
+
+        <div class="nos-scenarios-area">
+          <h3>Spot the Flaw</h3>
+          <div class="nos-scenario-card card" id="fair-scenario">
+            <div class="scenario-text" id="fair-text"></div>
+            <div class="scenario-actions">
+              <button class="btn btn-primary btn-sm" id="btn-reveal-flaw">Reveal Flaw</button>
+              <button class="btn btn-ghost btn-sm" id="btn-next-flaw">Next Scenario</button>
+            </div>
+            <div class="scenario-answer" id="fair-answer" hidden>
+              <div class="flaw-section">
+                <span class="flaw-label">Flaw:</span>
+                <span id="fair-flaw"></span>
+              </div>
+              <div class="fix-section">
+                <span class="fix-label">Fix:</span>
+                <span id="fair-fix"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Planning Section -->
+      <section class="nos-section" id="sec-planning" hidden>
+        <div class="nos-section-header">
+          <h2>Planning an Investigation</h2>
+          <p class="nos-intro" id="planning-intro"></p>
+        </div>
+
+        <div class="nos-rimmer" id="rimmer-steps"></div>
+
+        <div class="nos-plan-builder">
+          <h3>Plan Builder</h3>
+          <p class="nos-hint">Choose a practical and try writing a research question that includes the IV and DV.</p>
+          <div class="plan-select-row">
+            <label for="plan-practical">Practical:</label>
+            <select id="plan-practical" class="nos-select">
+              <option value="">— Choose —</option>
+            </select>
+          </div>
+          <div class="plan-rq" id="plan-rq" hidden>
+            <div class="plan-rq-label">Example research question:</div>
+            <div class="plan-rq-text" id="plan-rq-text"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Evaluation Section -->
+      <section class="nos-section" id="sec-evaluation" hidden>
+        <div class="nos-section-header">
+          <h2>Evaluation Word Bank</h2>
+          <p class="nos-intro">Use these phrases when writing evaluations in your practical reports. Drag them into the correct category, or just study the lists.</p>
+        </div>
+
+        <div class="nos-eval-columns" id="eval-columns">
+          <div class="eval-column">
+            <h4 class="eval-col-title strength-title">Strengths</h4>
+            <ul class="eval-list" id="eval-strengths"></ul>
+          </div>
+          <div class="eval-column">
+            <h4 class="eval-col-title weakness-title">Weaknesses</h4>
+            <ul class="eval-list" id="eval-weaknesses"></ul>
+          </div>
+          <div class="eval-column">
+            <h4 class="eval-col-title improvement-title">Improvements</h4>
+            <ul class="eval-list" id="eval-improvements"></ul>
+          </div>
+        </div>
+
+        <div class="nos-eval-practice">
+          <h3>Practice: Sort the Phrases</h3>
+          <p class="nos-hint">Click a phrase, then click the category it belongs to.</p>
+          <div class="eval-scramble" id="eval-scramble"></div>
+          <div class="eval-targets">
+            <div class="eval-target" data-cat="strengths">
+              <div class="eval-target-label">Strengths</div>
+              <div class="eval-target-items" id="target-strengths"></div>
+            </div>
+            <div class="eval-target" data-cat="weaknesses">
+              <div class="eval-target-label">Weaknesses</div>
+              <div class="eval-target-items" id="target-weaknesses"></div>
+            </div>
+            <div class="eval-target" data-cat="improvements">
+              <div class="eval-target-label">Improvements</div>
+              <div class="eval-target-items" id="target-improvements"></div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-check-eval">Check Answers</button>
+          <div class="eval-result" id="eval-result" hidden></div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script src="../shared/lab-audio.js"></script>
+  <script src="nos-data.js"></script>
+  <script src="nos.js"></script>
+</body>
+</html>

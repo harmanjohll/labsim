@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Safety – LabSim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="safety.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">LabSim</a> <span class="sep">/</span>
+        <span>Lab Safety</span>
+      </nav>
+      <div class="topbar-actions">
+        <button id="btn-reset" class="btn btn-ghost btn-sm">Start Over</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="safety-layout container">
+
+    <!-- Tabs -->
+    <nav class="safety-tabs" role="tablist" aria-label="Safety sections">
+      <button class="tab active" data-tab="hazards" role="tab" aria-selected="true">Hazard Symbols</button>
+      <button class="tab" data-tab="quiz" role="tab" aria-selected="false">Safety Quiz</button>
+      <button class="tab" data-tab="risk" role="tab" aria-selected="false">Risk Assessment</button>
+    </nav>
+
+    <!-- ═══ Tab 1: Hazard Symbols ═══ -->
+    <section class="tab-content active" id="tab-hazards" role="tabpanel" aria-label="Hazard symbols">
+      <div class="hazard-intro">
+        <h2>GHS Hazard Pictograms</h2>
+        <p>Click each symbol to learn what it means and what precautions to take.</p>
+      </div>
+      <div class="hazard-grid" id="hazard-grid"></div>
+      <div class="hazard-detail card" id="hazard-detail" hidden>
+        <div class="hazard-detail-header">
+          <div class="hazard-detail-icon" id="detail-icon"></div>
+          <div>
+            <h3 id="detail-name"></h3>
+            <span class="tag" id="detail-tag"></span>
+          </div>
+        </div>
+        <div class="hazard-detail-body">
+          <div class="detail-section">
+            <h4>Meaning</h4>
+            <p id="detail-meaning"></p>
+          </div>
+          <div class="detail-section">
+            <h4>Examples</h4>
+            <p id="detail-examples"></p>
+          </div>
+          <div class="detail-section">
+            <h4>Precautions</h4>
+            <ul id="detail-precautions"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Match game -->
+      <div class="match-section">
+        <h3>Test Yourself: Match the Symbol</h3>
+        <p class="text-sm text-muted">Drag or click to match each hazard symbol with its name.</p>
+        <div class="match-game" id="match-game"></div>
+        <div class="match-score" id="match-score" hidden>
+          <span id="match-result"></span>
+          <button class="btn btn-primary btn-sm" id="btn-match-retry">Try Again</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Tab 2: Safety Quiz ═══ -->
+    <section class="tab-content" id="tab-quiz" role="tabpanel" aria-label="Safety quiz" hidden>
+      <div class="quiz-header">
+        <h2>Laboratory Safety Quiz</h2>
+        <p class="text-sm text-muted">Test your knowledge of safe laboratory practice. Choose the best answer for each question.</p>
+        <div class="quiz-progress">
+          <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+        </div>
+        <span class="quiz-counter" id="quiz-counter">Question 1 of 15</span>
+      </div>
+      <div class="quiz-card card" id="quiz-card">
+        <div class="quiz-question" id="quiz-question"></div>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="quiz-feedback" id="quiz-feedback" hidden>
+          <p id="quiz-feedback-text"></p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-quiz-next" hidden>Next Question</button>
+      </div>
+      <div class="quiz-results card" id="quiz-results" hidden>
+        <h3>Quiz Complete!</h3>
+        <div class="quiz-score-ring" id="quiz-score-ring">
+          <span id="quiz-score-pct">0%</span>
+        </div>
+        <p id="quiz-score-text"></p>
+        <div class="quiz-breakdown" id="quiz-breakdown"></div>
+        <button class="btn btn-primary btn-sm" id="btn-quiz-retry">Retry Quiz</button>
+      </div>
+    </section>
+
+    <!-- ═══ Tab 3: Risk Assessment ═══ -->
+    <section class="tab-content" id="tab-risk" role="tabpanel" aria-label="Risk assessment" hidden>
+      <div class="risk-header">
+        <h2>Risk Assessment Builder</h2>
+        <p class="text-sm text-muted">Choose a practical and build a risk assessment by identifying hazards, risks, and precautions.</p>
+      </div>
+      <div class="risk-select-row">
+        <label class="config-label" for="risk-practical">Select Practical</label>
+        <select id="risk-practical" class="config-select">
+          <option value="">— Choose —</option>
+          <option value="titration">Acid-Base Titration</option>
+          <option value="qa">Qualitative Analysis</option>
+          <option value="electrolysis">Electrolysis</option>
+          <option value="food-tests">Food Tests</option>
+          <option value="pendulum">Pendulum</option>
+          <option value="ohms-law">Ohm's Law</option>
+          <option value="lenses">Lenses &amp; Light</option>
+          <option value="osmosis">Osmosis</option>
+        </select>
+      </div>
+      <div class="risk-builder" id="risk-builder" hidden>
+        <div class="risk-table-wrap">
+          <table class="data-table risk-table" id="risk-table">
+            <thead>
+              <tr>
+                <th style="width:25%;">Hazard</th>
+                <th style="width:25%;">Risk</th>
+                <th style="width:35%;">Precaution</th>
+                <th style="width:15%;">Check</th>
+              </tr>
+            </thead>
+            <tbody id="risk-tbody"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-check-risk">Check My Assessment</button>
+        <div class="risk-result" id="risk-result" hidden></div>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script src="../shared/lab-audio.js"></script>
+  <script src="safety-data.js"></script>
+  <script src="safety.js"></script>
+</body>
+</html>

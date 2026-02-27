@@ -1,5 +1,5 @@
 /* ============================================================
-   Qualitative Analysis Practical — Styles
+   Food Tests Practical — Styles
    ============================================================ */
 
 body {
@@ -10,27 +10,27 @@ body {
 }
 
 /* --- Layout --- */
-.qa-layout {
+.ft-layout {
   display: grid;
   grid-template-columns: 240px 1fr 300px;
   flex: 1;
   overflow: hidden;
 }
 
-.qa-guide-panel {
+.ft-guide-panel {
   padding: var(--sp-4);
   overflow-y: auto;
   border-right: 1px solid var(--color-border);
   background: var(--color-surface-alt);
 }
 
-.qa-workbench-panel {
+.ft-workbench-panel {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.qa-data-panel {
+.ft-data-panel {
   padding: var(--sp-4);
   overflow-y: auto;
   border-left: 1px solid var(--color-border);
@@ -38,13 +38,13 @@ body {
 }
 
 
-/* --- Unknown selection --- */
-.unknown-badge {
+/* --- Sample badge --- */
+.sample-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: var(--sp-2) var(--sp-4);
-  background: var(--color-primary);
+  background: var(--bio-color);
   color: #fff;
   font-weight: 700;
   font-size: var(--text-lg);
@@ -97,10 +97,10 @@ body {
 }
 .procedure-step.active {
   color: var(--color-text);
-  border-left-color: var(--color-primary);
+  border-left-color: var(--bio-color);
 }
 .procedure-step.active::before {
-  background: var(--color-primary);
+  background: var(--bio-color);
   color: #fff;
 }
 .procedure-step.done::before {
@@ -110,7 +110,7 @@ body {
 
 
 /* --- Workbench --- */
-.qa-workbench {
+.ft-workbench {
   flex: 1;
   display: flex;
   align-items: flex-end;
@@ -134,15 +134,9 @@ body {
   position: relative;
   margin-bottom: 4px;
 }
-.rack-base {
-  position: relative;
-}
-.rack-svg {
-  width: 210px;
-  height: 50px;
-}
+.rack-base { position: relative; }
+.rack-svg { width: 250px; height: 50px; }
 
-/* Test tube */
 .tube-slot {
   display: flex;
   flex-direction: column;
@@ -197,7 +191,6 @@ body {
   z-index: 2;
   border-radius: 0 0 8px 8px;
 }
-/* Meniscus line at liquid surface — primary indicator for colourless liquids */
 .tube-liquid::before {
   content: '';
   position: absolute;
@@ -217,22 +210,19 @@ body {
   transition: all var(--dur-slow) var(--ease-out);
   z-index: 3;
   border-radius: 0 0 8px 8px;
-  /* Chalky highlight at top to distinguish solid precipitate from liquid */
   box-shadow: inset 0 3px 5px rgba(255, 255, 255, 0.3);
 }
-.tube-contents-label {
-  position: absolute;
-  bottom: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 6px;
-  color: rgba(255, 255, 255, 0.35);
-  white-space: nowrap;
-  pointer-events: none;
+
+.test-tube.flash {
+  animation: tubeFlash 0.5s ease-out;
+}
+@keyframes tubeFlash {
+  0% { filter: brightness(1.6) drop-shadow(0 0 10px rgba(67, 97, 238, 0.6)); }
+  100% { filter: brightness(1); }
 }
 
 
-/* --- Reagent Bottles --- */
+/* --- Reagent Shelf --- */
 .reagent-shelf {
   display: flex;
   gap: 14px;
@@ -240,13 +230,11 @@ body {
   z-index: 20;
   flex-shrink: 0;
 }
-
 .reagent-slot {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
 .reagent-bottle {
   width: 48px;
   height: 86px;
@@ -276,12 +264,12 @@ body {
   transform: translateY(-2px);
 }
 .reagent-bottle.selected {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.3);
+  border-color: var(--bio-color);
+  box-shadow: 0 0 0 2px rgba(6, 214, 160, 0.3);
   transform: translateY(-3px);
 }
 
-/* --- Dropper bottle top --- */
+/* Dropper bottle top */
 .bottle-dropper {
   position: absolute;
   top: -18px;
@@ -307,6 +295,17 @@ body {
   border-radius: 0 0 1px 1px;
   margin-top: -1px;
 }
+
+.bottle-fill {
+  position: absolute;
+  bottom: 6px;
+  left: 4px;
+  right: 4px;
+  height: 55%;
+  border-radius: 0 0 6px 6px;
+  opacity: 0.6;
+  pointer-events: none;
+}
 .bottle-label {
   font-size: var(--text-xs);
   font-weight: 600;
@@ -316,49 +315,66 @@ body {
   pointer-events: none;
   z-index: 2;
 }
-.bottle-label sub { font-size: 0.7em; }
 
 
-/* --- Bunsen Burner --- */
-.bunsen-assembly {
+/* --- Water Bath --- */
+.water-bath-assembly {
   position: relative;
   z-index: 10;
   cursor: pointer;
   flex-shrink: 0;
-}
-.bunsen-body {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.bunsen-barrel {
-  width: 16px;
+.water-bath-body {
+  width: 70px;
   height: 50px;
-  background: linear-gradient(90deg, #888, #aaa, #888);
-  border-radius: 2px 2px 0 0;
+  background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
+  border: 1.5px solid #6b7280;
+  border-radius: 4px 4px 6px 6px;
+  position: relative;
+  overflow: hidden;
 }
-.bunsen-base {
-  width: 40px;
-  height: 12px;
-  background: linear-gradient(90deg, #666, #888, #666);
-  border-radius: 0 0 4px 4px;
-}
-.bunsen-flame {
-  width: 20px;
-  height: 0;
+.water-bath-water {
   position: absolute;
-  top: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
-  background: linear-gradient(to top, #3b82f6 0%, #60a5fa 40%, #fbbf24 80%, transparent 100%);
-  transition: height var(--dur-slow) ease;
-  opacity: 0;
-  filter: blur(1px);
+  bottom: 0;
+  left: 2px;
+  right: 2px;
+  height: 75%;
+  background: rgba(130, 180, 255, 0.3);
+  border-radius: 0 0 4px 4px;
+  transition: background 0.5s ease;
 }
-.bunsen-flame.lit {
-  height: 30px;
-  opacity: 0.85;
+.water-bath-body.heating .water-bath-water {
+  background: rgba(255, 160, 80, 0.35);
+}
+.water-bath-element {
+  position: absolute;
+  bottom: 4px;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background: #6b7280;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+.water-bath-body.heating .water-bath-element {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+.water-bath-indicator {
+  margin-top: 4px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  transition: color 0.3s ease;
+}
+.water-bath-indicator.heating {
+  color: #ef4444;
+}
+.water-bath-assembly:hover .water-bath-body {
+  filter: brightness(1.1);
 }
 
 
@@ -400,28 +416,65 @@ body {
   text-align: center;
 }
 
-/* --- Bottle liquid fill --- */
-.bottle-fill {
-  position: absolute;
-  bottom: 6px;
-  left: 4px;
-  right: 4px;
-  height: 55%;
-  border-radius: 0 0 6px 6px;
-  opacity: 0.6;
-  pointer-events: none;
+
+/* --- Wash Bar --- */
+.wash-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
-/* --- Tube flash animation --- */
-.test-tube.flash {
-  animation: tubeFlash 0.5s ease-out;
+
+/* --- Observations Table --- */
+.ft-obs-scroll {
+  max-height: 50vh;
+  overflow-y: auto;
 }
-@keyframes tubeFlash {
-  0% { filter: brightness(1.6) drop-shadow(0 0 10px rgba(67, 97, 238, 0.6)); }
-  100% { filter: brightness(1); }
+.ft-obs-table th,
+.ft-obs-table td {
+  font-size: var(--text-xs);
+  padding: var(--sp-1) var(--sp-2);
 }
 
-/* --- Toast notifications --- */
+
+/* --- Identification --- */
+.id-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.id-checkbox input {
+  accent-color: var(--bio-color);
+}
+.id-result-correct {
+  padding: var(--sp-2) var(--sp-3);
+  background: rgba(6, 214, 160, 0.1);
+  border: 1px solid rgba(6, 214, 160, 0.3);
+  border-radius: var(--radius-sm);
+  color: #059669;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.id-result-incorrect {
+  padding: var(--sp-2) var(--sp-3);
+  background: rgba(239, 71, 111, 0.1);
+  border: 1px solid rgba(239, 71, 111, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+
+/* --- Toast --- */
 .toast-container {
   position: fixed;
   top: 60px;
@@ -445,147 +498,19 @@ body {
   pointer-events: auto;
   white-space: nowrap;
 }
-.toast.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-.toast-info {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
-.toast-warn {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fbbf24;
-}
-.toast-success {
-  background: #d1fae5;
-  color: #065f46;
-  border: 1px solid #34d399;
-}
-
-
-/* --- Flame Test Overlay --- */
-.flame-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-4);
-}
-.flame-result {
-  text-align: center;
-}
-.flame-visual {
-  width: 80px;
-  height: 120px;
-  margin: 0 auto var(--sp-4);
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  filter: blur(3px);
-  animation: flicker 0.6s ease-in-out infinite alternate;
-}
-@keyframes flicker {
-  0% { transform: scale(1) rotate(-1deg); opacity: 0.85; }
-  100% { transform: scale(1.05) rotate(1deg); opacity: 1; }
-}
-.flame-result p {
-  color: #fff;
-  font-size: var(--text-lg);
-  font-weight: 500;
-}
-
-
-/* --- Wash Bar --- */
-.wash-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-4);
-  padding: var(--sp-2) var(--sp-4);
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  flex-shrink: 0;
-}
-
-
-/* --- Observations Table --- */
-.qa-obs-scroll {
-  max-height: 50vh;
-  overflow-y: auto;
-}
-.qa-obs-table th,
-.qa-obs-table td {
-  font-size: var(--text-xs);
-  padding: var(--sp-1) var(--sp-2);
-}
-.qa-obs-table td:first-child {
-  text-align: center;
-  font-weight: 600;
-  font-size: var(--text-xs);
-  width: 40px;
-}
-.qa-obs-table td:nth-child(2) {
-  text-align: left;
-  font-size: var(--text-xs);
-}
-.qa-obs-table td:nth-child(3) {
-  text-align: left;
-  font-size: var(--text-xs);
-}
-
-
-/* --- Identification --- */
-.id-row {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-}
-.id-input {
-  padding: var(--sp-2) var(--sp-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  font-family: var(--font-sans);
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-.id-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.15);
-}
-.id-result-correct {
-  padding: var(--sp-2) var(--sp-3);
-  background: rgba(6, 214, 160, 0.1);
-  border: 1px solid rgba(6, 214, 160, 0.3);
-  border-radius: var(--radius-sm);
-  color: #059669;
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-.id-result-incorrect {
-  padding: var(--sp-2) var(--sp-3);
-  background: rgba(239, 71, 111, 0.1);
-  border: 1px solid rgba(239, 71, 111, 0.3);
-  border-radius: var(--radius-sm);
-  color: var(--color-danger);
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
+.toast.visible { opacity: 1; transform: translateY(0); }
+.toast-info { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); }
+.toast-warn { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+.toast-success { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
 
 
 /* --- Responsive --- */
 @media (max-width: 1024px) {
-  .qa-layout {
+  .ft-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr auto;
   }
-  .qa-guide-panel {
+  .ft-guide-panel {
     border-right: none;
     border-bottom: 1px solid var(--color-border);
     display: flex;
@@ -593,9 +518,9 @@ body {
     overflow-y: visible;
     padding: var(--sp-3);
   }
-  .qa-guide-panel .panel { flex: 1; }
-  .qa-guide-panel .mt-4 { margin-top: 0; }
-  .qa-data-panel {
+  .ft-guide-panel .panel { flex: 1; }
+  .ft-guide-panel .mt-4 { margin-top: 0; }
+  .ft-data-panel {
     border-left: none;
     border-top: 1px solid var(--color-border);
   }

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – LabSim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">LabSim</a> <span class="sep">/</span>
+        <span>Dashboard</span>
+      </nav>
+    </div>
+  </header>
+
+  <div class="dash-layout container">
+
+    <div class="dash-header">
+      <h1>Your Progress</h1>
+      <p class="dash-subtitle">Track your practical completion, scores, and study streaks.</p>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="dash-stats" id="dash-stats">
+      <div class="dash-stat-card">
+        <div class="dash-stat-num" id="stat-completed">0</div>
+        <div class="dash-stat-label">Completed</div>
+        <div class="dash-stat-sub" id="stat-total">of 0 practicals</div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="dash-stat-num" id="stat-avg-score">—</div>
+        <div class="dash-stat-label">Avg Score</div>
+        <div class="dash-stat-sub">best attempts</div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="dash-stat-num" id="stat-fc-studied">0</div>
+        <div class="dash-stat-label">Cards Studied</div>
+        <div class="dash-stat-sub">flashcard sessions</div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="dash-stat-num" id="stat-streak">0</div>
+        <div class="dash-stat-label">Study Streak</div>
+        <div class="dash-stat-sub">consecutive cards</div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="dash-progress-bar">
+      <div class="dash-progress-fill" id="dash-progress-fill"></div>
+    </div>
+
+    <!-- Practicals grid -->
+    <h2 class="dash-section-title">Practicals</h2>
+    <div class="dash-grid" id="dash-grid"></div>
+
+    <!-- Study tools -->
+    <h2 class="dash-section-title">Study Tools</h2>
+    <div class="dash-tools" id="dash-tools">
+      <a href="../flashcards/index.html" class="dash-tool-card">
+        <span class="dash-tool-icon">&#127183;</span>
+        <span class="dash-tool-name">Flashcards</span>
+        <span class="dash-tool-stat" id="tool-fc">0 cards studied</span>
+      </a>
+      <a href="../safety/index.html" class="dash-tool-card">
+        <span class="dash-tool-icon">&#9888;&#65039;</span>
+        <span class="dash-tool-name">Safety Guides</span>
+      </a>
+      <a href="../nature-of-science/index.html" class="dash-tool-card">
+        <span class="dash-tool-icon">&#128202;</span>
+        <span class="dash-tool-name">Nature of Science</span>
+      </a>
+    </div>
+
+    <!-- Actions -->
+    <div class="dash-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-reset-progress">Reset All Progress</button>
+    </div>
+
+  </div>
+
+  <script src="../shared/lab-progress.js"></script>
+  <script src="../shared/dark-mode.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

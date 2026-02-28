@@ -154,6 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
     toast: $('toast-container'),
   };
 
+  // ── Recording Mode ──
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject(document.getElementById('topbar-actions'));
+  }
+
   // ── Initialization ──
   computeEndpoint();
   renderStepsBar();
@@ -677,10 +682,37 @@ document.addEventListener('DOMContentLoaded', () => {
     state.initialReading = state.buretteVolume;
     const reading = getBuretteReading();
     const input = document.getElementById(`initial-${state.run}`);
-    if (input) input.value = reading.toFixed(2);
-    enableFlowButtons(true);
-    toast(`Initial reading: ${reading.toFixed(2)} cm³`);
-    if (state.step === 7) advanceStep();
+
+    if (typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided()) {
+      // Independent mode: student enters reading manually
+      if (input) {
+        input.readOnly = false;
+        input.value = '';
+        input.placeholder = reading.toFixed(2);
+        input.focus();
+        input.style.background = 'var(--color-primary-light)';
+        toast('Read the burette and type your initial reading.', 'info');
+        const confirmHandler = () => {
+          const entered = parseFloat(input.value);
+          if (isNaN(entered)) return;
+          input.readOnly = true;
+          input.style.background = '';
+          input.removeEventListener('blur', confirmHandler);
+          input.removeEventListener('keydown', keyHandler);
+          enableFlowButtons(true);
+          if (state.step === 7) advanceStep();
+        };
+        const keyHandler = (e) => { if (e.key === 'Enter') confirmHandler(); };
+        input.addEventListener('blur', confirmHandler);
+        input.addEventListener('keydown', keyHandler);
+      }
+    } else {
+      // Guided mode: auto-fill
+      if (input) input.value = reading.toFixed(2);
+      enableFlowButtons(true);
+      toast(`Initial reading: ${reading.toFixed(2)} cm\u00B3`);
+      if (state.step === 7) advanceStep();
+    }
   });
 
   // Log final
@@ -691,14 +723,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const finalInput = document.getElementById(`final-${state.run}`);
     const titreInput = document.getElementById(`titre-${state.run}`);
-    if (finalInput) finalInput.value = finalReading.toFixed(2);
-    if (titreInput) titreInput.value = titre.toFixed(2);
 
-    state.results.push({ initial: initialReading, final: finalReading, titre, run: state.run });
-    enableFlowButtons(false);
-    checkConcordance();
-    toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titre.toFixed(2)} cm³`);
-    if (state.step === 9) advanceStep();
+    if (typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided()) {
+      // Independent mode: student enters final reading manually
+      if (finalInput) {
+        finalInput.readOnly = false;
+        finalInput.value = '';
+        finalInput.placeholder = finalReading.toFixed(2);
+        finalInput.focus();
+        finalInput.style.background = 'var(--color-primary-light)';
+        toast('Read the burette and type your final reading.', 'info');
+        const confirmHandler = () => {
+          const entered = parseFloat(finalInput.value);
+          if (isNaN(entered)) return;
+          finalInput.readOnly = true;
+          finalInput.style.background = '';
+          finalInput.removeEventListener('blur', confirmHandler);
+          finalInput.removeEventListener('keydown', keyHandler);
+          // Calculate titre from student-entered values
+          const studentInitial = parseFloat(document.getElementById(`initial-${state.run}`)?.value || '0');
+          const studentTitre = entered - studentInitial;
+          if (titreInput) titreInput.value = studentTitre.toFixed(2);
+          state.results.push({ initial: studentInitial, final: entered, titre: studentTitre, run: state.run });
+          enableFlowButtons(false);
+          checkConcordance();
+          toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${studentTitre.toFixed(2)} cm\u00B3`);
+          if (state.step === 9) advanceStep();
+        };
+        const keyHandler = (e) => { if (e.key === 'Enter') confirmHandler(); };
+        finalInput.addEventListener('blur', confirmHandler);
+        finalInput.addEventListener('keydown', keyHandler);
+      }
+    } else {
+      // Guided mode: auto-fill
+      if (finalInput) finalInput.value = finalReading.toFixed(2);
+      if (titreInput) titreInput.value = titre.toFixed(2);
+      state.results.push({ initial: initialReading, final: finalReading, titre, run: state.run });
+      enableFlowButtons(false);
+      checkConcordance();
+      toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titre.toFixed(2)} cm\u00B3`);
+      if (state.step === 9) advanceStep();
+    }
   });
 
 

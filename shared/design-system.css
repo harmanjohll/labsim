@@ -867,6 +867,87 @@ input:focus-visible, select:focus-visible {
   background: linear-gradient(180deg, transparent 60%, rgba(26,27,39,0.8));
 }
 
+/* Dark mode: Select / Dropdown visibility */
+[data-theme="dark"] select,
+[data-theme="dark"] .config-select,
+[data-theme="dark"] .selector-dropdown,
+[data-theme="dark"] .nos-select,
+[data-theme="dark"] .draw-size {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+}
+[data-theme="dark"] select:hover,
+[data-theme="dark"] .config-select:hover,
+[data-theme="dark"] .selector-dropdown:hover,
+[data-theme="dark"] .nos-select:hover,
+[data-theme="dark"] .draw-size:hover {
+  border-color: #50526a;
+}
+[data-theme="dark"] select:focus,
+[data-theme="dark"] .config-select:focus,
+[data-theme="dark"] .selector-dropdown:focus,
+[data-theme="dark"] .nos-select:focus,
+[data-theme="dark"] .draw-size:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
+  outline: none;
+}
+[data-theme="dark"] select option,
+[data-theme="dark"] .config-select option,
+[data-theme="dark"] .selector-dropdown option,
+[data-theme="dark"] .nos-select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* --- Recording Mode Toggle --- */
+.record-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+  user-select: none;
+}
+.record-toggle-hint {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+.record-toggle-track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: var(--color-border-strong);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--dur-fast) ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+.record-toggle-track.active {
+  background: var(--color-primary);
+}
+.record-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: var(--radius-full);
+  transition: transform var(--dur-fast) ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+.record-toggle-track.active .record-toggle-thumb {
+  transform: translateX(16px);
+}
+.record-toggle-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 72px;
+}
+
 /* --- Tutorial overlay --- */
 .tutorial-overlay {
   position: fixed;

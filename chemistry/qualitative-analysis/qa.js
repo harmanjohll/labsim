@@ -66,6 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
     { key: 'BaCl2', label: 'BaCl₂', sub: '(aq)',  color: 'rgba(220,220,220,0.4)' },
   ];
 
+  // ── Recording Mode ──
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject(document.getElementById('topbar-actions'));
+  }
+
   // ── Initialise UI ──
   buildUnknownSelect();
   buildTestTubes();
@@ -535,13 +540,47 @@ document.addEventListener('DOMContentLoaded', () => {
     state.observations.push({ tube, procedure, observation });
     dom.obsEmpty.style.display = 'none';
 
+    const isIndependent = typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided();
+
     const row = document.createElement('tr');
     row.className = 'animate-fade-in';
-    row.innerHTML = `
-      <td>${tube}</td>
-      <td>${procedure}</td>
-      <td>${observation}</td>
-    `;
+
+    if (isIndependent) {
+      // Independent mode: student records observation manually
+      const tdTube = document.createElement('td');
+      tdTube.textContent = tube;
+      const tdProc = document.createElement('td');
+      tdProc.textContent = procedure;
+      const tdObs = document.createElement('td');
+      const obsInput = document.createElement('input');
+      obsInput.type = 'text';
+      obsInput.className = 'reading-input';
+      obsInput.placeholder = 'Type your observation...';
+      obsInput.style.cssText = 'width:100%;font-size:var(--text-xs);border:1px dashed var(--color-border);padding:4px;border-radius:4px;background:var(--color-surface);color:var(--color-text);';
+      obsInput.dataset.answer = observation;
+      obsInput.title = 'Record what you observe';
+      // Reveal correct answer on blur if student typed something
+      obsInput.addEventListener('blur', function () {
+        if (this.value.trim().length > 0 && !this.dataset.revealed) {
+          this.dataset.revealed = 'true';
+          const feedback = document.createElement('div');
+          feedback.style.cssText = 'font-size:9px;color:var(--color-text-muted);margin-top:2px;';
+          feedback.textContent = 'Expected: ' + observation;
+          tdObs.appendChild(feedback);
+        }
+      });
+      tdObs.appendChild(obsInput);
+      row.appendChild(tdTube);
+      row.appendChild(tdProc);
+      row.appendChild(tdObs);
+    } else {
+      row.innerHTML = `
+        <td>${tube}</td>
+        <td>${procedure}</td>
+        <td>${observation}</td>
+      `;
+    }
+
     dom.obsTbody.appendChild(row);
 
     const scrollContainer = dom.obsTbody.closest('.qa-obs-scroll');

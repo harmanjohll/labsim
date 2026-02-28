@@ -41,6 +41,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var ctx = dom.canvas.getContext('2d');
 
+  /* ── Recording Mode ── */
+  if (typeof LabRecordMode !== 'undefined') {
+    var topbarActions = document.querySelector('.topbar-actions');
+    if (topbarActions) LabRecordMode.inject(topbarActions);
+  }
+
   /* ── State ── */
   var state = {
     electrolyteKey: '',
@@ -176,29 +182,72 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  function isIndependentMode() {
+    return typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided();
+  }
+
+  function makeObsInput(correctAnswer, container) {
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Type your observation...';
+    input.style.cssText = 'width:100%;font-size:var(--text-sm);border:1px dashed var(--color-border);padding:6px 8px;border-radius:6px;background:var(--color-surface);color:var(--color-text);font-family:inherit;';
+    input.dataset.answer = correctAnswer;
+    input.addEventListener('blur', function () {
+      if (this.value.trim().length > 0 && !this.dataset.revealed) {
+        this.dataset.revealed = 'true';
+        var fb = document.createElement('div');
+        fb.style.cssText = 'font-size:11px;color:var(--color-text-muted);margin-top:4px;font-style:italic;';
+        fb.textContent = 'Expected: ' + correctAnswer;
+        container.appendChild(fb);
+      }
+    });
+    return input;
+  }
+
   function showCathodeObs() {
     var r = state.resultData.cathode;
     dom.obsCathode.hidden = false;
-    dom.obsCathodeText.textContent = r.observation;
-    dom.obsCathodeProduct.textContent = r.product + ' (' + r.formula + ')';
+    if (isIndependentMode()) {
+      dom.obsCathodeText.textContent = '';
+      dom.obsCathodeText.appendChild(makeObsInput(r.observation, dom.obsCathodeText));
+      dom.obsCathodeProduct.textContent = '';
+    } else {
+      dom.obsCathodeText.textContent = r.observation;
+      dom.obsCathodeProduct.textContent = r.product + ' (' + r.formula + ')';
+    }
     markProcedure('cathode');
   }
 
   function showAnodeObs() {
     var r = state.resultData.anode;
     dom.obsAnode.hidden = false;
-    dom.obsAnodeText.textContent = r.observation;
-    dom.obsAnodeProduct.textContent = r.product + ' (' + r.formula + ')';
+    if (isIndependentMode()) {
+      dom.obsAnodeText.textContent = '';
+      dom.obsAnodeText.appendChild(makeObsInput(r.observation, dom.obsAnodeText));
+      dom.obsAnodeProduct.textContent = '';
+    } else {
+      dom.obsAnodeText.textContent = r.observation;
+      dom.obsAnodeProduct.textContent = r.product + ' (' + r.formula + ')';
+    }
     markProcedure('anode');
   }
 
   function showEquations() {
     var r = state.resultData;
     dom.eqPanel.hidden = false;
-    dom.eqCathode.textContent = r.cathodeEq;
-    dom.eqAnode.textContent = r.anodeEq;
-    dom.eqOverall.textContent = r.overall;
-    dom.eqNotes.textContent = r.notes;
+    if (isIndependentMode()) {
+      dom.eqCathode.textContent = '';
+      dom.eqCathode.appendChild(makeObsInput(r.cathodeEq, dom.eqCathode));
+      dom.eqAnode.textContent = '';
+      dom.eqAnode.appendChild(makeObsInput(r.anodeEq, dom.eqAnode));
+      dom.eqOverall.textContent = '';
+      dom.eqNotes.textContent = '';
+    } else {
+      dom.eqCathode.textContent = r.cathodeEq;
+      dom.eqAnode.textContent = r.anodeEq;
+      dom.eqOverall.textContent = r.overall;
+      dom.eqNotes.textContent = r.notes;
+    }
     markProcedure('equations');
   }
 
@@ -273,12 +322,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (r.anode.type === 'gas' && Math.random() < 0.3) {
       spawnBubble('anode', r.anode.bubbleColor);
     }
-    // move bubbles up
+    // move bubbles up, clamp within beaker bounds
     for (var i = state.bubbles.length - 1; i >= 0; i--) {
       var b = state.bubbles[i];
       b.y -= b.speed * dt;
       b.x += Math.sin(b.wobble + state.elapsed * 3) * 0.3;
       b.wobble += dt * 2;
+      // Clamp horizontal position within beaker walls
+      if (b.minX !== undefined && b.x - b.radius < b.minX) b.x = b.minX + b.radius;
+      if (b.maxX !== undefined && b.x + b.radius > b.maxX) b.x = b.maxX - b.radius;
+      // Remove bubble when it reaches liquid surface
       if (b.y < b.minY) {
         state.bubbles.splice(i, 1);
       }
@@ -302,7 +355,9 @@ document.addEventListener('DOMContentLoaded', function () {
       radius: 2 + Math.random() * 3,
       color: color,
       wobble: Math.random() * Math.PI * 2,
-      minY: beakerTop + 5
+      minY: beakerTop + 5,
+      minX: beakerX + 3,
+      maxX: beakerX + beakerW - 3
     });
   }
 

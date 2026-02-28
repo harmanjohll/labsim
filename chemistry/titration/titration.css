@@ -662,8 +662,8 @@ body {
 }
 .toast.visible { opacity: 1; transform: translateY(0); }
 .toast-info { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); }
-.toast-warn { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
-.toast-success { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+.toast-warn { background: var(--color-surface); color: var(--color-text); border: 1px solid #fbbf24; border-left: 4px solid #fbbf24; }
+.toast-success { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-success); border-left: 4px solid var(--color-success); }
 
 
 /* --- Responsive --- */

@@ -171,6 +171,9 @@ body {
   border-radius: var(--radius-sm);
   background: #fff;
 }
+[data-theme="dark"] .graph-container canvas {
+  background: var(--color-surface);
+}
 
 
 /* --- Calc --- */

@@ -302,6 +302,28 @@
   color: var(--bio-color);
 }
 
+/* Magnification calculation display */
+.mag-calc {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(420px, 100%);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.calc-formula {
+  font-style: italic;
+}
+.calc-value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--bio-color);
+}
+
 /* --- Right: Drawing panel --- */
 .micro-draw-panel {
   align-self: start;
@@ -521,4 +543,7 @@
 [data-theme="dark"] .viewport-empty {
   background: rgba(245,245,240,0.92);
   color: #666;
+}
+[data-theme="dark"] .selector-dropdown {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%239a9dab' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
 }

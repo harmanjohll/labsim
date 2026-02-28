@@ -26,6 +26,11 @@
   var procList   = document.getElementById('procedure-list');
   var toastContainer = document.getElementById('toast-container');
 
+  /* --- Recording Mode --- */
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject(document.getElementById('topbar-actions'));
+  }
+
   /* --- Canvas sizing --- */
   var W = 620, H = 420;
   canvas.width = W;
@@ -205,7 +210,29 @@
 
     var text = document.createElement('div');
     text.className = 'obs-card-text';
-    text.textContent = step.observation(state.pair);
+
+    var isIndependent = typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided();
+    var correctObs = step.observation(state.pair);
+
+    if (isIndependent) {
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Type your observation...';
+      input.style.cssText = 'width:100%;font-size:var(--text-sm);border:1px dashed var(--color-border);padding:6px 8px;border-radius:6px;background:var(--color-surface);color:var(--color-text);font-family:inherit;';
+      input.dataset.answer = correctObs;
+      input.addEventListener('blur', function () {
+        if (this.value.trim().length > 0 && !this.dataset.revealed) {
+          this.dataset.revealed = 'true';
+          var fb = document.createElement('div');
+          fb.style.cssText = 'font-size:11px;color:var(--color-text-muted);margin-top:4px;font-style:italic;';
+          fb.textContent = 'Expected: ' + correctObs;
+          text.appendChild(fb);
+        }
+      });
+      text.appendChild(input);
+    } else {
+      text.textContent = correctObs;
+    }
 
     card.appendChild(title);
     card.appendChild(text);

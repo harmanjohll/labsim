@@ -173,14 +173,23 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     var c = state.chips[state.weighIndex];
-    dom.balanceReading.textContent = c.initialMass.toFixed(2) + ' g';
+    var guided = (typeof LabRecordMode === 'undefined') || LabRecordMode.isGuided();
+
+    if (guided) {
+      dom.balanceReading.textContent = c.initialMass.toFixed(2) + ' g';
+    } else {
+      dom.balanceReading.textContent = '?.?? g';
+    }
     dom.balanceLabel.textContent = 'Cylinder ' + (state.weighIndex + 1)
       + ' (' + c.conc.toFixed(1) + ' M)';
 
     setTimeout(function () {
+      if (!guided) {
+        dom.balanceReading.textContent = c.initialMass.toFixed(2) + ' g';
+      }
       state.weighIndex++;
       showInitialMass();
-    }, 800);
+    }, guided ? 800 : 1500);
   }
 
   dom.btnPlace.addEventListener('click', function () {
@@ -271,14 +280,23 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     var c = state.chips[state.weighIndex];
-    dom.balanceReading.textContent = c.finalMass.toFixed(2) + ' g';
+    var guided = (typeof LabRecordMode === 'undefined') || LabRecordMode.isGuided();
+
+    if (guided) {
+      dom.balanceReading.textContent = c.finalMass.toFixed(2) + ' g';
+    } else {
+      dom.balanceReading.textContent = '?.?? g';
+    }
     dom.balanceLabel.textContent = 'Cylinder ' + (state.weighIndex + 1)
-      + ' (' + c.conc.toFixed(1) + ' M) — final';
+      + ' (' + c.conc.toFixed(1) + ' M) \u2014 final';
 
     setTimeout(function () {
+      if (!guided) {
+        dom.balanceReading.textContent = c.finalMass.toFixed(2) + ' g';
+      }
       state.weighIndex++;
       showFinalMass();
-    }, 800);
+    }, guided ? 800 : 1500);
   }
 
   /* ── Table ── */
@@ -295,13 +313,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function updateTable() {
     dom.tbody.innerHTML = '';
+    var guided = (typeof LabRecordMode === 'undefined') || LabRecordMode.isGuided();
+
     state.chips.forEach(function (c) {
       var pct = ((c.finalMass - c.initialMass) / c.initialMass * 100).toFixed(1);
       var row = document.createElement('tr');
-      row.innerHTML = '<td>' + c.conc.toFixed(1) + '</td>'
-        + '<td>' + c.initialMass.toFixed(2) + '</td>'
-        + '<td>' + c.finalMass.toFixed(2) + '</td>'
-        + '<td>' + (pct > 0 ? '+' : '') + pct + '%</td>';
+
+      if (guided) {
+        row.innerHTML = '<td>' + c.conc.toFixed(1) + '</td>'
+          + '<td>' + c.initialMass.toFixed(2) + '</td>'
+          + '<td>' + c.finalMass.toFixed(2) + '</td>'
+          + '<td>' + (pct > 0 ? '+' : '') + pct + '%</td>';
+      } else {
+        // Independent mode: student must calculate % change
+        row.innerHTML = '<td>' + c.conc.toFixed(1) + '</td>'
+          + '<td>' + c.initialMass.toFixed(2) + '</td>'
+          + '<td>' + c.finalMass.toFixed(2) + '</td>'
+          + '<td><input type="text" placeholder="calc %" style="width:60px;text-align:center;border:1px solid var(--color-border);border-radius:4px;padding:2px;font-size:inherit;background:var(--color-surface);color:var(--color-text);" data-expected="' + ((pct > 0 ? '+' : '') + pct) + '"></td>';
+      }
+
       dom.tbody.appendChild(row);
     });
   }
@@ -321,6 +351,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var h = 240;
     gctx.clearRect(0, 0, w, h);
 
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    gctx.fillStyle = isDark ? '#1a1b27' : '#ffffff';
+    gctx.fillRect(0, 0, w, h);
+
     var pad = { top: 20, right: 15, bottom: 40, left: 50 };
     var gw = w - pad.left - pad.right;
     var gh = h - pad.top - pad.bottom;
@@ -332,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // zero line
     var zeroY = pad.top + (maxPct / pctRange) * gh;
-    gctx.strokeStyle = '#ccc';
+    gctx.strokeStyle = isDark ? 'rgba(255,255,255,0.15)' : '#ccc';
     gctx.lineWidth = 0.5;
     gctx.setLineDash([4, 3]);
     gctx.beginPath();
@@ -342,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
     gctx.setLineDash([]);
 
     // axes
-    gctx.strokeStyle = '#666';
+    gctx.strokeStyle = isDark ? 'rgba(255,255,255,0.4)' : '#666';
     gctx.lineWidth = 1;
     gctx.beginPath();
     gctx.moveTo(pad.left, pad.top);
@@ -351,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
     gctx.stroke();
 
     // labels
-    gctx.fillStyle = '#666';
+    gctx.fillStyle = isDark ? '#9a9dab' : '#666';
     gctx.font = '500 10px Inter, sans-serif';
     gctx.textAlign = 'center';
     gctx.fillText('Sucrose concentration (mol/dm\u00b3)', pad.left + gw / 2, h - 4);
@@ -363,8 +397,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ticks
     gctx.font = '400 9px Inter, sans-serif';
-    gctx.fillStyle = '#999';
-    gctx.strokeStyle = '#eee';
+    gctx.fillStyle = isDark ? '#6b6e7d' : '#999';
+    gctx.strokeStyle = isDark ? 'rgba(255,255,255,0.06)' : '#eee';
     gctx.lineWidth = 0.5;
 
     for (var c = 0; c <= 1.0; c += 0.2) {
@@ -541,6 +575,11 @@ document.addEventListener('DOMContentLoaded', function () {
       else if (type === 'warn') LabAudio.warn();
       else LabAudio.click();
     }
+  }
+
+  /* ── LabRecordMode ── */
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject(document.querySelector('.topbar-actions'));
   }
 
   /* ── Init ── */

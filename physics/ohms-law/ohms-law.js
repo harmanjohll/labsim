@@ -112,10 +112,33 @@ document.addEventListener('DOMContentLoaded', () => {
   // RECORD
   // ══════════════════════════════════════
 
+  /* ── LabRecordMode integration ── */
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject('.topbar-actions');
+  }
+
   dom.btnRecord.addEventListener('click', () => {
     if (!state.switchClosed) { toast('Close the switch first.', 'warn'); return; }
 
-    const dp = { voltage: state.voltage, current: state.current };
+    let dp;
+
+    /* In independent mode, require manual entry of V and I */
+    if (typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided()) {
+      const userV = prompt('Enter the voltmeter reading (V):');
+      if (userV === null) return;
+      const userI = prompt('Enter the ammeter reading (A):');
+      if (userI === null) return;
+      const vVal = parseFloat(userV);
+      const iVal = parseFloat(userI);
+      if (isNaN(vVal) || vVal < 0 || isNaN(iVal) || iVal < 0) {
+        toast('Please enter valid positive numbers for V and I.', 'warn');
+        return;
+      }
+      dp = { voltage: vVal, current: iVal };
+    } else {
+      dp = { voltage: state.voltage, current: state.current };
+    }
+
     state.dataPoints.push(dp);
 
     dom.dataEmpty.style.display = 'none';
@@ -230,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.stroke();
 
     // Voltmeter (in parallel across resistor)
-    const vmY = br.y + 55;
+    const vmY = Math.min(br.y + 55, H - 30);
     ctx.strokeStyle = wireColor;
     ctx.lineWidth = wireWidth * 0.8;
 
@@ -420,11 +443,16 @@ document.addEventListener('DOMContentLoaded', () => {
     gCtx.clearRect(0, 0, W, H);
     if (state.dataPoints.length === 0) return;
 
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const axisColor = isDark ? '#9ca3af' : '#374151';
+    const gridColor = isDark ? '#4b5563' : '#e5e7eb';
+    const labelColor = isDark ? '#d1d5db' : '#6b7280';
+
     const maxV = Math.max(13, ...state.dataPoints.map(d => d.voltage)) * 1.1;
     const maxI = Math.max(0.15, ...state.dataPoints.map(d => d.current)) * 1.2;
 
     // Axes
-    gCtx.strokeStyle = '#374151';
+    gCtx.strokeStyle = axisColor;
     gCtx.lineWidth = 1;
     gCtx.beginPath();
     gCtx.moveTo(pad.left, pad.top);
@@ -433,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gCtx.stroke();
 
     // Grid
-    gCtx.strokeStyle = '#e5e7eb';
+    gCtx.strokeStyle = gridColor;
     gCtx.lineWidth = 0.5;
     for (let i = 1; i <= 5; i++) {
       const y = pad.top + (plotH * i / 5);
@@ -443,7 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Axis labels
-    gCtx.fillStyle = '#6b7280';
+    gCtx.fillStyle = labelColor;
     gCtx.font = '9px Inter, sans-serif';
     gCtx.textAlign = 'center';
     gCtx.fillText('I / A', W / 2, H - 5);
@@ -454,6 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gCtx.restore();
 
     // Tick labels — X axis (I)
+    gCtx.fillStyle = labelColor;
     gCtx.textAlign = 'center';
     gCtx.textBaseline = 'top';
     for (let i = 0; i <= 5; i++) {

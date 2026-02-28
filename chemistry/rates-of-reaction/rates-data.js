@@ -15,10 +15,15 @@ var RATES_DATA = {
     { label: '2.0 M HCl', value: 2.0, color: 'rgba(90,160,255,0.65)' }
   ],
 
-  /* Maximum gas volume (cm³) and base rate parameters */
-  maxGas: 60,           /* cm³ CO₂ at completion */
-  chipMass: 2.0,        /* g of marble chips */
-  acidVolume: 50,       /* cm³ */
+  /* Maximum gas volume (cm³) and base rate parameters
+     Stoichiometry check: 1.0 g CaCO₃ = 0.01 mol
+     → 0.01 mol CO₂ at RTP ≈ 240 cm³ theoretical
+     In practice, not all gas is collected (dissolved CO₂, losses
+     during bunging). A practical yield of ~60 cm³ is typical
+     for school gas syringe experiments with small chip masses. */
+  maxGas: 60,           /* cm³ CO₂ collected (practical yield) */
+  chipMass: 1.0,        /* g of marble chips */
+  acidVolume: 25,       /* cm³ of acid */
 
   /* Rate model: V(t) = Vmax * (1 - e^(-k*t))
      k scales with concentration */

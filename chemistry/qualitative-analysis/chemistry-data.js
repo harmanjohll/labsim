@@ -52,7 +52,7 @@ var CHEMISTRY_DATA = {
         ppt: false, solutionColor: '#2d4cc6',
         observation: 'Precipitate dissolves, forming a deep blue solution — [Cu(NH₃)₄]²⁺ complex.',
       },
-      flame: { flameColor: '#22c55e', colorName: 'blue-green', observation: 'Blue-green flame observed.' },
+      flame: { flameColor: '#00b894', colorName: 'blue-green', observation: 'Blue-green flame observed.' },
     },
 
     'Fe2+': {

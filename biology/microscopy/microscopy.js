@@ -65,6 +65,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var scorer = null;
 
+  /* ── LabRecordMode ── */
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject(document.querySelector('.topbar-actions'));
+  }
+
+  /* Magnification calculation elements */
+  var magCalcEl = document.getElementById('mag-calc');
+  var magCalcValue = document.getElementById('mag-calc-value');
+  var EYEPIECE_MAG = 10; /* Standard eyepiece magnification */
+
   /* ── Build procedure list ── */
   function buildProcedure() {
     dom.procList.innerHTML = '';
@@ -236,6 +246,17 @@ document.addEventListener('DOMContentLoaded', function () {
       renderSpecimen();
 
       dom.infoMag.textContent = mag;
+
+      /* Update magnification calculation
+         The buttons show total magnification (x40, x100, x400).
+         Objective = total / eyepiece. Eyepiece = x10. */
+      var totalMag = parseInt(mag.replace('x', ''), 10);
+      var objectivePower = totalMag / EYEPIECE_MAG;
+      if (magCalcEl) {
+        magCalcEl.hidden = false;
+        magCalcValue.textContent = '\u00d710 \u00d7 \u00d7' + objectivePower + ' = \u00d7' + totalMag;
+      }
+
       toast('Switched to ' + mag + ' magnification. Adjust focus.', 'info');
 
       if (typeof LabAudio !== 'undefined') LabAudio.switchToggle();
@@ -848,6 +869,8 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.checklistList.innerHTML = '';
     state.checkedStructures = {};
 
+    var guided = (typeof LabRecordMode === 'undefined') || LabRecordMode.isGuided();
+
     slide.structures.forEach(function (struct) {
       var li = document.createElement('li');
       li.className = 'checklist-item';
@@ -872,10 +895,20 @@ document.addEventListener('DOMContentLoaded', function () {
       swatch.className = 'structure-colour';
       swatch.style.backgroundColor = struct.colour;
 
-      var text = document.createTextNode(struct.label);
-
       label.appendChild(swatch);
-      label.appendChild(text);
+
+      if (guided) {
+        var text = document.createTextNode(struct.label);
+        label.appendChild(text);
+      } else {
+        /* Independent mode: student must type the structure name */
+        var nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = 'Name this structure\u2026';
+        nameInput.setAttribute('data-expected', struct.label);
+        nameInput.style.cssText = 'width:120px;border:1px solid var(--color-border);border-radius:4px;padding:2px 6px;font-size:inherit;background:var(--color-surface);color:var(--color-text);';
+        label.appendChild(nameInput);
+      }
 
       if (struct.required) {
         var req = document.createElement('span');
@@ -884,16 +917,27 @@ document.addEventListener('DOMContentLoaded', function () {
         label.appendChild(req);
       }
 
-      // Description tooltip on hover / underneath
+      // Description tooltip on hover / underneath (always show in guided, hide in independent)
       var desc = document.createElement('span');
       desc.className = 'structure-desc';
-      desc.textContent = struct.description;
+      if (guided) {
+        desc.textContent = struct.description;
+      } else {
+        desc.textContent = ''; /* Hidden in independent mode */
+      }
       label.appendChild(desc);
 
       li.appendChild(cb);
       li.appendChild(label);
       dom.checklistList.appendChild(li);
     });
+
+    /* Rebuild checklist when mode changes */
+    if (typeof LabRecordMode !== 'undefined') {
+      LabRecordMode.onChange(function () {
+        if (state.slide) buildChecklist(state.slide);
+      });
+    }
   }
 
   function checkCompletionReady() {

@@ -149,11 +149,17 @@
 }
 
 .graph-container {
-  background: #fff;
+  background: var(--color-surface, #fff);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--sp-2);
   margin-bottom: var(--sp-3);
+}
+[data-theme="dark"] .graph-container {
+  background: var(--color-surface);
+}
+[data-theme="dark"] .graph-container canvas {
+  background: var(--color-surface);
 }
 .graph-container canvas {
   width: 100%;

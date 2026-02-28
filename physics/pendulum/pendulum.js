@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     angle: 0,           // current angle in radians
     angularVel: 0,
     swinging: false,
-    damping: 0.9995,    // very slight damping for realism
+    damping: 0.99999,   // very slight damping for realism
 
     // Timer
     timerRunning: false,
@@ -335,11 +335,29 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.btnStartTimer.disabled = true;
   }
 
+  /* ── LabRecordMode integration ── */
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject('.topbar-actions');
+  }
+
   dom.btnRecord.addEventListener('click', () => {
-    const time10 = state.timerElapsed;
-    // Add small random error (±0.1s) for realism
-    const noise = (Math.random() - 0.5) * 0.15;
-    const adjustedTime = Math.max(0.5, time10 + noise);
+    let adjustedTime;
+
+    /* In independent mode, require manual entry of the time */
+    if (typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided()) {
+      const userTime = prompt('Enter the time for ' + NUM_OSCILLATIONS + ' oscillations (s):');
+      if (userTime === null) return;
+      adjustedTime = parseFloat(userTime);
+      if (isNaN(adjustedTime) || adjustedTime <= 0) {
+        toast('Please enter a valid positive time.', 'warn');
+        return;
+      }
+    } else {
+      const time10 = state.timerElapsed;
+      // Add small random error (±0.1s) for realism
+      const noise = (Math.random() - 0.5) * 0.15;
+      adjustedTime = Math.max(0.5, time10 + noise);
+    }
 
     const period = adjustedTime / NUM_OSCILLATIONS;
     const periodSq = period * period;
@@ -397,12 +415,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (state.dataPoints.length === 0) return;
 
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const axisColor = isDark ? '#9ca3af' : '#374151';
+    const gridColor = isDark ? '#4b5563' : '#e5e7eb';
+    const labelColor = isDark ? '#d1d5db' : '#6b7280';
+
     // Determine axis ranges
     const maxL = Math.max(1.3, ...state.dataPoints.map(d => d.length)) * 1.1;
     const maxT2 = Math.max(1, ...state.dataPoints.map(d => d.periodSq)) * 1.2;
 
     // ── Axes ──
-    gCtx.strokeStyle = '#374151';
+    gCtx.strokeStyle = axisColor;
     gCtx.lineWidth = 1;
     // Y axis
     gCtx.beginPath();
@@ -416,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gCtx.stroke();
 
     // ── Grid lines ──
-    gCtx.strokeStyle = '#e5e7eb';
+    gCtx.strokeStyle = gridColor;
     gCtx.lineWidth = 0.5;
     for (let i = 1; i <= 5; i++) {
       const y = pad.top + (plotH * i / 5);
@@ -434,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── Axis labels ──
-    gCtx.fillStyle = '#6b7280';
+    gCtx.fillStyle = labelColor;
     gCtx.font = '9px Inter, sans-serif';
     gCtx.textAlign = 'center';
     gCtx.fillText('L / m', W / 2, H - 5);
@@ -445,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gCtx.restore();
 
     // Tick labels
+    gCtx.fillStyle = labelColor;
     gCtx.textAlign = 'center';
     gCtx.textBaseline = 'top';
     for (let i = 0; i <= 5; i++) {

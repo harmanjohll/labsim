@@ -55,6 +55,21 @@
         <button class="btn btn-ghost btn-sm" id="btn-reset">Reset</button>
         <span class="timer-display" id="timer">0 s</span>
       </div>
+
+      <div class="record-prompt" id="record-prompt" hidden>
+        <div class="prompt-inner">
+          <div class="prompt-icon">&#9201;</div>
+          <div class="prompt-text">
+            Time: <strong><span class="prompt-time">0</span> s</strong> &mdash;
+            Read the gas syringe and enter the volume of CO&#x2082; collected:
+          </div>
+          <div class="prompt-input-row">
+            <input type="number" class="reading-input" min="0" max="65" step="0.5" placeholder="e.g. 24.5" autocomplete="off">
+            <span class="prompt-unit">cm&sup3;</span>
+            <button class="btn btn-primary btn-sm" id="btn-record" disabled>Record Reading</button>
+          </div>
+        </div>
+      </div>
     </main>
 
     <!-- Right: Data -->

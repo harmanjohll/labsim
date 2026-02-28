@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard – LabSim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="teacher.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">LabSim</a> <span class="sep">/</span>
+        <span>Teacher Dashboard</span>
+      </nav>
+    </div>
+  </header>
+
+  <div class="teacher-layout container">
+
+    <div class="teacher-header">
+      <h1>Teacher Dashboard</h1>
+      <p class="teacher-subtitle">View aggregate student progress, identify gaps, and export class data.</p>
+    </div>
+
+    <!-- Class setup -->
+    <section class="teacher-section" id="class-setup">
+      <h2 class="teacher-section-title">Class Setup</h2>
+      <p class="teacher-hint">Add students manually or import a class list. Student progress is stored locally on each student's device and can be shared via export codes.</p>
+      <div class="class-controls">
+        <div class="add-student-row">
+          <input type="text" id="student-name-input" class="teacher-input" placeholder="Student name..." aria-label="Student name">
+          <button class="btn btn-primary btn-sm" id="btn-add-student">Add Student</button>
+        </div>
+        <div class="class-import-row">
+          <button class="btn btn-ghost btn-sm" id="btn-import-codes">Import Progress Codes</button>
+          <button class="btn btn-ghost btn-sm" id="btn-demo-data">Load Demo Data</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Class overview stats -->
+    <section class="teacher-section" id="class-overview">
+      <h2 class="teacher-section-title">Class Overview</h2>
+      <div class="teacher-stats" id="teacher-stats">
+        <div class="teacher-stat-card">
+          <div class="teacher-stat-num" id="t-stat-students">0</div>
+          <div class="teacher-stat-label">Students</div>
+        </div>
+        <div class="teacher-stat-card">
+          <div class="teacher-stat-num" id="t-stat-avg-completion">0%</div>
+          <div class="teacher-stat-label">Avg Completion</div>
+        </div>
+        <div class="teacher-stat-card">
+          <div class="teacher-stat-num" id="t-stat-avg-score">—</div>
+          <div class="teacher-stat-label">Avg Score</div>
+        </div>
+        <div class="teacher-stat-card">
+          <div class="teacher-stat-num" id="t-stat-needs-help">0</div>
+          <div class="teacher-stat-label">Need Support</div>
+          <div class="teacher-stat-sub">below 50% score</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Practical completion heatmap -->
+    <section class="teacher-section" id="heatmap-section">
+      <h2 class="teacher-section-title">Completion Heatmap</h2>
+      <p class="teacher-hint">Green = completed, amber = started, grey = not attempted. Click a cell for details.</p>
+      <div class="heatmap-wrapper">
+        <table class="heatmap-table" id="heatmap-table">
+          <thead id="heatmap-head"></thead>
+          <tbody id="heatmap-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Per-practical breakdown -->
+    <section class="teacher-section" id="practical-breakdown">
+      <h2 class="teacher-section-title">Practical Breakdown</h2>
+      <div class="breakdown-grid" id="breakdown-grid"></div>
+    </section>
+
+    <!-- Student list -->
+    <section class="teacher-section" id="student-list-section">
+      <h2 class="teacher-section-title">Student List</h2>
+      <div class="student-list" id="student-list"></div>
+    </section>
+
+    <!-- Export -->
+    <section class="teacher-section">
+      <h2 class="teacher-section-title">Export</h2>
+      <div class="export-controls">
+        <button class="btn btn-primary btn-sm" id="btn-export-csv">Export Class CSV</button>
+        <button class="btn btn-ghost btn-sm" id="btn-export-json">Export Raw JSON</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../shared/lab-progress.js"></script>
+  <script src="../shared/dark-mode.js"></script>
+  <script src="teacher.js"></script>
+</body>
+</html>

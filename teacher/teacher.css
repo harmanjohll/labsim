@@ -1,0 +1,318 @@
+/* ============================================================
+   Teacher Dashboard – Styles
+   ============================================================ */
+
+.teacher-layout {
+  padding-top: var(--sp-6);
+  padding-bottom: var(--sp-10);
+  max-width: 1100px;
+}
+
+.teacher-header {
+  text-align: center;
+  margin-bottom: var(--sp-8);
+}
+.teacher-header h1 {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--sp-2);
+}
+.teacher-subtitle {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+/* --- Sections --- */
+.teacher-section {
+  margin-bottom: var(--sp-8);
+}
+.teacher-section-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--color-border);
+}
+.teacher-hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--sp-4);
+  line-height: var(--leading-relaxed);
+}
+
+/* --- Class setup --- */
+.class-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.add-student-row {
+  display: flex;
+  gap: var(--sp-2);
+}
+.teacher-input {
+  flex: 1;
+  padding: var(--sp-2) var(--sp-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color var(--dur-fast) ease;
+}
+.teacher-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+.class-import-row {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* --- Stat cards --- */
+.teacher-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-4);
+}
+.teacher-stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+  text-align: center;
+}
+.teacher-stat-num {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1;
+  margin-bottom: var(--sp-1);
+}
+.teacher-stat-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--sp-1);
+}
+.teacher-stat-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* --- Heatmap --- */
+.heatmap-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.heatmap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+}
+.heatmap-table th,
+.heatmap-table td {
+  padding: var(--sp-2);
+  text-align: center;
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.heatmap-table th {
+  background: var(--color-surface-alt);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.heatmap-table th.rotate-header {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  height: 100px;
+  padding: var(--sp-2) var(--sp-1);
+  font-size: 0.65rem;
+}
+.heatmap-table td:first-child {
+  text-align: left;
+  font-weight: 500;
+  background: var(--color-surface-alt);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 100px;
+}
+
+.hm-cell {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  cursor: pointer;
+  transition: transform var(--dur-fast) ease;
+}
+.hm-cell:hover {
+  transform: scale(1.2);
+}
+.hm-not-started {
+  background: var(--color-border);
+}
+.hm-visited {
+  background: var(--color-warning);
+}
+.hm-completed {
+  background: var(--color-success);
+}
+.hm-completed-high {
+  background: #059669;
+}
+.hm-completed-low {
+  background: #f97316;
+}
+
+/* --- Breakdown grid --- */
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--sp-3);
+}
+.breakdown-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+}
+.breakdown-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-bottom: var(--sp-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.breakdown-bar {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--sp-2);
+}
+.breakdown-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.4s var(--ease-out);
+}
+.breakdown-bar-fill.high { background: var(--color-success); }
+.breakdown-bar-fill.mid { background: var(--color-warning); }
+.breakdown-bar-fill.low { background: var(--color-danger); }
+.breakdown-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* --- Student list --- */
+.student-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.student-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--dur-fast) ease;
+}
+.student-row:hover {
+  border-color: var(--color-primary);
+}
+.student-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  min-width: 120px;
+}
+.student-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.student-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+  border-radius: var(--radius-full);
+  transition: width 0.4s var(--ease-out);
+}
+.student-pct {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 40px;
+  text-align: right;
+}
+.student-score {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  min-width: 50px;
+  text-align: right;
+}
+.student-remove {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  padding: var(--sp-1);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) ease;
+}
+.student-remove:hover {
+  color: var(--color-danger);
+}
+
+/* --- Export --- */
+.export-controls {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* --- Empty state --- */
+.empty-state {
+  text-align: center;
+  padding: var(--sp-8);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .teacher-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .breakdown-grid {
+    grid-template-columns: 1fr;
+  }
+  .heatmap-table th.rotate-header {
+    height: 60px;
+  }
+}
+@media (max-width: 480px) {
+  .teacher-stats {
+    grid-template-columns: 1fr;
+  }
+  .add-student-row {
+    flex-direction: column;
+  }
+}

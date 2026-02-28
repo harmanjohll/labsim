@@ -71,6 +71,11 @@
      ══════════════════════════════════════ */
 
   function init() {
+    /* LabRecordMode toggle */
+    if (typeof LabRecordMode !== 'undefined') {
+      LabRecordMode.inject(document.querySelector('.topbar-actions'));
+    }
+
     buildTempButtons();
     buildProcedureList();
     buildRiskTable();
@@ -196,6 +201,7 @@
     var tdTime = document.getElementById('res-time-' + temp);
     var tdRate = document.getElementById('res-rate-' + temp);
     var tr     = document.getElementById('result-row-' + temp);
+    var guided = (typeof LabRecordMode === 'undefined') || LabRecordMode.isGuided();
 
     if (time === null) {
       tdTime.textContent = 'No reaction';
@@ -203,10 +209,17 @@
       tdRate.textContent = '0';
       tdRate.className = '';
       if (tr) tr.className = 'denatured-row';
-    } else {
+    } else if (guided) {
       tdTime.textContent = time;
       tdTime.className = '';
       tdRate.textContent = rate;
+      tdRate.className = '';
+      if (tr) tr.className = 'completed-row';
+    } else {
+      /* Independent mode: student enters time and rate manually */
+      tdTime.innerHTML = '<input type="text" placeholder="time" data-expected="' + time + '" style="width:50px;text-align:center;border:1px solid var(--color-border);border-radius:4px;padding:2px;font-family:var(--font-mono);font-size:inherit;background:var(--color-surface);color:var(--color-text);">';
+      tdTime.className = '';
+      tdRate.innerHTML = '<input type="text" placeholder="rate" data-expected="' + rate + '" style="width:60px;text-align:center;border:1px solid var(--color-border);border-radius:4px;padding:2px;font-family:var(--font-mono);font-size:inherit;background:var(--color-surface);color:var(--color-text);">';
       tdRate.className = '';
       if (tr) tr.className = 'completed-row';
     }

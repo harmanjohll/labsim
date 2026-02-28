@@ -527,6 +527,7 @@
   font-size: var(--text-sm);
   font-family: var(--font-sans);
   background: var(--color-surface);
+  color: var(--color-text);
   min-width: 200px;
 }
 

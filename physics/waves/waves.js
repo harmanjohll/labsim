@@ -96,6 +96,14 @@
     });
   }
 
+  /* ── LabRecordMode integration ── */
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject('.topbar-actions');
+    LabRecordMode.onChange(function () {
+      updateMeasurements();
+    });
+  }
+
   /* ── Progress ── */
   if (typeof LabProgress !== 'undefined') {
     LabProgress.markVisited('waves');
@@ -201,16 +209,28 @@
     var v = state.speedDeep;
     var lam = lambdaDeep();
 
+    var isIndependent = typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided();
+
     measFreq.textContent   = f.toFixed(1) + ' Hz';
-    measLambda.textContent = lam.toFixed(2) + ' cm';
-    measSpeed.textContent  = v.toFixed(1) + ' cm/s';
 
-    var vs = state.speedShallow;
-    var lamS = lambdaShallow();
-    measLambdaShallow.textContent = lamS.toFixed(2) + ' cm';
-    measSpeedShallow.textContent  = vs.toFixed(1) + ' cm/s';
+    if (isIndependent) {
+      /* In independent mode, students must determine wavelength and speed themselves */
+      measLambda.textContent = '— (measure)';
+      measSpeed.textContent  = '— (calculate)';
+      measLambdaShallow.textContent = '— (measure)';
+      measSpeedShallow.textContent  = '— (calculate)';
+      equationSub.innerHTML = 'v = f &times; &lambda; &mdash; calculate using your measurements';
+    } else {
+      measLambda.textContent = lam.toFixed(2) + ' cm';
+      measSpeed.textContent  = v.toFixed(1) + ' cm/s';
 
-    equationSub.innerHTML = v.toFixed(1) + ' = ' + f.toFixed(1) + ' &times; ' + lam.toFixed(2);
+      var vs = state.speedShallow;
+      var lamS = lambdaShallow();
+      measLambdaShallow.textContent = lamS.toFixed(2) + ' cm';
+      measSpeedShallow.textContent  = vs.toFixed(1) + ' cm/s';
+
+      equationSub.innerHTML = v.toFixed(1) + ' = ' + f.toFixed(1) + ' &times; ' + lam.toFixed(2);
+    }
   }
 
 

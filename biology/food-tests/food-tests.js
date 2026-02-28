@@ -54,6 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   dom.waterBathBody = dom.waterBath.querySelector('.water-bath-body');
 
+  // ── LabRecordMode ──
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject(document.querySelector('.topbar-actions'));
+  }
+
   // ── Init ──
   buildSampleSelect();
   buildTestTubes();
@@ -387,9 +392,32 @@ document.addEventListener('DOMContentLoaded', () => {
     state.observations.push({ tube, procedure, observation });
     dom.obsEmpty.style.display = 'none';
 
+    const guided = (typeof LabRecordMode === 'undefined') || LabRecordMode.isGuided();
+
     const row = document.createElement('tr');
     row.className = 'animate-fade-in';
-    row.innerHTML = `<td>${tube}</td><td>${procedure}</td><td>${observation}</td>`;
+
+    if (guided) {
+      row.innerHTML = `<td>${tube}</td><td>${procedure}</td><td>${observation}</td>`;
+    } else {
+      // Independent mode: student must type the observation
+      const tdTube = document.createElement('td');
+      tdTube.textContent = tube;
+      const tdProc = document.createElement('td');
+      tdProc.textContent = procedure;
+      const tdObs = document.createElement('td');
+      const obsInput = document.createElement('input');
+      obsInput.type = 'text';
+      obsInput.className = 'obs-manual-input';
+      obsInput.placeholder = 'Type your observation\u2026';
+      obsInput.style.cssText = 'width:100%;border:1px solid var(--color-border);border-radius:4px;padding:2px 6px;font-size:inherit;background:var(--color-surface);color:var(--color-text);';
+      obsInput.setAttribute('data-expected', observation);
+      tdObs.appendChild(obsInput);
+      row.appendChild(tdTube);
+      row.appendChild(tdProc);
+      row.appendChild(tdObs);
+    }
+
     dom.obsTbody.appendChild(row);
 
     const scrollContainer = dom.obsTbody.closest('.ft-obs-scroll');

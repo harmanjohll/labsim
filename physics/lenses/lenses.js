@@ -58,6 +58,11 @@ document.addEventListener('DOMContentLoaded', function () {
     update();
   });
 
+  /* ── LabRecordMode integration ── */
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject('.topbar-actions');
+  }
+
   /* ── Record ── */
   dom.btnRecord.addEventListener('click', function () {
     var v = computeV();
@@ -65,18 +70,34 @@ document.addEventListener('DOMContentLoaded', function () {
       toast('Virtual image — cannot be captured on a screen. Move object beyond F.', 'warn');
       return;
     }
-    // add noise
-    var vNoisy = v + (Math.random() - 0.5) * 0.6;
-    var uVal = state.u;
+
+    /* In independent mode, require manual entry of v */
+    if (typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided()) {
+      var userV = prompt('Enter the image distance v (cm) you measured:');
+      if (userV === null) return;
+      userV = parseFloat(userV);
+      if (isNaN(userV) || userV <= 0) {
+        toast('Please enter a valid positive number for v.', 'warn');
+        return;
+      }
+      addReading(state.u, userV);
+    } else {
+      // add noise (guided mode auto-records)
+      var vNoisy = v + (Math.random() - 0.5) * 0.6;
+      addReading(state.u, +vNoisy.toFixed(1));
+    }
+  });
+
+  function addReading(uVal, vVal) {
     var invU = 1 / uVal;
-    var invV = 1 / vNoisy;
-    state.dataPoints.push({ u: uVal, v: +vNoisy.toFixed(1), invU: invU, invV: invV });
+    var invV = 1 / vVal;
+    state.dataPoints.push({ u: uVal, v: vVal, invU: invU, invV: invV });
 
     // table row
     var n = state.dataPoints.length;
     var row = document.createElement('tr');
     row.innerHTML = '<td>' + n + '</td><td>' + uVal.toFixed(1) + '</td><td>'
-      + vNoisy.toFixed(1) + '</td><td>' + invU.toFixed(4) + '</td><td>' + invV.toFixed(4) + '</td>';
+      + vVal.toFixed(1) + '</td><td>' + invU.toFixed(4) + '</td><td>' + invV.toFixed(4) + '</td>';
     dom.tbody.appendChild(row);
 
     markProcedure('record');
@@ -87,8 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
       calculateF();
       markProcedure('graph');
     }
-    toast('Reading #' + n + ' recorded (u=' + uVal + ', v=' + vNoisy.toFixed(1) + ').', 'info');
-  });
+    toast('Reading #' + n + ' recorded (u=' + uVal + ', v=' + vVal.toFixed(1) + ').', 'info');
+  }
 
   /* ── Compute image ── */
   function computeV() {
@@ -110,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function () {
       dom.infoV.textContent = Math.abs(v).toFixed(1) + ' cm';
       var mag = Math.abs(v / state.u);
       dom.infoMag.textContent = mag.toFixed(2) + '×';
-      dom.infoNature.textContent = 'Virtual, upright, magnified';
+      var vSize = mag > 1.05 ? 'magnified' : (mag < 0.95 ? 'diminished' : 'same size');
+      dom.infoNature.textContent = 'Virtual, upright, ' + vSize;
     } else {
       dom.infoV.textContent = v.toFixed(1) + ' cm';
       var mag2 = v / state.u;
@@ -431,8 +453,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var maxInvU = 0.22;
     var maxInvV = 0.22;
 
+    // detect dark mode for graph colors
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var axisColor = isDark ? '#aaa' : '#666';
+    var gridColor = isDark ? '#444' : '#eee';
+    var textColor = isDark ? '#bbb' : '#999';
+    var labelColor = isDark ? '#bbb' : '#666';
+
     // axes
-    gctx.strokeStyle = '#666';
+    gctx.strokeStyle = axisColor;
     gctx.lineWidth = 1;
     gctx.beginPath();
     gctx.moveTo(pad.left, pad.top);
@@ -441,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function () {
     gctx.stroke();
 
     // labels
-    gctx.fillStyle = '#666';
+    gctx.fillStyle = labelColor;
     gctx.font = '500 10px Inter, sans-serif';
     gctx.textAlign = 'center';
     gctx.fillText('1/u (cm\u207b\u00b9)', pad.left + gw / 2, h - 4);
@@ -452,10 +481,10 @@ document.addEventListener('DOMContentLoaded', function () {
     gctx.restore();
 
     // grid + ticks
-    gctx.strokeStyle = '#eee';
+    gctx.strokeStyle = gridColor;
     gctx.lineWidth = 0.5;
     gctx.font = '400 9px Inter, sans-serif';
-    gctx.fillStyle = '#999';
+    gctx.fillStyle = textColor;
     for (var t = 0; t <= 0.2; t += 0.05) {
       var xp = pad.left + (t / maxInvU) * gw;
       var yp = pad.top + gh - (t / maxInvV) * gh;

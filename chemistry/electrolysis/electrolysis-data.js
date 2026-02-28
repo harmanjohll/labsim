@@ -51,12 +51,12 @@ var ELECTROLYSIS_DATA = {
         notes: 'Twice the volume of gas at cathode vs anode (2:1 ratio H\u2082:O\u2082).'
       },
       'copper': {
-        cathode: { product: 'Hydrogen', formula: 'H\u2082', type: 'gas', bubbleColor: 'rgba(220,230,240,0.6)', observation: 'Colourless gas bubbles at cathode' },
+        cathode: { product: 'Copper', formula: 'Cu', type: 'deposit', depositColor: '#b87333', observation: 'Copper deposits on cathode as Cu\u00b2\u207a ions from dissolving anode are discharged' },
         anode:   { product: 'Copper dissolves', formula: 'Cu', type: 'dissolve', observation: 'Copper anode dissolves; solution turns more blue' },
-        overall: 'Cu(s) \u2192 Cu\u00b2\u207a(aq) + 2e\u207b (anode)',
-        cathodeEq: '2H\u207a(aq) + 2e\u207b \u2192 H\u2082(g)',
+        overall: 'Cu(s)(anode) \u2192 Cu\u00b2\u207a(aq) + 2e\u207b; Cu\u00b2\u207a(aq) + 2e\u207b \u2192 Cu(s)(cathode)',
+        cathodeEq: 'Cu\u00b2\u207a(aq) + 2e\u207b \u2192 Cu(s)',
         anodeEq:  'Cu(s) \u2192 Cu\u00b2\u207a(aq) + 2e\u207b',
-        notes: 'Active copper electrode dissolves preferentially at anode.'
+        notes: 'Active copper electrode dissolves at anode. Cu\u00b2\u207a ions are preferentially discharged at cathode over H\u207a ions.'
       }
     },
     'cuso4': {
@@ -87,12 +87,12 @@ var ELECTROLYSIS_DATA = {
         notes: 'Chlorine is produced instead of oxygen because Cl\u207b is more concentrated than OH\u207b.'
       },
       'copper': {
-        cathode: { product: 'Hydrogen', formula: 'H\u2082', type: 'gas', bubbleColor: 'rgba(220,230,240,0.6)', observation: 'Colourless gas bubbles at cathode' },
-        anode:   { product: 'Copper dissolves', formula: 'Cu', type: 'dissolve', observation: 'Copper anode dissolves into solution' },
-        overall: 'Cu(s) \u2192 Cu\u00b2\u207a(aq) + 2e\u207b (anode)',
-        cathodeEq: '2H\u207a(aq) + 2e\u207b \u2192 H\u2082(g)',
+        cathode: { product: 'Copper', formula: 'Cu', type: 'deposit', depositColor: '#b87333', observation: 'Copper deposits on cathode as Cu\u00b2\u207a ions from dissolving anode are discharged' },
+        anode:   { product: 'Copper dissolves', formula: 'Cu', type: 'dissolve', observation: 'Copper anode dissolves into solution; solution turns blue-green' },
+        overall: 'Cu(s)(anode) \u2192 Cu\u00b2\u207a(aq) + 2e\u207b; Cu\u00b2\u207a(aq) + 2e\u207b \u2192 Cu(s)(cathode)',
+        cathodeEq: 'Cu\u00b2\u207a(aq) + 2e\u207b \u2192 Cu(s)',
         anodeEq:  'Cu(s) \u2192 Cu\u00b2\u207a(aq) + 2e\u207b',
-        notes: 'Active copper anode dissolves in preference to Cl\u207b discharge.'
+        notes: 'Active copper anode dissolves in preference to Cl\u207b or OH\u207b discharge. Cu\u00b2\u207a is preferentially discharged at cathode.'
       }
     },
     'molten-pbbr2': {

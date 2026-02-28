@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', function () {
   // ── Scoring ──
   var scorer = (typeof LabScore !== 'undefined') ? LabScore.create(DATA.scoring) : null;
 
+  // ── LabRecordMode integration ──
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.inject('.topbar-actions');
+  }
+
   // ── DOM references ──
   function $(id) { return document.getElementById(id); }
   var dom = {
@@ -220,8 +225,23 @@ document.addEventListener('DOMContentLoaded', function () {
       dom.timerValue.textContent = state.simTime + ' s';
       dom.tempValue.textContent  = state.currentTemp.toFixed(1) + ' \u00B0C';
 
-      // Record the reading
-      recordReading(state.simTime, state.currentTemp);
+      var isIndependent = typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided();
+
+      if (isIndependent) {
+        // In independent mode, prompt student to enter the temperature reading
+        var userTemp = prompt('Time = ' + state.simTime + ' s. Read the thermometer and enter the temperature (\u00B0C):');
+        if (userTemp !== null) {
+          var tempVal = parseFloat(userTemp);
+          if (!isNaN(tempVal) && tempVal > 0) {
+            recordReading(state.simTime, tempVal);
+          } else {
+            toast('Invalid temperature. Reading skipped.', 'warn');
+          }
+        }
+      } else {
+        // Record the reading automatically
+        recordReading(state.simTime, state.currentTemp);
+      }
 
       // Update canvas (thermometer rises)
       drawApparatus();

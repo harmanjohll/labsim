@@ -230,7 +230,7 @@
 }
 
 .graph-container {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--sp-2);
@@ -292,6 +292,15 @@
 .toast-info { background: var(--bio-color); }
 .toast-warn { background: #d97706; }
 .toast-success { background: var(--color-success); }
+
+/* --- Dark mode --- */
+[data-theme="dark"] .legend-chip {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text-secondary);
+}
+[data-theme="dark"] .beakers-row {
+  background: linear-gradient(180deg, #111219 0%, #1a1b27 100%);
+}
 
 /* --- Responsive --- */
 @media (max-width: 1024px) {

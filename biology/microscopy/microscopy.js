@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var objectivePower = totalMag / EYEPIECE_MAG;
       if (magCalcEl) {
         magCalcEl.hidden = false;
-        magCalcValue.textContent = '\u00d710 \u00d7 \u00d7' + objectivePower + ' = \u00d7' + totalMag;
+        magCalcValue.textContent = '\u00d710 \u00d7 ' + objectivePower + ' = \u00d7' + totalMag;
       }
 
       toast('Switched to ' + mag + ' magnification. Adjust focus.', 'info');
@@ -1244,6 +1244,7 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.focusValue.classList.remove('blurred');
     dom.infoSlide.textContent = 'No slide loaded';
     dom.infoMag.textContent = '\u2014';
+    if (magCalcEl) magCalcEl.hidden = true;
 
     // Clear drawing
     var size = dom.drawCanvas.width / (window.devicePixelRatio || 1);

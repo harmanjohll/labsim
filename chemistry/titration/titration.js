@@ -242,6 +242,19 @@ document.addEventListener('DOMContentLoaded', () => {
       note.className = 'text-sm text-muted';
       note.textContent = 'Use the controls below the workbench.';
       dom.guideActions.appendChild(note);
+    } else if (step.id === 'repeat') {
+      if (state.run < 3) {
+        const nxt = document.createElement('button');
+        nxt.className = 'btn btn-primary btn-sm';
+        nxt.dataset.action = 'next-titration';
+        nxt.textContent = 'Next Titration';
+        dom.guideActions.appendChild(nxt);
+      } else {
+        const done = document.createElement('span');
+        done.className = 'text-sm text-success';
+        done.textContent = 'All four titrations complete. Check your results.';
+        dom.guideActions.appendChild(done);
+      }
     }
 
     // Highlight target apparatus

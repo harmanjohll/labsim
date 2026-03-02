@@ -823,6 +823,7 @@
     state.eqIntervalId = null;
     state.results = {};
     state.completedTemps = [];
+    state.exportAdded = false;
 
     buildTempButtons();
     buildResultsTable();
@@ -831,6 +832,8 @@
     resetWaterBath();
     resetTimer();
     drawGraphEmpty();
+
+    if (exportArea) exportArea.innerHTML = '';
 
     btnStartTemp.disabled = true;
     analysisBtn.disabled = true;

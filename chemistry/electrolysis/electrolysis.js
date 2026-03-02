@@ -43,8 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Recording Mode ── */
   if (typeof LabRecordMode !== 'undefined') {
-    var topbarActions = document.querySelector('.topbar-actions');
-    if (topbarActions) LabRecordMode.inject(topbarActions);
+    LabRecordMode.inject('#record-mode-slot');
   }
 
   /* ── State ── */

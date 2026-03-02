@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // LabRecordMode integration
     if (typeof LabRecordMode !== 'undefined') {
-      LabRecordMode.inject('.topbar-actions');
+      LabRecordMode.inject('#record-mode-slot');
     }
   }
 

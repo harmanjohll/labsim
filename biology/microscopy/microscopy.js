@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── LabRecordMode ── */
   if (typeof LabRecordMode !== 'undefined') {
-    LabRecordMode.inject(document.querySelector('.topbar-actions'));
+    LabRecordMode.inject('#record-mode-slot');
   }
 
   /* Magnification calculation elements */

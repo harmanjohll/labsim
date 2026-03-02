@@ -68,6 +68,22 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
+  // ── Procedure step tracking ──
+  const STEP_ORDER = ['setup', 'release', 'time', 'record', 'repeat', 'graph'];
+
+  function highlightStep(stepId) {
+    const steps = document.querySelectorAll('.procedure-step');
+    const targetIdx = STEP_ORDER.indexOf(stepId);
+    steps.forEach(step => {
+      const sid = step.getAttribute('data-step');
+      const idx = STEP_ORDER.indexOf(sid);
+      step.classList.remove('active', 'done');
+      if (idx < targetIdx) step.classList.add('done');
+      else if (idx === targetIdx) step.classList.add('active');
+    });
+  }
+  highlightStep('setup');
+
   // ── Config ──
   dom.lengthSlider.addEventListener('input', () => {
     state.length = parseFloat(dom.lengthSlider.value);
@@ -297,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     lastFrameTime = 0;
     requestAnimationFrame(animate);
+    highlightStep('release');
     toast('Pendulum released. Start the timer when ready.');
   });
 
@@ -323,6 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.btnStartTimer.disabled = true;
     dom.btnStopTimer.disabled = false;
     dom.btnRecord.disabled = true;
+    highlightStep('time');
     toast(`Timing ${NUM_OSCILLATIONS} oscillations...`);
   });
 
@@ -333,11 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.btnStopTimer.disabled = true;
     dom.btnRecord.disabled = false;
     dom.btnStartTimer.disabled = true;
+    highlightStep('record');
   }
 
   /* ── LabRecordMode integration ── */
   if (typeof LabRecordMode !== 'undefined') {
-    LabRecordMode.inject('.topbar-actions');
+    LabRecordMode.inject('#record-mode-slot');
   }
 
   dom.btnRecord.addEventListener('click', () => {
@@ -395,7 +414,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     draw();
     drawGraph();
-    if (state.dataPoints.length >= 3) calculateG();
+    if (state.dataPoints.length >= 3) {
+      calculateG();
+      highlightStep('graph');
+    } else {
+      highlightStep('repeat');
+    }
     toast(`Recorded: L=${dp.length.toFixed(2)}m, T=${dp.period.toFixed(3)}s`);
   });
 
@@ -584,6 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.calcPanel.innerHTML = '<p class="text-sm text-muted">Collect at least 3 data points to calculate g from the gradient.</p>';
 
     draw();
+    highlightStep('setup');
 
     // Clear graph
     const W = dom.graphCanvas.width, H = dom.graphCanvas.height;

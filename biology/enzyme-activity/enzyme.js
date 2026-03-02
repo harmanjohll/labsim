@@ -73,7 +73,7 @@
   function init() {
     /* LabRecordMode toggle */
     if (typeof LabRecordMode !== 'undefined') {
-      LabRecordMode.inject(document.querySelector('.topbar-actions'));
+      LabRecordMode.inject('#record-mode-slot');
     }
 
     buildTempButtons();

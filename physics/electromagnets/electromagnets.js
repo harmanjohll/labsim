@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ══════════════════════════════════════
 
   if (typeof LabRecordMode !== 'undefined') {
-    LabRecordMode.inject('.topbar-actions');
+    LabRecordMode.inject('#record-mode-container');
   }
 
   function isGuidedMode() {
@@ -1194,7 +1194,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // INITIALISE
   // ══════════════════════════════════════
 
+  // ══════════════════════════════════════
+  // CANVAS RESIZE
+  // ══════════════════════════════════════
+
+  function resizeCanvas() {
+    const parent = dom.canvas.parentElement;
+    if (!parent) return;
+    const w = Math.min(parent.clientWidth - 16, 620);
+    const h = Math.round(w * (420 / 620));
+    if (dom.canvas.width !== w || dom.canvas.height !== h) {
+      dom.canvas.width = w;
+      dom.canvas.height = h;
+      draw();
+    }
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+
+
+  // ══════════════════════════════════════
+  // INITIALISE
+  // ══════════════════════════════════════
+
   selectVariable('coils');
+  resizeCanvas();
   draw();
 
 });

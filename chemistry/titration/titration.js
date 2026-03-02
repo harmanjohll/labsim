@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Recording Mode ──
   if (typeof LabRecordMode !== 'undefined') {
-    LabRecordMode.inject(document.getElementById('topbar-actions'));
+    LabRecordMode.inject('#record-mode-slot');
   }
 
   // ── Initialization ──

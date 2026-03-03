@@ -869,10 +869,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.run >= 3) {
       dom.nextTitrationMsg.textContent = 'All four titrations complete. Check concordance below.';
       dom.btnNextTitration.style.display = 'none';
+      toast('All four titrations complete! Check your concordance results.', 'success');
     } else {
       const label = state.run === 0 ? '1st accurate' : state.run === 1 ? '2nd accurate' : '3rd accurate';
       dom.nextTitrationMsg.textContent = 'Titration recorded. Ready for the ' + label + ' run.';
       dom.btnNextTitration.style.display = '';
+      toast('Titration recorded! Click "Next Titration" below to start the ' + label + ' run.', 'success');
     }
     dom.nextTitrationBar.style.display = '';
   }

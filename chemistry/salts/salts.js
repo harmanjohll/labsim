@@ -281,7 +281,48 @@
       toast('Practical complete! Pure, dry sample prepared.', 'success');
       if (typeof LabAudio !== 'undefined') LabAudio.success();
       if (typeof LabProgress !== 'undefined') LabProgress.markComplete('salts');
+      showTryAnotherSalt();
     }
+  }
+
+  function showTryAnotherSalt() {
+    if (document.getElementById('try-another-bar')) return;
+    var bar = document.createElement('div');
+    bar.id = 'try-another-bar';
+    bar.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;background:var(--color-primary-light,#eff6ff);border:2px solid var(--color-primary);border-radius:var(--radius-md);margin-top:var(--sp-3);';
+    var msg = document.createElement('span');
+    msg.style.cssText = 'font-size:var(--text-sm);color:var(--color-text);';
+    msg.textContent = 'Try preparing a different salt?';
+    bar.appendChild(msg);
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-primary btn-sm';
+    btn.textContent = 'Prepare Another Salt';
+    btn.addEventListener('click', function () {
+      state.started = false;
+      state.stepIndex = 0;
+      state.animating = false;
+      state.excess = false;
+      state.filtered = false;
+      state.showFunnel = false;
+      state.showEvapDish = false;
+      state.steamParticles = [];
+      state.evapProgress = 0;
+      state.showCrystals = false;
+      state.crystalGrowth = 0;
+      state.showDrying = false;
+      state.dryProgress = 0;
+      state.scene = 'beaker';
+      selPair.disabled = false;
+      selPair.value = '';
+      actionBar.hidden = true;
+      bar.remove();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      highlightProcedure(-1);
+      toast('Select a new acid-base pair.', 'info');
+    });
+    bar.appendChild(btn);
+    var parent = canvas.parentElement;
+    if (parent) parent.appendChild(bar);
   }
 
   function highlightAllDone() {

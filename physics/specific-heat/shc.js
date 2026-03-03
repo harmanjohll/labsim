@@ -304,6 +304,11 @@ document.addEventListener('DOMContentLoaded', function () {
     toast('Data collection complete! Now calculate the SHC.', 'success');
     if (typeof LabAudio !== 'undefined') LabAudio.success();
 
+    // Show "Try Another Metal" button after a short delay
+    setTimeout(function () {
+      showTryAnotherMetal();
+    }, 500);
+
     // Track progress
     if (typeof LabProgress !== 'undefined') {
       LabProgress.markStep('specific-heat', 'collect');
@@ -901,6 +906,78 @@ document.addEventListener('DOMContentLoaded', function () {
     // Track progress
     if (typeof LabProgress !== 'undefined') {
       LabProgress.markStep('specific-heat', step);
+    }
+  }
+
+
+  // ══════════════════════════════════════
+  // TRY ANOTHER METAL
+  // ══════════════════════════════════════
+
+  function showTryAnotherMetal() {
+    // Add a "Try Another Metal" button below the power controls
+    var existing = document.getElementById('try-another-bar');
+    if (existing) return;
+
+    var bar = document.createElement('div');
+    bar.id = 'try-another-bar';
+    bar.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 16px;background:var(--color-primary-light,#eff6ff);border-top:2px solid var(--color-primary);flex-shrink:0;';
+
+    var msg = document.createElement('span');
+    msg.style.cssText = 'font-size:var(--text-sm);color:var(--color-text);';
+    msg.textContent = 'Want to compare another metal?';
+    bar.appendChild(msg);
+
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-primary btn-sm';
+    btn.textContent = 'Try Another Metal';
+    btn.addEventListener('click', function () {
+      // Soft reset: preserve completed data in summary but reset apparatus
+      state.startTemp = 20 + Math.random() * 2;
+      state.currentTemp = state.startTemp;
+      state.simTime = 0;
+      state.readings = [];
+      state.powerOn = false;
+      state.collecting = false;
+      state.collectionDone = false;
+
+      // Re-enable controls
+      dom.metalSelect.disabled = false;
+      dom.btnPower.textContent = 'Switch On Power Supply';
+      dom.btnPower.disabled = false;
+      dom.btnPower.className = 'btn btn-primary btn-sm w-full';
+      dom.powerStatus.innerHTML =
+        '<span class="status-dot off"></span>' +
+        '<span class="text-sm text-muted">Off</span>';
+
+      // Clear data table for new run
+      dom.dataTbody.innerHTML = '';
+      dom.dataEmpty.style.display = '';
+
+      // Reset calc section
+      dom.calcPlaceholder.style.display = '';
+      dom.calcInputs.style.display = 'none';
+
+      // Clear graph for new run
+      var W = dom.graphCanvas.width, H = dom.graphCanvas.height;
+      var gctx = dom.graphCanvas.getContext('2d');
+      gctx.clearRect(0, 0, W, H);
+
+      // Remove this bar
+      bar.remove();
+
+      // Update procedure
+      markProcedure('select');
+      drawApparatus();
+      toast('Select a metal and begin a new measurement.', 'info');
+    });
+    bar.appendChild(btn);
+
+    // Insert after the workbench
+    var workbench = dom.btnPower.closest('.shc-workbench-panel') ||
+                    dom.btnPower.closest('section');
+    if (workbench) {
+      workbench.appendChild(bar);
     }
   }
 

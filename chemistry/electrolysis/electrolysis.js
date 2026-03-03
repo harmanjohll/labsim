@@ -261,6 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
       dom.idResult.textContent = 'Both correct!';
       dom.idResult.className = 'id-result correct';
       toast('Excellent — both products identified correctly!', 'success');
+      showTryAnotherElectrolyte();
     } else if (catCorrect || anoCorrect) {
       var wrong = catCorrect ? 'anode' : 'cathode';
       dom.idResult.textContent = 'One correct. Check the ' + wrong + ' product.';
@@ -270,6 +271,54 @@ document.addEventListener('DOMContentLoaded', function () {
       dom.idResult.className = 'id-result incorrect';
     }
   });
+
+  function showTryAnotherElectrolyte() {
+    if (document.getElementById('try-another-bar')) return;
+    var bar = document.createElement('div');
+    bar.id = 'try-another-bar';
+    bar.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 16px;background:var(--color-primary-light,#eff6ff);border-top:2px solid var(--color-primary);margin-top:var(--sp-3);border-radius:var(--radius-md);';
+    var msg = document.createElement('span');
+    msg.style.cssText = 'font-size:var(--text-sm);color:var(--color-text);';
+    msg.textContent = 'Try a different electrolyte or electrode combination?';
+    bar.appendChild(msg);
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-primary btn-sm';
+    btn.textContent = 'Try Another';
+    btn.addEventListener('click', function () {
+      // Soft reset: stop animation, re-enable selectors, clear cell
+      stopAnimation();
+      state.cellReady = false;
+      state.switchClosed = false;
+      state.elapsed = 0;
+      state.bubbles = [];
+      state.depositThickness = 0;
+      state.anodeDissolve = 0;
+      state.solutionFade = 0;
+
+      dom.selElectrolyte.disabled = false;
+      dom.selElectrode.disabled = false;
+      dom.selElectrolyte.value = '';
+      dom.selElectrode.value = '';
+      dom.btnConfirm.disabled = true;
+      dom.ionInfo.hidden = true;
+      dom.controls.hidden = true;
+      dom.currentDisplay.hidden = true;
+      dom.obsBefore.hidden = true;
+      dom.obsCathode.hidden = true;
+      dom.obsAnode.hidden = true;
+      dom.eqPanel.hidden = true;
+      dom.idSection.hidden = true;
+      dom.idResult.textContent = '';
+      dom.idCathode.value = '';
+      dom.idAnode.value = '';
+      bar.remove();
+      markProcedure('select');
+      drawCell();
+      toast('Select a new electrolyte and electrode combination.', 'info');
+    });
+    bar.appendChild(btn);
+    dom.idSection.parentElement.appendChild(bar);
+  }
 
   function matchProduct(answer, product) {
     if (!answer) return false;

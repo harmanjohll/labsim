@@ -170,6 +170,12 @@
           <button id="btn-topup" class="btn btn-ghost btn-sm">Top Up</button>
         </div>
       </div>
+
+      <!-- Next Titration action — shown after endpoint reached -->
+      <div id="next-titration-bar" class="next-titration-bar" style="display:none;">
+        <span id="next-titration-msg" class="next-titration-msg">Titration complete. Record your readings, then start the next one.</span>
+        <button id="btn-next-titration" class="btn btn-primary btn-sm">Next Titration</button>
+      </div>
     </section>
 
     <!-- Data panel (right) -->
@@ -222,13 +228,13 @@
           <p class="text-sm text-muted">Complete at least two concordant titrations to begin calculations.</p>
         </div>
       </div>
+
+      <!-- Lab Notebook -->
+      <div class="lab-notebook-slot" data-practical="titration"></div>
     </aside>
 
   </div>
 
-
-  <!-- Lab Notebook -->
-  <div class="lab-notebook-slot" data-practical="titration" style="max-width:640px;margin:var(--sp-4) auto;padding:0 var(--sp-4);"></div>
   <!-- Toast container -->
   <div id="toast-container" class="toast-container"></div>
 

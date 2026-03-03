@@ -151,6 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
     baseSelect: $('base-select'),
     concordantMsg: $('concordant-msg'),
     calcWorkspace: $('calc-workspace'),
+    nextTitrationBar: $('next-titration-bar'),
+    nextTitrationMsg: $('next-titration-msg'),
+    btnNextTitration: $('btn-next-titration'),
     toast: $('toast-container'),
   };
 
@@ -270,6 +273,10 @@ document.addEventListener('DOMContentLoaded', () => {
       state.step++;
       renderStepsBar();
       updateGuide();
+      // Show the Next Titration bar when reaching the repeat step
+      if (STEPS[state.step] && STEPS[state.step].id === 'repeat') {
+        showNextTitrationBar();
+      }
     }
   }
 
@@ -852,11 +859,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn?.dataset.action === 'next-titration') startNextTitration();
   });
 
+  // Prominent workbench button for next titration
+  if (dom.btnNextTitration) {
+    dom.btnNextTitration.addEventListener('click', () => startNextTitration());
+  }
+
+  function showNextTitrationBar() {
+    if (!dom.nextTitrationBar) return;
+    if (state.run >= 3) {
+      dom.nextTitrationMsg.textContent = 'All four titrations complete. Check concordance below.';
+      dom.btnNextTitration.style.display = 'none';
+    } else {
+      const label = state.run === 0 ? '1st accurate' : state.run === 1 ? '2nd accurate' : '3rd accurate';
+      dom.nextTitrationMsg.textContent = 'Titration recorded. Ready for the ' + label + ' run.';
+      dom.btnNextTitration.style.display = '';
+    }
+    dom.nextTitrationBar.style.display = '';
+  }
+
+  function hideNextTitrationBar() {
+    if (dom.nextTitrationBar) dom.nextTitrationBar.style.display = 'none';
+  }
+
   function startNextTitration() {
     if (state.run >= 3) {
       toast('All four titrations complete.', 'info');
       return;
     }
+    hideNextTitrationBar();
 
     state.run++;
     state.pipetteFilled = false;

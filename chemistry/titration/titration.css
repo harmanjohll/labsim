@@ -478,27 +478,6 @@ body {
 }
 
 
-/* --- Next Titration Bar --- */
-.next-titration-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-4);
-  padding: var(--sp-3) var(--sp-4);
-  background: var(--color-primary-light, #eff6ff);
-  border-top: 2px solid var(--color-primary);
-  flex-shrink: 0;
-  animation: fadeIn 0.3s var(--ease-out);
-}
-.next-titration-msg {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--color-primary);
-}
-.next-titration-bar .btn {
-  white-space: nowrap;
-}
-
 /* --- Burette Controls --- */
 .burette-controls {
   display: flex;

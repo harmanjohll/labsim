@@ -301,7 +301,6 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.calcPlaceholder.style.display = 'none';
     dom.calcInputs.style.display = '';
 
-    toast('Data collection complete! Now calculate the SHC.', 'success');
     if (typeof LabAudio !== 'undefined') LabAudio.success();
 
     // Show "Try Another Metal" button after a short delay

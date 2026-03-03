@@ -151,7 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
     baseSelect: $('base-select'),
     concordantMsg: $('concordant-msg'),
     calcWorkspace: $('calc-workspace'),
-    readingActions: document.querySelector('#burette-controls .reading-actions'),
+    btnNextTitration: $('btn-next-titration'),
+    btnNextTitrationData: $('btn-next-titration-data'),
     toast: $('toast-container'),
   };
 
@@ -857,31 +858,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn?.dataset.action === 'next-titration') startNextTitration();
   });
 
+  // Permanent Next Titration buttons (in burette controls + data panel)
+  if (dom.btnNextTitration) dom.btnNextTitration.addEventListener('click', () => startNextTitration());
+  if (dom.btnNextTitrationData) dom.btnNextTitrationData.addEventListener('click', () => startNextTitration());
+
   function showNextTitrationBar() {
-    hideNextTitrationBar(); // remove any existing
     if (state.run >= 3) {
       toast('All four titrations complete! Check your concordance results.', 'success');
+      if (dom.btnNextTitration) { dom.btnNextTitration.disabled = true; dom.btnNextTitration.style.display = 'none'; }
+      if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = true; dom.btnNextTitrationData.textContent = 'All titrations complete'; }
       return;
     }
     const label = state.run === 0 ? '1st accurate' : state.run === 1 ? '2nd accurate' : '3rd accurate';
     toast('Titration recorded! Click "Next Titration" to start the ' + label + ' run.', 'success');
 
-    // Inject a prominent button into burette controls
-    const btn = document.createElement('button');
-    btn.id = 'btn-next-titration';
-    btn.className = 'btn btn-success btn-sm';
-    btn.textContent = 'Next Titration';
-    btn.style.marginLeft = 'var(--sp-2)';
-    btn.addEventListener('click', () => startNextTitration());
-
-    if (dom.readingActions) {
-      dom.readingActions.appendChild(btn);
-    }
+    // Enable both permanent buttons
+    if (dom.btnNextTitration) { dom.btnNextTitration.disabled = false; dom.btnNextTitration.style.display = ''; }
+    if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = false; dom.btnNextTitrationData.textContent = 'Next Titration (' + label + ')'; }
   }
 
   function hideNextTitrationBar() {
-    const existing = document.getElementById('btn-next-titration');
-    if (existing) existing.remove();
+    if (dom.btnNextTitration) { dom.btnNextTitration.disabled = true; dom.btnNextTitration.style.display = 'none'; }
+    if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = true; dom.btnNextTitrationData.textContent = 'Next Titration'; }
   }
 
   function startNextTitration() {

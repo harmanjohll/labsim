@@ -887,9 +887,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const label = state.run === 0 ? '1st accurate' : state.run === 1 ? '2nd accurate' : '3rd accurate';
-    // Enable the static topbar button
+    // Enable the static topbar button as backup
     if (dom.btnNextTitration) { dom.btnNextTitration.disabled = false; }
-    toast('Titration recorded! Click "Next Titration" in the top bar to start the ' + label + ' run.', 'success');
+    // Use native browser confirm dialog — cannot be hidden by any CSS
+    setTimeout(() => {
+      if (window.confirm('Titration recorded! Start the ' + label + ' run now?')) {
+        startNextTitration();
+      } else {
+        toast('Click "Next Titration" in the top bar when ready for the ' + label + ' run.', 'info');
+      }
+    }, 300);
   }
 
   function hideNextTitrationBar() {

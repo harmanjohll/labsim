@@ -244,17 +244,17 @@ document.addEventListener('DOMContentLoaded', () => {
       note.textContent = 'Use the controls below the workbench.';
       dom.guideActions.appendChild(note);
     } else if (step.id === 'repeat') {
+      // Put the Next Titration button INSIDE the description so it's inline with text
       if (state.run < 3) {
-        const nxt = document.createElement('button');
-        nxt.className = 'btn btn-primary btn-sm';
-        nxt.dataset.action = 'next-titration';
-        nxt.textContent = 'Next Titration';
-        dom.guideActions.appendChild(nxt);
+        dom.guideDesc.innerHTML = 'Titration recorded! Click here to start the next run: ';
+        const inlineBtn = document.createElement('button');
+        inlineBtn.className = 'btn btn-primary';
+        inlineBtn.textContent = 'Next Titration';
+        inlineBtn.style.cssText = 'display:inline-block;margin-left:8px;padding:8px 20px;font-size:1rem;font-weight:700;';
+        inlineBtn.addEventListener('click', () => startNextTitration());
+        dom.guideDesc.appendChild(inlineBtn);
       } else {
-        const done = document.createElement('span');
-        done.className = 'text-sm text-success';
-        done.textContent = 'All four titrations complete. Check your results.';
-        dom.guideActions.appendChild(done);
+        dom.guideDesc.textContent = 'All four titrations complete. Check your concordance results.';
       }
     }
 
@@ -892,6 +892,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dom.btnNextTitration) { dom.btnNextTitration.disabled = false; }
     // Show a prominent in-page banner that cannot be missed
     showNextBanner(label);
+    // Diagnostic: native alert to confirm this function is reached
+    window.alert('Titration recorded! Click OK, then click the "Next Titration" button in the guide panel on the left.');
   }
 
   function showNextBanner(label) {

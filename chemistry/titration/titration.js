@@ -244,15 +244,8 @@ document.addEventListener('DOMContentLoaded', () => {
       note.textContent = 'Use the controls below the workbench.';
       dom.guideActions.appendChild(note);
     } else if (step.id === 'repeat') {
-      // Put the Next Titration button INSIDE the description so it's inline with text
       if (state.run < 3) {
-        dom.guideDesc.innerHTML = 'Titration recorded! Click here to start the next run: ';
-        const inlineBtn = document.createElement('button');
-        inlineBtn.className = 'btn btn-primary';
-        inlineBtn.textContent = 'Next Titration';
-        inlineBtn.style.cssText = 'display:inline-block;margin-left:8px;padding:8px 20px;font-size:1rem;font-weight:700;';
-        inlineBtn.addEventListener('click', () => startNextTitration());
-        dom.guideDesc.appendChild(inlineBtn);
+        dom.guideDesc.textContent = 'Titration recorded! Use the green bar at the bottom of the screen to start the next run.';
       } else {
         dom.guideDesc.textContent = 'All four titrations complete. Check your concordance results.';
       }
@@ -273,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateGuide();
       // Show the Next Titration bar when reaching the repeat step
       if (STEPS[state.step] && STEPS[state.step].id === 'repeat') {
-        showNextTitrationBar();
+        showNextRunBar();
       }
     }
   }
@@ -541,14 +534,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const flaskRect = dom.flask.getBoundingClientRect();
     const wbRect = dom.workbench.getBoundingClientRect();
 
-    // Show white tile
+    // Show white tile — position relative to workbench using bounding rects
     dom.whiteTile.style.display = '';
     dom.whiteTile.style.position = 'absolute';
-    dom.whiteTile.style.bottom = (base.offsetHeight + 2) + 'px';
-    dom.whiteTile.style.left = (bur.offsetLeft + bur.offsetWidth / 2 - 45) + 'px';
+    const wbRect2 = dom.workbench.getBoundingClientRect();
+    const burRect2 = bur.getBoundingClientRect();
+    const baseRect = base.getBoundingClientRect();
+    dom.whiteTile.style.bottom = (wbRect2.bottom - baseRect.top + 2) + 'px';
+    dom.whiteTile.style.left = (burRect2.left + burRect2.width / 2 - wbRect2.left - 45) + 'px';
     dom.whiteTile.style.zIndex = '5';
 
-    // Animate flask to position under burette
+    // Animate flask to position under burette (flask is inside stand-assembly)
     dom.flask.classList.add('placed');
     stand.appendChild(dom.flask);
     dom.flask.style.bottom = (base.offsetHeight + 14) + 'px';
@@ -780,8 +776,8 @@ document.addEventListener('DOMContentLoaded', () => {
           console.log('[LOG-FINAL:INDEP] advancing to repeat step', state.step);
           renderStepsBar();
           updateGuide();
-          showNextTitrationBar();
-          console.log('[LOG-FINAL:INDEP] showNextTitrationBar complete');
+          showNextRunBar();
+          console.log('[LOG-FINAL:INDEP] showNextRunBar complete');
         };
         const keyHandler = (e) => { if (e.key === 'Enter') confirmHandler(); };
         finalInput.addEventListener('blur', confirmHandler);
@@ -800,8 +796,8 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('[LOG-FINAL:GUIDED] advancing to repeat step', state.step);
       renderStepsBar();
       updateGuide();
-      showNextTitrationBar();
-      console.log('[LOG-FINAL:GUIDED] showNextTitrationBar complete');
+      showNextRunBar();
+      console.log('[LOG-FINAL:GUIDED] showNextRunBar complete');
     }
   });
 
@@ -889,51 +885,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function showNextTitrationBar() {
+  // ── Next Run Bar (fixed HTML element at bottom of screen) ──
+  const nextRunBar = document.getElementById('next-run-bar');
+  const nextRunLabel = document.getElementById('next-run-label');
+  const btnNextRun = document.getElementById('btn-next-run');
+
+  if (btnNextRun) {
+    btnNextRun.addEventListener('click', () => {
+      hideNextRunBar();
+      startNextTitration();
+    });
+  }
+
+  function showNextRunBar() {
+    console.log('[NEXT-RUN-BAR] showNextRunBar called, state.run=', state.run);
     if (state.run >= 3) {
       toast('All four titrations complete! Check your concordance results.', 'success');
       if (dom.btnNextTitration) { dom.btnNextTitration.disabled = true; dom.btnNextTitration.textContent = 'All Done'; }
-      removeNextBanner();
       return;
     }
-    const label = state.run === 0 ? '1st accurate' : state.run === 1 ? '2nd accurate' : '3rd accurate';
-    // Enable the static topbar button
+    const label = state.run === 0 ? 'Rough titration complete!' :
+                  state.run === 1 ? '1st accurate titration complete!' :
+                  state.run === 2 ? '2nd accurate titration complete!' : '3rd accurate titration complete!';
+    const btnLabel = state.run === 0 ? 'Start 1st Accurate Run' :
+                     state.run === 1 ? 'Start 2nd Accurate Run' : 'Start 3rd Accurate Run';
+    if (nextRunLabel) nextRunLabel.textContent = label;
+    if (btnNextRun) btnNextRun.textContent = btnLabel;
+    if (nextRunBar) nextRunBar.style.display = '';
     if (dom.btnNextTitration) { dom.btnNextTitration.disabled = false; }
-    // Show a prominent in-page banner that cannot be missed
-    showNextBanner(label);
-    // Diagnostic: native alert to confirm this function is reached
-    window.alert('Titration recorded! Click OK, then click the "Next Titration" button in the guide panel on the left.');
   }
 
-  function showNextBanner(label) {
-    removeNextBanner();
-    const banner = document.createElement('div');
-    banner.id = 'next-titration-banner';
-    banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 24px;font-size:1.1rem;font-weight:600;box-shadow:0 -4px 20px rgba(0,0,0,0.3);animation:slideUp 0.3s ease-out;';
-    banner.innerHTML = '<span>Titration recorded!</span>';
-    const btn = document.createElement('button');
-    btn.textContent = 'Start ' + label + ' run';
-    btn.style.cssText = 'background:#fff;color:#16a34a;border:none;border-radius:8px;padding:10px 24px;font-size:1rem;font-weight:700;cursor:pointer;';
-    btn.addEventListener('click', () => { removeNextBanner(); startNextTitration(); });
-    banner.appendChild(btn);
-    document.body.appendChild(banner);
-    // Add slide-up animation
-    if (!document.getElementById('next-banner-style')) {
-      const style = document.createElement('style');
-      style.id = 'next-banner-style';
-      style.textContent = '@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}';
-      document.head.appendChild(style);
-    }
-  }
-
-  function removeNextBanner() {
-    const existing = document.getElementById('next-titration-banner');
-    if (existing) existing.remove();
-  }
-
-  function hideNextTitrationBar() {
+  function hideNextRunBar() {
+    if (nextRunBar) nextRunBar.style.display = 'none';
     if (dom.btnNextTitration) { dom.btnNextTitration.disabled = true; dom.btnNextTitration.textContent = 'Next Titration'; }
-    removeNextBanner();
   }
 
   function startNextTitration() {
@@ -941,7 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
       toast('All four titrations complete.', 'info');
       return;
     }
-    hideNextTitrationBar();
+    hideNextRunBar();
 
     state.run++;
     // Reset all per-titration state so guided steps advance correctly
@@ -999,7 +983,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.beakerLiquid.style.height = '75%';
     cancelPick();
     closePopups();
-    hideNextTitrationBar();
+    hideNextRunBar();
 
     for (let i = 0; i < 4; i++) {
       ['final', 'initial', 'titre'].forEach(prefix => {

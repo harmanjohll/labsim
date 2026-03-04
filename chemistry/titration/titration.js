@@ -736,6 +736,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Log final
   dom.btnLogFinal.addEventListener('click', () => {
+    if (state.initialReading === null) {
+      toast('Log the initial reading first.', 'warn');
+      return;
+    }
     const finalReading = getBuretteReading();
     const initialReading = parseFloat(document.getElementById(`initial-${state.run}`)?.value || '0');
     const titre = finalReading - initialReading;
@@ -767,7 +771,11 @@ document.addEventListener('DOMContentLoaded', () => {
           enableFlowButtons(false);
           checkConcordance();
           toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${studentTitre.toFixed(2)} cm\u00B3`);
-          if (state.step === 9) advanceStep();
+          // Jump to repeat step and show Next Titration directly
+          state.step = STEPS.length - 1; // go to 'repeat' step
+          renderStepsBar();
+          updateGuide();
+          showNextTitrationBar();
         };
         const keyHandler = (e) => { if (e.key === 'Enter') confirmHandler(); };
         finalInput.addEventListener('blur', confirmHandler);
@@ -781,7 +789,11 @@ document.addEventListener('DOMContentLoaded', () => {
       enableFlowButtons(false);
       checkConcordance();
       toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titre.toFixed(2)} cm\u00B3`);
-      if (state.step === 9) advanceStep();
+      // Jump to repeat step and show Next Titration directly
+      state.step = STEPS.length - 1; // go to 'repeat' step
+      renderStepsBar();
+      updateGuide();
+      showNextTitrationBar();
     }
   });
 

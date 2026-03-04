@@ -729,9 +729,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Log final
+  // Log final — records the final burette reading and completes the titration
   dom.btnLogFinal.addEventListener('click', () => {
-    console.log('[LOG-FINAL] clicked, state.initialReading=', state.initialReading, 'state.run=', state.run);
     if (state.initialReading === null) {
       toast('Log the initial reading first.', 'warn');
       return;
@@ -739,65 +738,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalReading = getBuretteReading();
     const initialReading = parseFloat(document.getElementById(`initial-${state.run}`)?.value || '0');
     const titre = finalReading - initialReading;
-    console.log('[LOG-FINAL] finalReading=', finalReading, 'initialReading=', initialReading, 'titre=', titre);
-
     const finalInput = document.getElementById(`final-${state.run}`);
     const titreInput = document.getElementById(`titre-${state.run}`);
-    console.log('[LOG-FINAL] finalInput=', finalInput, 'titreInput=', titreInput);
-
     const isIndependent = typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided();
-    console.log('[LOG-FINAL] isIndependent=', isIndependent);
 
-    if (isIndependent) {
-      // Independent mode: student enters final reading manually
-      if (finalInput) {
-        finalInput.readOnly = false;
-        finalInput.value = '';
-        finalInput.placeholder = finalReading.toFixed(2);
-        finalInput.focus();
-        finalInput.style.background = 'var(--color-primary-light)';
-        toast('Read the burette and type your final reading.', 'info');
-        const confirmHandler = () => {
-          const entered = parseFloat(finalInput.value);
-          console.log('[LOG-FINAL:INDEP] confirmHandler entered=', entered);
-          if (isNaN(entered)) return;
-          finalInput.readOnly = true;
-          finalInput.style.background = '';
-          finalInput.removeEventListener('blur', confirmHandler);
-          finalInput.removeEventListener('keydown', keyHandler);
-          const studentInitial = parseFloat(document.getElementById(`initial-${state.run}`)?.value || '0');
-          const studentTitre = entered - studentInitial;
-          if (titreInput) titreInput.value = studentTitre.toFixed(2);
-          state.results.push({ initial: studentInitial, final: entered, titre: studentTitre, run: state.run });
-          enableFlowButtons(false);
-          checkConcordance();
-          toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${studentTitre.toFixed(2)} cm\u00B3`);
-          state.step = STEPS.length - 1;
-          console.log('[LOG-FINAL:INDEP] advancing to repeat step', state.step);
-          renderStepsBar();
-          updateGuide();
-          showNextRunBar();
-          console.log('[LOG-FINAL:INDEP] showNextRunBar complete');
-        };
-        const keyHandler = (e) => { if (e.key === 'Enter') confirmHandler(); };
-        finalInput.addEventListener('blur', confirmHandler);
-        finalInput.addEventListener('keydown', keyHandler);
-      }
-    } else {
-      // Guided mode: auto-fill
-      console.log('[LOG-FINAL:GUIDED] auto-filling values');
-      if (finalInput) finalInput.value = finalReading.toFixed(2);
-      if (titreInput) titreInput.value = titre.toFixed(2);
-      state.results.push({ initial: initialReading, final: finalReading, titre, run: state.run });
+    // Helper: called after final reading is determined (immediately in guided, after input in independent)
+    function finishTitration(finalVal, initVal, titreVal) {
+      if (finalInput) finalInput.value = finalVal.toFixed(2);
+      if (titreInput) titreInput.value = titreVal.toFixed(2);
+      state.results.push({ initial: initVal, final: finalVal, titre: titreVal, run: state.run });
       enableFlowButtons(false);
       checkConcordance();
-      toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titre.toFixed(2)} cm\u00B3`);
+      toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titreVal.toFixed(2)} cm\u00B3`);
       state.step = STEPS.length - 1;
-      console.log('[LOG-FINAL:GUIDED] advancing to repeat step', state.step);
       renderStepsBar();
       updateGuide();
       showNextRunBar();
-      console.log('[LOG-FINAL:GUIDED] showNextRunBar complete');
+    }
+
+    if (isIndependent && finalInput) {
+      // Independent mode: student types their own final reading
+      finalInput.readOnly = false;
+      finalInput.value = '';
+      finalInput.placeholder = finalReading.toFixed(2);
+      finalInput.focus();
+      finalInput.style.background = 'var(--color-primary-light)';
+      toast('Read the burette and type your final reading.', 'info');
+      const confirmHandler = () => {
+        const entered = parseFloat(finalInput.value);
+        if (isNaN(entered)) return;
+        finalInput.readOnly = true;
+        finalInput.style.background = '';
+        finalInput.removeEventListener('blur', confirmHandler);
+        finalInput.removeEventListener('keydown', keyHandler);
+        const studentInitial = parseFloat(document.getElementById(`initial-${state.run}`)?.value || '0');
+        finishTitration(entered, studentInitial, entered - studentInitial);
+      };
+      const keyHandler = (e) => { if (e.key === 'Enter') confirmHandler(); };
+      finalInput.addEventListener('blur', confirmHandler);
+      finalInput.addEventListener('keydown', keyHandler);
+    } else {
+      // Guided mode: auto-fill immediately
+      finishTitration(finalReading, initialReading, titre);
     }
   });
 
@@ -885,39 +867,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Next Run Bar (fixed HTML element at bottom of screen) ──
-  const nextRunBar = document.getElementById('next-run-bar');
-  const nextRunLabel = document.getElementById('next-run-label');
-  const btnNextRun = document.getElementById('btn-next-run');
-
-  if (btnNextRun) {
-    btnNextRun.addEventListener('click', () => {
-      hideNextRunBar();
-      startNextTitration();
-    });
-  }
+  // ── Next Run (uses native browser confirm dialog) ──
 
   function showNextRunBar() {
-    console.log('[NEXT-RUN-BAR] showNextRunBar called, state.run=', state.run);
     if (state.run >= 3) {
       toast('All four titrations complete! Check your concordance results.', 'success');
-      if (dom.btnNextTitration) { dom.btnNextTitration.disabled = true; dom.btnNextTitration.textContent = 'All Done'; }
       return;
     }
-    const label = state.run === 0 ? 'Rough titration complete!' :
-                  state.run === 1 ? '1st accurate titration complete!' :
-                  state.run === 2 ? '2nd accurate titration complete!' : '3rd accurate titration complete!';
-    const btnLabel = state.run === 0 ? 'Start 1st Accurate Run' :
-                     state.run === 1 ? 'Start 2nd Accurate Run' : 'Start 3rd Accurate Run';
-    if (nextRunLabel) nextRunLabel.textContent = label;
-    if (btnNextRun) btnNextRun.textContent = btnLabel;
-    if (nextRunBar) nextRunBar.style.display = '';
-    if (dom.btnNextTitration) { dom.btnNextTitration.disabled = false; }
+    const label = state.run === 0 ? '1st accurate' :
+                  state.run === 1 ? '2nd accurate' : '3rd accurate';
+
+    // Use native browser confirm dialog — cannot be hidden by CSS/DOM issues
+    const go = window.confirm(
+      'Titration recorded!\n\nClick OK to start the ' + label + ' run.\nClick Cancel to stay on this screen.'
+    );
+    if (go) {
+      startNextTitration();
+    }
   }
 
   function hideNextRunBar() {
-    if (nextRunBar) nextRunBar.style.display = 'none';
-    if (dom.btnNextTitration) { dom.btnNextTitration.disabled = true; dom.btnNextTitration.textContent = 'Next Titration'; }
+    // No-op: using native confirm dialog now, nothing to hide
   }
 
   function startNextTitration() {

@@ -529,22 +529,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const bur = dom.burette;
     const base = stand.querySelector('.retort-base');
 
-    // Calculate target position for the flask under the burette
-    const burRect = bur.getBoundingClientRect();
-    const flaskRect = dom.flask.getBoundingClientRect();
-    const wbRect = dom.workbench.getBoundingClientRect();
-
-    // Show white tile — position relative to workbench using bounding rects
+    // Show white tile — it's inside stand-assembly, so use stand-relative coords
     dom.whiteTile.style.display = '';
-    dom.whiteTile.style.position = 'absolute';
-    const wbRect2 = dom.workbench.getBoundingClientRect();
-    const burRect2 = bur.getBoundingClientRect();
-    const baseRect = base.getBoundingClientRect();
-    dom.whiteTile.style.bottom = (wbRect2.bottom - baseRect.top + 2) + 'px';
-    dom.whiteTile.style.left = (burRect2.left + burRect2.width / 2 - wbRect2.left - 45) + 'px';
-    dom.whiteTile.style.zIndex = '5';
+    dom.whiteTile.style.bottom = (base.offsetHeight + 2) + 'px';
+    dom.whiteTile.style.left = (bur.offsetLeft + bur.offsetWidth / 2 - 45) + 'px';
 
-    // Animate flask to position under burette (flask is inside stand-assembly)
+    // Place flask inside stand-assembly, just above the white tile
     dom.flask.classList.add('placed');
     stand.appendChild(dom.flask);
     dom.flask.style.bottom = (base.offsetHeight + 14) + 'px';
@@ -744,15 +734,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Helper: called after final reading is determined (immediately in guided, after input in independent)
     function finishTitration(finalVal, initVal, titreVal) {
-      if (finalInput) finalInput.value = finalVal.toFixed(2);
-      if (titreInput) titreInput.value = titreVal.toFixed(2);
-      state.results.push({ initial: initVal, final: finalVal, titre: titreVal, run: state.run });
-      enableFlowButtons(false);
-      checkConcordance();
-      toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titreVal.toFixed(2)} cm\u00B3`);
-      state.step = STEPS.length - 1;
-      renderStepsBar();
-      updateGuide();
+      try {
+        if (finalInput) finalInput.value = finalVal.toFixed(2);
+        if (titreInput) titreInput.value = titreVal.toFixed(2);
+        state.results.push({ initial: initVal, final: finalVal, titre: titreVal, run: state.run });
+        enableFlowButtons(false);
+        checkConcordance();
+        toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titreVal.toFixed(2)} cm\u00B3`);
+        state.step = STEPS.length - 1;
+        renderStepsBar();
+        updateGuide();
+      } catch (err) {
+        console.error('[finishTitration] Error:', err);
+      }
+      // Always show the next-run dialog, even if something above failed
       showNextRunBar();
     }
 

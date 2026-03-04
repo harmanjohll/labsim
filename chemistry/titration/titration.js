@@ -151,40 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
     baseSelect: $('base-select'),
     concordantMsg: $('concordant-msg'),
     calcWorkspace: $('calc-workspace'),
-    btnNextTitration: $('btn-next-titration'),
-    btnNextTitrationData: $('btn-next-titration-data'),
     toast: $('toast-container'),
   };
-
-  // ── Ensure Next Titration buttons exist (handles cached HTML) ──
-  if (!dom.btnNextTitrationData) {
-    // Create data-panel button below the results table
-    const dataPanel = dom.concordantMsg ? dom.concordantMsg.parentElement : null;
-    if (dataPanel) {
-      const btn = document.createElement('button');
-      btn.id = 'btn-next-titration-data';
-      btn.className = 'btn btn-success';
-      btn.disabled = true;
-      btn.style.cssText = 'margin-top:12px;width:100%;padding:10px 16px;font-size:15px;font-weight:600;';
-      btn.textContent = 'Next Titration';
-      dataPanel.appendChild(btn);
-      dom.btnNextTitrationData = btn;
-    }
-  }
-  if (!dom.btnNextTitration) {
-    // Create burette-controls button
-    const readingActions = document.querySelector('#burette-controls .reading-actions');
-    if (readingActions) {
-      const btn = document.createElement('button');
-      btn.id = 'btn-next-titration';
-      btn.className = 'btn btn-success btn-sm';
-      btn.disabled = true;
-      btn.style.display = 'none';
-      btn.textContent = 'Next Titration';
-      readingActions.appendChild(btn);
-      dom.btnNextTitration = btn;
-    }
-  }
 
   // ── Recording Mode ──
   if (typeof LabRecordMode !== 'undefined') {
@@ -900,25 +868,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn?.dataset.action === 'next-titration') startNextTitration();
   });
 
-  // Data panel Next Titration button
-  if (dom.btnNextTitrationData) dom.btnNextTitrationData.addEventListener('click', () => startNextTitration());
-
   function showNextTitrationBar() {
     // Remove any previous next-titration overlay
     hideNextTitrationBar();
 
     if (state.run >= 3) {
       toast('All four titrations complete! Check your concordance results.', 'success');
-      if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = true; dom.btnNextTitrationData.textContent = 'All titrations complete'; }
       return;
     }
     const label = state.run === 0 ? '1st accurate' : state.run === 1 ? '2nd accurate' : '3rd accurate';
 
-    // Take over the ENTIRE burette controls area with a big Next Titration prompt
-    // This is the most visible area on screen — center, below the workbench
-    const overlay = document.createElement('div');
-    overlay.id = 'next-titration-overlay';
-    overlay.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 24px;background:linear-gradient(135deg,#06d6a0 0%,#05b889 100%);border-top:2px solid #059669;flex-shrink:0;';
+    // FIXED-POSITION bottom banner — appended to <body>, ignores all overflow:hidden
+    const bar = document.createElement('div');
+    bar.id = 'next-titration-overlay';
+    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 24px;background:linear-gradient(135deg,#06d6a0 0%,#05b889 100%);box-shadow:0 -4px 20px rgba(0,0,0,0.2);';
 
     const msg = document.createElement('span');
     msg.style.cssText = 'color:#fff;font-size:15px;font-weight:600;';
@@ -926,28 +889,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const btn = document.createElement('button');
     btn.style.cssText = 'padding:10px 28px;background:#fff;color:#059669;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.15);';
-    btn.textContent = 'Next Titration →';
+    btn.textContent = 'Next Titration \u2192';
     btn.addEventListener('click', () => startNextTitration());
     btn.addEventListener('mouseenter', () => { btn.style.background = '#f0fdf4'; });
     btn.addEventListener('mouseleave', () => { btn.style.background = '#fff'; });
 
-    overlay.appendChild(msg);
-    overlay.appendChild(btn);
-
-    // Hide the normal burette controls and insert the overlay in its place
-    dom.buretteControls.style.display = 'none';
-    dom.buretteControls.parentElement.appendChild(overlay);
-
-    // Also enable data panel button
-    if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = false; dom.btnNextTitrationData.textContent = 'Next Titration (' + label + ')'; }
+    bar.appendChild(msg);
+    bar.appendChild(btn);
+    document.body.appendChild(bar);
 
     toast('Click "Next Titration" to start the ' + label + ' run.', 'success');
   }
 
   function hideNextTitrationBar() {
-    const overlay = document.getElementById('next-titration-overlay');
-    if (overlay) overlay.remove();
-    if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = true; dom.btnNextTitrationData.textContent = 'Next Titration'; }
+    const bar = document.getElementById('next-titration-overlay');
+    if (bar) bar.remove();
   }
 
   function startNextTitration() {

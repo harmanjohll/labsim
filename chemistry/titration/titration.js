@@ -900,27 +900,53 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn?.dataset.action === 'next-titration') startNextTitration();
   });
 
-  // Permanent Next Titration buttons (in burette controls + data panel)
-  if (dom.btnNextTitration) dom.btnNextTitration.addEventListener('click', () => startNextTitration());
+  // Data panel Next Titration button
   if (dom.btnNextTitrationData) dom.btnNextTitrationData.addEventListener('click', () => startNextTitration());
 
   function showNextTitrationBar() {
+    // Remove any previous next-titration overlay
+    hideNextTitrationBar();
+
     if (state.run >= 3) {
       toast('All four titrations complete! Check your concordance results.', 'success');
-      if (dom.btnNextTitration) { dom.btnNextTitration.disabled = true; dom.btnNextTitration.style.display = 'none'; }
       if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = true; dom.btnNextTitrationData.textContent = 'All titrations complete'; }
       return;
     }
     const label = state.run === 0 ? '1st accurate' : state.run === 1 ? '2nd accurate' : '3rd accurate';
-    toast('Titration recorded! Click "Next Titration" to start the ' + label + ' run.', 'success');
 
-    // Enable both permanent buttons
-    if (dom.btnNextTitration) { dom.btnNextTitration.disabled = false; dom.btnNextTitration.style.display = ''; }
+    // Take over the ENTIRE burette controls area with a big Next Titration prompt
+    // This is the most visible area on screen — center, below the workbench
+    const overlay = document.createElement('div');
+    overlay.id = 'next-titration-overlay';
+    overlay.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 24px;background:linear-gradient(135deg,#06d6a0 0%,#05b889 100%);border-top:2px solid #059669;flex-shrink:0;';
+
+    const msg = document.createElement('span');
+    msg.style.cssText = 'color:#fff;font-size:15px;font-weight:600;';
+    msg.textContent = 'Titration ' + (state.run === 0 ? 'rough' : '#' + state.run) + ' recorded. Ready for ' + label + ' run.';
+
+    const btn = document.createElement('button');
+    btn.style.cssText = 'padding:10px 28px;background:#fff;color:#059669;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.15);';
+    btn.textContent = 'Next Titration →';
+    btn.addEventListener('click', () => startNextTitration());
+    btn.addEventListener('mouseenter', () => { btn.style.background = '#f0fdf4'; });
+    btn.addEventListener('mouseleave', () => { btn.style.background = '#fff'; });
+
+    overlay.appendChild(msg);
+    overlay.appendChild(btn);
+
+    // Hide the normal burette controls and insert the overlay in its place
+    dom.buretteControls.style.display = 'none';
+    dom.buretteControls.parentElement.appendChild(overlay);
+
+    // Also enable data panel button
     if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = false; dom.btnNextTitrationData.textContent = 'Next Titration (' + label + ')'; }
+
+    toast('Click "Next Titration" to start the ' + label + ' run.', 'success');
   }
 
   function hideNextTitrationBar() {
-    if (dom.btnNextTitration) { dom.btnNextTitration.disabled = true; dom.btnNextTitration.style.display = 'none'; }
+    const overlay = document.getElementById('next-titration-overlay');
+    if (overlay) overlay.remove();
     if (dom.btnNextTitrationData) { dom.btnNextTitrationData.disabled = true; dom.btnNextTitrationData.textContent = 'Next Titration'; }
   }
 

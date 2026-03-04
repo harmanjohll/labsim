@@ -8,8 +8,8 @@
   <meta http-equiv="Expires" content="0">
   <title>Acid-Base Titration – LabSim</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/design-system.css?v=14">
-  <link rel="stylesheet" href="titration.css?v=14">
+  <link rel="stylesheet" href="../../shared/design-system.css?v=15">
+  <link rel="stylesheet" href="titration.css?v=15">
 </head>
 <body>
 
@@ -75,11 +75,6 @@
     <section class="workbench-panel">
       <div id="workbench" class="workbench">
         <div class="bench-surface"></div>
-
-        <!-- White tile (hidden until placed) -->
-        <div id="white-tile" class="white-tile" style="display:none;">
-          <div class="tile-surface"></div>
-        </div>
 
         <!-- Beaker (FA2) -->
         <div id="beaker" class="apparatus beaker-apparatus" data-item="beaker">
@@ -148,6 +143,10 @@
             <div class="burette-nozzle"></div>
             <!-- Drip animation element -->
             <div class="burette-drip" id="burette-drip"></div>
+          </div>
+          <!-- White tile (hidden until flask placed) -->
+          <div id="white-tile" class="white-tile" style="display:none;">
+            <div class="tile-surface"></div>
           </div>
           <!-- Flask placement zone under burette -->
           <div id="flask-zone" class="flask-under-zone" style="display:none;"></div>
@@ -244,12 +243,12 @@
   <!-- Toast container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="../../shared/lab-audio.js?v=14"></script>
-  <script src="../../shared/lab-score.js?v=14"></script>
-  <script src="../../shared/dark-mode.js?v=14"></script>
-  <script src="../../shared/lab-record-mode.js?v=14"></script>
-  <script src="../../shared/guide-collapse.js?v=14"></script>
-  <script src="../../shared/lab-notebook.js?v=14"></script>
-  <script src="titration.js?v=14"></script>
+  <script src="../../shared/lab-audio.js?v=15"></script>
+  <script src="../../shared/lab-score.js?v=15"></script>
+  <script src="../../shared/dark-mode.js?v=15"></script>
+  <script src="../../shared/lab-record-mode.js?v=15"></script>
+  <script src="../../shared/guide-collapse.js?v=15"></script>
+  <script src="../../shared/lab-notebook.js?v=15"></script>
+  <script src="titration.js?v=15"></script>
 </body>
 </html>

@@ -156,6 +156,36 @@ document.addEventListener('DOMContentLoaded', () => {
     toast: $('toast-container'),
   };
 
+  // ── Ensure Next Titration buttons exist (handles cached HTML) ──
+  if (!dom.btnNextTitrationData) {
+    // Create data-panel button below the results table
+    const dataPanel = dom.concordantMsg ? dom.concordantMsg.parentElement : null;
+    if (dataPanel) {
+      const btn = document.createElement('button');
+      btn.id = 'btn-next-titration-data';
+      btn.className = 'btn btn-success';
+      btn.disabled = true;
+      btn.style.cssText = 'margin-top:12px;width:100%;padding:10px 16px;font-size:15px;font-weight:600;';
+      btn.textContent = 'Next Titration';
+      dataPanel.appendChild(btn);
+      dom.btnNextTitrationData = btn;
+    }
+  }
+  if (!dom.btnNextTitration) {
+    // Create burette-controls button
+    const readingActions = document.querySelector('#burette-controls .reading-actions');
+    if (readingActions) {
+      const btn = document.createElement('button');
+      btn.id = 'btn-next-titration';
+      btn.className = 'btn btn-success btn-sm';
+      btn.disabled = true;
+      btn.style.display = 'none';
+      btn.textContent = 'Next Titration';
+      readingActions.appendChild(btn);
+      dom.btnNextTitration = btn;
+    }
+  }
+
   // ── Recording Mode ──
   if (typeof LabRecordMode !== 'undefined') {
     LabRecordMode.inject('#record-mode-slot');

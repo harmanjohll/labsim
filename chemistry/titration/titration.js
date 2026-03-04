@@ -245,7 +245,12 @@ document.addEventListener('DOMContentLoaded', () => {
       dom.guideActions.appendChild(note);
     } else if (step.id === 'repeat') {
       if (state.run < 3) {
-        dom.guideDesc.textContent = 'Titration recorded! Use the green bar at the bottom of the screen to start the next run.';
+        dom.guideDesc.textContent = 'Titration recorded! Click below or use the green bar at the bottom to start the next run.';
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-success btn-sm';
+        btn.textContent = 'Next Titration';
+        btn.dataset.action = 'next-titration';
+        dom.guideActions.appendChild(btn);
       } else {
         dom.guideDesc.textContent = 'All four titrations complete. Check your concordance results.';
       }
@@ -530,15 +535,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const base = stand.querySelector('.retort-base');
 
     // Show white tile — it's inside stand-assembly, so use stand-relative coords
+    const burCenter = bur.offsetLeft + bur.offsetWidth / 2;
     dom.whiteTile.style.display = '';
     dom.whiteTile.style.bottom = (base.offsetHeight + 2) + 'px';
-    dom.whiteTile.style.left = (bur.offsetLeft + bur.offsetWidth / 2 - 45) + 'px';
+    dom.whiteTile.style.left = (burCenter - 50) + 'px';
 
-    // Place flask inside stand-assembly, just above the white tile
+    // Place flask inside stand-assembly, sitting on the white tile
     dom.flask.classList.add('placed');
     stand.appendChild(dom.flask);
-    dom.flask.style.bottom = (base.offsetHeight + 14) + 'px';
-    dom.flask.style.left = (bur.offsetLeft + bur.offsetWidth / 2 - 38) + 'px';
+    dom.flask.style.bottom = (base.offsetHeight + 22) + 'px';
+    dom.flask.style.left = (burCenter - 38) + 'px';
 
     // Show controls
     dom.buretteControls.style.display = '';
@@ -862,7 +868,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Next Run (uses native browser confirm dialog) ──
+  // ── Next Run Bar ──
+
+  const nextRunBar = $('next-run-bar');
+  const nextRunLabel = $('next-run-label');
+  const btnNextRun = $('btn-next-run');
+
+  if (btnNextRun) {
+    btnNextRun.addEventListener('click', () => startNextTitration());
+  }
 
   function showNextRunBar() {
     if (state.run >= 3) {
@@ -872,17 +886,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const label = state.run === 0 ? '1st accurate' :
                   state.run === 1 ? '2nd accurate' : '3rd accurate';
 
-    // Use native browser confirm dialog — cannot be hidden by CSS/DOM issues
-    const go = window.confirm(
-      'Titration recorded!\n\nClick OK to start the ' + label + ' run.\nClick Cancel to stay on this screen.'
-    );
-    if (go) {
-      startNextTitration();
+    // Enable the topbar button
+    if (dom.btnNextTitration) dom.btnNextTitration.disabled = false;
+
+    // Show the green bottom bar
+    if (nextRunBar) {
+      if (nextRunLabel) nextRunLabel.textContent = `Titration recorded! Ready for ${label} run.`;
+      nextRunBar.style.display = '';
     }
   }
 
   function hideNextRunBar() {
-    // No-op: using native confirm dialog now, nothing to hide
+    if (nextRunBar) nextRunBar.style.display = 'none';
+    if (dom.btnNextTitration) dom.btnNextTitration.disabled = true;
   }
 
   function startNextTitration() {

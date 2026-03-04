@@ -735,6 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Log final
   dom.btnLogFinal.addEventListener('click', () => {
+    console.log('[LOG-FINAL] clicked, state.initialReading=', state.initialReading, 'state.run=', state.run);
     if (state.initialReading === null) {
       toast('Log the initial reading first.', 'warn');
       return;
@@ -742,11 +743,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalReading = getBuretteReading();
     const initialReading = parseFloat(document.getElementById(`initial-${state.run}`)?.value || '0');
     const titre = finalReading - initialReading;
+    console.log('[LOG-FINAL] finalReading=', finalReading, 'initialReading=', initialReading, 'titre=', titre);
 
     const finalInput = document.getElementById(`final-${state.run}`);
     const titreInput = document.getElementById(`titre-${state.run}`);
+    console.log('[LOG-FINAL] finalInput=', finalInput, 'titreInput=', titreInput);
 
-    if (typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided()) {
+    const isIndependent = typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided();
+    console.log('[LOG-FINAL] isIndependent=', isIndependent);
+
+    if (isIndependent) {
       // Independent mode: student enters final reading manually
       if (finalInput) {
         finalInput.readOnly = false;
@@ -757,12 +763,12 @@ document.addEventListener('DOMContentLoaded', () => {
         toast('Read the burette and type your final reading.', 'info');
         const confirmHandler = () => {
           const entered = parseFloat(finalInput.value);
+          console.log('[LOG-FINAL:INDEP] confirmHandler entered=', entered);
           if (isNaN(entered)) return;
           finalInput.readOnly = true;
           finalInput.style.background = '';
           finalInput.removeEventListener('blur', confirmHandler);
           finalInput.removeEventListener('keydown', keyHandler);
-          // Calculate titre from student-entered values
           const studentInitial = parseFloat(document.getElementById(`initial-${state.run}`)?.value || '0');
           const studentTitre = entered - studentInitial;
           if (titreInput) titreInput.value = studentTitre.toFixed(2);
@@ -770,11 +776,12 @@ document.addEventListener('DOMContentLoaded', () => {
           enableFlowButtons(false);
           checkConcordance();
           toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${studentTitre.toFixed(2)} cm\u00B3`);
-          // Jump to repeat step and show Next Titration directly
-          state.step = STEPS.length - 1; // go to 'repeat' step
+          state.step = STEPS.length - 1;
+          console.log('[LOG-FINAL:INDEP] advancing to repeat step', state.step);
           renderStepsBar();
           updateGuide();
           showNextTitrationBar();
+          console.log('[LOG-FINAL:INDEP] showNextTitrationBar complete');
         };
         const keyHandler = (e) => { if (e.key === 'Enter') confirmHandler(); };
         finalInput.addEventListener('blur', confirmHandler);
@@ -782,17 +789,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else {
       // Guided mode: auto-fill
+      console.log('[LOG-FINAL:GUIDED] auto-filling values');
       if (finalInput) finalInput.value = finalReading.toFixed(2);
       if (titreInput) titreInput.value = titre.toFixed(2);
       state.results.push({ initial: initialReading, final: finalReading, titre, run: state.run });
       enableFlowButtons(false);
       checkConcordance();
       toast(`Titre ${state.run === 0 ? '(rough)' : '#' + state.run}: ${titre.toFixed(2)} cm\u00B3`);
-      // Jump to repeat step and show Next Titration directly
-      state.step = STEPS.length - 1; // go to 'repeat' step
+      state.step = STEPS.length - 1;
+      console.log('[LOG-FINAL:GUIDED] advancing to repeat step', state.step);
       renderStepsBar();
       updateGuide();
       showNextTitrationBar();
+      console.log('[LOG-FINAL:GUIDED] showNextTitrationBar complete');
     }
   });
 

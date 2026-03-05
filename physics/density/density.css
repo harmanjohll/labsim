@@ -48,7 +48,8 @@ body {
   gap: var(--sp-2);
 }
 
-.object-card {
+.object-card,
+.object-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -64,23 +65,27 @@ body {
   user-select: none;
   min-height: 36px;
 }
-.object-card:hover {
+.object-card:hover,
+.object-btn:hover {
   border-color: var(--phys-color);
   background: var(--phys-bg);
 }
-.object-card.active {
+.object-card.active,
+.object-btn.active {
   border-color: var(--phys-color);
   background: var(--phys-bg);
   box-shadow: 0 0 0 3px rgba(247, 127, 0, 0.15);
 }
-.object-card .obj-swatch {
+.object-card .obj-swatch,
+.object-btn .object-swatch {
   width: 18px;
   height: 18px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(0,0,0,0.15);
   flex-shrink: 0;
 }
-.object-card .obj-name {
+.object-card .obj-name,
+.object-btn .object-name {
   font-weight: 600;
   color: var(--color-text);
   line-height: 1.2;

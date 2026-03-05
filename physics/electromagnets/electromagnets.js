@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dataPoints: [],             // [{iv, ivLabel, clips}]
     animFrame: 0,               // animation counter for current flow
     animId: null,               // requestAnimationFrame id
+    pickupAnimId: null,         // pickup animation frame id
     clipsOnNail: [],            // positions of clips stuck to nail for drawing
   };
 
@@ -340,6 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
       cancelAnimationFrame(state.animId);
       state.animId = null;
     }
+    if (state.pickupAnimId) {
+      cancelAnimationFrame(state.pickupAnimId);
+      state.pickupAnimId = null;
+    }
   }
 
 
@@ -382,12 +387,15 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       draw();
       if (elapsed < totalDuration) {
-        requestAnimationFrame(animatePickup);
+        state.pickupAnimId = requestAnimationFrame(animatePickup);
       } else {
+        state.pickupAnimId = null;
         finishPickup(clipCount);
       }
     }
-    requestAnimationFrame(animatePickup);
+    /* Cancel any previous pickup animation */
+    if (state.pickupAnimId) cancelAnimationFrame(state.pickupAnimId);
+    state.pickupAnimId = requestAnimationFrame(animatePickup);
 
     toast('Bringing electromagnet near paper clips...');
     if (typeof LabAudio !== 'undefined') LabAudio.click();
@@ -535,8 +543,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ══════════════════════════════════════
 
   function draw() {
-    const W = dom.canvas.width;
-    const H = dom.canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const W = dom.canvas.width / dpr;
+    const H = dom.canvas.height / dpr;
     ctx.clearRect(0, 0, W, H);
 
     drawBattery(ctx, W, H);
@@ -547,9 +556,13 @@ document.addEventListener('DOMContentLoaded', () => {
     drawLabels(ctx, W, H);
   }
 
+  // ── Proportional helpers (reference canvas: 620 × 420) ──
+  function px(val, W) { return val * (W / 620); }
+  function py(val, H) { return val * (H / 420); }
+
   // ── Battery ──
   function drawBattery(ctx, W, H) {
-    const bx = 80, by = H - 80, bw = 60, bh = 30;
+    const bx = px(80, W), by = H - py(80, H), bw = px(60, W), bh = py(30, H);
 
     // Battery body
     ctx.fillStyle = '#374151';
@@ -582,12 +595,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Wires ──
   function drawWires(ctx, W, H) {
-    const batteryRight = 148;
-    const batteryLeft = 72;
-    const batteryY = H - 65;
-    const nailLeft = 220;
-    const nailRight = 450;
-    const nailY = 180;
+    const batteryRight = px(148, W);
+    const batteryLeft = px(72, W);
+    const batteryY = H - py(65, H);
+    const nailLeft = px(220, W);
+    const nailRight = px(450, W);
+    const nailY = py(180, H);
 
     ctx.strokeStyle = state.powerOn ? '#ef4444' : '#6b7280';
     ctx.lineWidth = 2.5;
@@ -606,8 +619,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.strokeStyle = state.powerOn ? '#3b82f6' : '#6b7280';
     ctx.beginPath();
     ctx.moveTo(batteryLeft, batteryY);
-    ctx.lineTo(40, batteryY);
-    ctx.lineTo(40, nailY);
+    ctx.lineTo(px(40, W), batteryY);
+    ctx.lineTo(px(40, W), nailY);
     ctx.lineTo(nailLeft, nailY);
     ctx.stroke();
 
@@ -629,8 +642,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Left wire path dots (coil back to -)
       drawCurrentDots(ctx, [
         { x: nailLeft, y: nailY },
-        { x: 40, y: nailY },
-        { x: 40, y: batteryY },
+        { x: px(40, W), y: nailY },
+        { x: px(40, W), y: batteryY },
         { x: batteryLeft, y: batteryY },
       ], dotSpacing, offset);
     }
@@ -667,9 +680,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Nail and coil ──
   function drawNailAndCoil(ctx, W, H) {
-    const nailX = 220;
-    const nailY = 180;
-    const nailLen = 230;
+    const nailX = px(220, W);
+    const nailY = py(180, H);
+    const nailLen = px(230, W);
     const turns = getCurrentTurns();
     const core = getCurrentCore();
 
@@ -744,12 +757,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Paper clips (scattered on bench and attached to nail) ──
   function drawPaperClips(ctx, W, H) {
-    const tipX = 470;
-    const tipY = 180;
+    const tipX = px(470, W);
+    const tipY = py(180, H);
 
     // Draw scattered clips on the bench (below the nail)
     if (!state.hasResult && state.clipsOnNail.length === 0) {
-      const scatterY = 280;
+      const scatterY = py(280, H);
       ctx.strokeStyle = '#94a3b8';
       ctx.lineWidth = 1.5;
       for (let i = 0; i < 15; i++) {
@@ -774,7 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clips remaining on bench when some are picked up
     if (state.hasResult || state.clipsOnNail.length > 0) {
       const remaining = 15 - state.lastClipCount;
-      const scatterY = 280;
+      const scatterY = py(280, H);
       ctx.strokeStyle = '#64748b';
       ctx.lineWidth = 1.5;
       for (let i = 0; i < Math.max(0, remaining); i++) {
@@ -810,8 +823,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Magnetic field lines ──
   function drawFieldLines(ctx, W, H) {
-    const nailCx = 335;
-    const nailCy = 180;
+    const nailCx = px(335, W);
+    const nailCy = py(180, H);
     const pulsePhase = (state.animFrame % 120) / 120;
 
     ctx.strokeStyle = 'rgba(59, 130, 246, 0.15)';
@@ -832,9 +845,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.font = 'bold 12px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
-    ctx.fillText('N', 500, 170);
+    ctx.fillText('N', px(500, W), py(170, H));
     ctx.fillStyle = 'rgba(59, 130, 246, 0.6)';
-    ctx.fillText('S', 210, 170);
+    ctx.fillText('S', px(210, W), py(170, H));
   }
 
   // ── Labels ──
@@ -1201,11 +1214,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function resizeCanvas() {
     const parent = dom.canvas.parentElement;
     if (!parent) return;
+    const dpr = window.devicePixelRatio || 1;
     const w = Math.min(parent.clientWidth - 16, 620);
     const h = Math.round(w * (420 / 620));
-    if (dom.canvas.width !== w || dom.canvas.height !== h) {
-      dom.canvas.width = w;
-      dom.canvas.height = h;
+    const needsUpdate = dom.canvas.width !== Math.round(w * dpr) || dom.canvas.height !== Math.round(h * dpr);
+    if (needsUpdate) {
+      dom.canvas.width = w * dpr;
+      dom.canvas.height = h * dpr;
+      dom.canvas.style.width = w + 'px';
+      dom.canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw();
     }
   }

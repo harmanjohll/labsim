@@ -322,11 +322,11 @@
   }
 
   /* --- Bubbles --- */
-  /* Flask geometry constants for bubble containment */
-  var FLASK_X = 160;                     /* centre x of flask */
-  var FLASK_BASE_Y = 380 - 52;          /* base y of flask (328) */
-  var FLASK_LIQUID_TOP = 380 - 52 - 70; /* liquid surface y (258) */
-  var FLASK_NECK_TOP = 380 - 52 - 130;  /* top of neck (198) */
+  /* Flask geometry constants for bubble containment (derived from actual canvas H) */
+  var FLASK_X = 160;
+  var FLASK_BASE_Y = H - 52;
+  var FLASK_LIQUID_TOP = H - 52 - 70;
+  var FLASK_NECK_TOP = H - 52 - 130;
 
   /* Return the half-width of the flask interior at a given y coordinate */
   function flaskHalfWidthAt(y) {

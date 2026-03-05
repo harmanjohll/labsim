@@ -951,6 +951,11 @@ body {
 }
 
 @media (max-width: 640px) {
+  body {
+    overflow: auto;
+    height: auto;
+    min-height: 100vh;
+  }
   .chrom-paper-assembly {
     transform: scale(0.8);
     transform-origin: bottom center;

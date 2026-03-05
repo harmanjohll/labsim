@@ -5,6 +5,26 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // ── roundRect polyfill for older browsers ──
+  if (typeof CanvasRenderingContext2D !== 'undefined' &&
+      !CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, radii) {
+      if (!Array.isArray(radii)) radii = [radii, radii, radii, radii];
+      var tl = radii[0] || 0, tr = radii[1] || 0, br = radii[2] || 0, bl = radii[3] || 0;
+      this.moveTo(x + tl, y);
+      this.lineTo(x + w - tr, y);
+      this.quadraticCurveTo(x + w, y, x + w, y + tr);
+      this.lineTo(x + w, y + h - br);
+      this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+      this.lineTo(x + bl, y + h);
+      this.quadraticCurveTo(x, y + h, x, y + h - bl);
+      this.lineTo(x, y + tl);
+      this.quadraticCurveTo(x, y, x + tl, y);
+      this.closePath();
+      return this;
+    };
+  }
+
   // ── Constants ──
   const PAPER_HEIGHT_CM  = 14;     // total paper height in cm
   const BASELINE_CM      = 2;      // baseline distance from bottom
@@ -638,6 +658,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const id = dom.sampleSelect.value;
     const sample = CHROM_DATA.getSample(id);
     if (!sample) return;
+
+    /* Cancel any running animation from a previous sample */
+    if (state.animationId) {
+      cancelAnimationFrame(state.animationId);
+      state.animationId = null;
+    }
 
     state.currentSample = sample;
     state.phase = 'selected';

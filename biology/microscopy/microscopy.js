@@ -932,12 +932,13 @@ document.addEventListener('DOMContentLoaded', function () {
       dom.checklistList.appendChild(li);
     });
 
-    /* Rebuild checklist when mode changes */
-    if (typeof LabRecordMode !== 'undefined') {
-      LabRecordMode.onChange(function () {
-        if (state.slide) buildChecklist(state.slide);
-      });
-    }
+  }
+
+  /* Rebuild checklist when mode changes (registered once, outside buildChecklist) */
+  if (typeof LabRecordMode !== 'undefined') {
+    LabRecordMode.onChange(function () {
+      if (state.slide) buildChecklist(state.slide);
+    });
   }
 
   function checkCompletionReady() {

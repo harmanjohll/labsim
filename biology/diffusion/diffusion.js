@@ -119,6 +119,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* Non-blocking inline input (replaces prompt()) */
+  function showInlineInput(label, onSubmit) {
+    const wrap = document.createElement('div');
+    wrap.className = 'inline-prompt';
+    wrap.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px;background:var(--color-surface-alt,#f8f8f8);border:1px solid var(--color-border,#ddd);border-radius:6px;margin:8px 0;';
+    const lbl = document.createElement('span');
+    lbl.textContent = label;
+    lbl.style.cssText = 'font-size:0.85rem;flex:1 1 100%;margin-bottom:4px;';
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.step = '0.1';
+    inp.className = 'calc-input';
+    inp.style.cssText = 'width:100px;';
+    const btn = document.createElement('button');
+    btn.textContent = 'Submit';
+    btn.className = 'btn btn-primary btn-xs';
+    wrap.appendChild(lbl);
+    wrap.appendChild(inp);
+    wrap.appendChild(btn);
+    dom.btnRecord.parentElement.insertBefore(wrap, dom.btnRecord);
+    inp.focus();
+    function submit() {
+      if (!inp.value) return;
+      wrap.remove();
+      onSubmit(inp.value);
+    }
+    btn.addEventListener('click', submit);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  }
+
 
   // ══════════════════════════════════════
   // EXPERIMENT SWITCHING
@@ -401,23 +431,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let time, distance, rate;
 
-    // Independent mode: manual entry
+    // Independent mode: non-blocking inline entry
     if (typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided()) {
-      const userTime = prompt(`Enter time for colour to reach ${TEMP.targetRadiusMM} mm at ${state.selectedTemp}\u00b0C (seconds):`);
-      if (userTime === null) return;
-      time = parseFloat(userTime);
-      if (isNaN(time) || time <= 0) {
-        toast('Please enter a valid positive time.', 'warn');
-        return;
-      }
-      distance = TEMP.targetRadiusMM;
-      rate = distance / time;
+      showInlineInput(
+        `Enter time for colour to reach ${TEMP.targetRadiusMM} mm at ${state.selectedTemp}\u00b0C (seconds):`,
+        function (val) {
+          const parsed = parseFloat(val);
+          if (isNaN(parsed) || parsed <= 0) {
+            toast('Please enter a valid positive time.', 'warn');
+            return;
+          }
+          const t = parsed;
+          const d = TEMP.targetRadiusMM;
+          const r = d / t;
+          finishTempRecord(t, d, r);
+        }
+      );
+      return;
     } else {
       time = DATA.addNoise(state.tempTimerElapsed, 0.03);
       distance = TEMP.targetRadiusMM;
       rate = distance / time;
     }
 
+    finishTempRecord(time, distance, rate);
+  }
+
+  function finishTempRecord(time, distance, rate) {
     const result = {
       temp: state.selectedTemp,
       time: time,
@@ -470,19 +510,35 @@ document.addEventListener('DOMContentLoaded', () => {
   function recordAgarResults() {
     if (!state.allCubesDone) return;
 
-    // Independent mode: manual entry
+    // Independent mode: non-blocking sequential inline entry
     if (typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided()) {
-      state.cubes.forEach(cube => {
-        const userTime = prompt(`Enter decolourisation time for ${cube.size} cm cube (seconds):`);
-        if (userTime !== null) {
-          const parsed = parseFloat(userTime);
-          if (!isNaN(parsed) && parsed > 0) {
-            cube.recordedTime = parsed;
-          }
+      let cubeIdx = 0;
+      function askNextCube() {
+        if (cubeIdx >= state.cubes.length) {
+          finishAgarRecord();
+          return;
         }
-      });
+        const cube = state.cubes[cubeIdx];
+        showInlineInput(
+          `Enter decolourisation time for ${cube.size} cm cube (seconds):`,
+          function (val) {
+            const parsed = parseFloat(val);
+            if (!isNaN(parsed) && parsed > 0) {
+              cube.recordedTime = parsed;
+            }
+            cubeIdx++;
+            askNextCube();
+          }
+        );
+      }
+      askNextCube();
+      return;
     }
 
+    finishAgarRecord();
+  }
+
+  function finishAgarRecord() {
     dom.dataEmpty.style.display = 'none';
     state.agarResults = [];
 

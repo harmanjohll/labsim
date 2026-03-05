@@ -298,12 +298,20 @@
     btn.className = 'btn btn-primary btn-sm';
     btn.textContent = 'Prepare Another Salt';
     btn.addEventListener('click', function () {
-      state.started = false;
-      state.stepIndex = 0;
+      cancelAnimationFrame(state.animId);
+      state.stepIndex = -1;
       state.animating = false;
-      state.excess = false;
-      state.filtered = false;
-      state.showFunnel = false;
+      state.flameOn = false;
+      state.flamePhase = 0;
+      state.liquidColor = 'rgba(200, 210, 220, 0.15)';
+      state.liquidLevel = 0.45;
+      state.particles = [];
+      state.particleAlpha = 1.0;
+      state.stirAngle = 0;
+      state.stirring = false;
+      state.showFilter = false;
+      state.filterProgress = 0;
+      state.filtrateDrips = [];
       state.showEvapDish = false;
       state.steamParticles = [];
       state.evapProgress = 0;
@@ -312,12 +320,28 @@
       state.showDrying = false;
       state.dryProgress = 0;
       state.scene = 'beaker';
+      state.pair = null;
+      state.pairKey = '';
       selPair.disabled = false;
       selPair.value = '';
+      btnStart.hidden = false;
+      btnStart.disabled = true;
+      eqInfo.hidden = true;
       actionBar.hidden = true;
+
+      /* Reset observations */
+      obsBody.innerHTML = '';
+      obsBody.appendChild(obsPlaceholder);
+      obsPlaceholder.hidden = false;
+
+      /* Reset procedure list */
+      var items = procList.querySelectorAll('.procedure-step');
+      for (var i = 0; i < items.length; i++) {
+        items[i].classList.remove('active', 'done');
+      }
+
       bar.remove();
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      highlightProcedure(-1);
+      draw();
       toast('Select a new acid-base pair.', 'info');
     });
     bar.appendChild(btn);

@@ -123,6 +123,12 @@
 
     document.getElementById('btn-next-var').addEventListener('click', function () {
       exIdx = (exIdx + 1) % exercises.length;
+      if (exIdx === 0) {
+        feedbackEl.hidden = false;
+        feedbackEl.className = 'exercise-feedback correct';
+        feedbackEl.innerHTML = '<strong>Well done!</strong> You\'ve completed all scenarios. Starting again from the first.';
+        if (typeof LabAudio !== 'undefined') LabAudio.success();
+      }
       loadExercise();
     });
 
@@ -204,6 +210,11 @@
 
     document.getElementById('btn-next-err').addEventListener('click', function () {
       qIdx = (qIdx + 1) % quiz.length;
+      /* Reset score when cycling back to the first question */
+      if (qIdx === 0) {
+        score = 0;
+        answered = 0;
+      }
       loadQuizQ();
     });
 
@@ -376,15 +387,31 @@
           var itemsEl = target.querySelector('.eval-target-items');
 
           /* Place chip */
+          var placedIdx = selectedChip;
           var pill = document.createElement('div');
           pill.className = 'eval-placed-item';
-          pill.textContent = subset[selectedChip].text;
-          pill.setAttribute('data-idx', selectedChip);
-          pill.setAttribute('data-actual', subset[selectedChip].cat);
+          pill.textContent = subset[placedIdx].text;
+          pill.setAttribute('data-idx', placedIdx);
+          pill.setAttribute('data-actual', subset[placedIdx].cat);
           pill.setAttribute('data-placed', cat);
+
+          /* Click placed pill to undo */
+          pill.style.cursor = 'pointer';
+          pill.addEventListener('click', function () {
+            pill.remove();
+            /* Remove from placements */
+            for (var r = placements.length - 1; r >= 0; r--) {
+              if (placements[r].idx === placedIdx) { placements.splice(r, 1); break; }
+            }
+            /* Restore chip in pool */
+            var chipEl = scrambleEl.querySelector('[data-idx="' + placedIdx + '"]');
+            if (chipEl) chipEl.classList.remove('placed');
+            if (typeof LabAudio !== 'undefined') LabAudio.click();
+          });
+
           itemsEl.appendChild(pill);
 
-          placements.push({ idx: selectedChip, cat: cat });
+          placements.push({ idx: placedIdx, cat: cat });
 
           /* Mark chip as placed */
           var chipEl = scrambleEl.querySelector('[data-idx="' + selectedChip + '"]');

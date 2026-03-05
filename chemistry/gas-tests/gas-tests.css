@@ -1169,6 +1169,11 @@ body {
 }
 
 @media (max-width: 640px) {
+  body {
+    overflow: auto;
+    height: auto;
+    min-height: 100vh;
+  }
   .apparatus-scene {
     transform: scale(0.75);
     transform-origin: bottom center;

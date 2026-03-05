@@ -321,9 +321,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function matchProduct(answer, product) {
-    if (!answer) return false;
+    if (!answer || answer.length < 3) return false;
     var p = product.toLowerCase().replace(/dissolves/g, '').trim();
-    return answer.indexOf(p) !== -1 || p.indexOf(answer) !== -1;
+    /* Only check if user answer contains the expected product — not the reverse,
+       which would accept partial guesses like "cop" for "copper" */
+    return answer.indexOf(p) !== -1;
   }
 
   /* ── Canvas sizing ── */

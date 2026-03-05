@@ -11,15 +11,21 @@
     { id: 'electrolysis', name: 'Electrolysis', subject: 'Chemistry', url: '../chemistry/electrolysis/index.html' },
     { id: 'rates-of-reaction', name: 'Rates of Reaction', subject: 'Chemistry', url: '../chemistry/rates-of-reaction/index.html' },
     { id: 'salts', name: 'Preparation of Salts', subject: 'Chemistry', url: '../chemistry/salts/index.html' },
+    { id: 'gas-tests', name: 'Gas Tests', subject: 'Chemistry', url: '../chemistry/gas-tests/index.html' },
+    { id: 'chromatography', name: 'Chromatography', subject: 'Chemistry', url: '../chemistry/chromatography/index.html' },
     { id: 'pendulum', name: 'Pendulum & Oscillations', subject: 'Physics', url: '../physics/pendulum/index.html' },
     { id: 'ohms-law', name: "Ohm's Law", subject: 'Physics', url: '../physics/ohms-law/index.html' },
     { id: 'lenses', name: 'Lenses & Light', subject: 'Physics', url: '../physics/lenses/index.html' },
     { id: 'waves', name: 'Waves & Ripple Tank', subject: 'Physics', url: '../physics/waves/index.html' },
     { id: 'specific-heat', name: 'Specific Heat Capacity', subject: 'Physics', url: '../physics/specific-heat/index.html' },
+    { id: 'density', name: 'Density', subject: 'Physics', url: '../physics/density/index.html' },
+    { id: 'electromagnets', name: 'Electromagnets', subject: 'Physics', url: '../physics/electromagnets/index.html' },
     { id: 'food-tests', name: 'Food Tests', subject: 'Biology', url: '../biology/food-tests/index.html' },
     { id: 'osmosis', name: 'Osmosis', subject: 'Biology', url: '../biology/osmosis/index.html' },
     { id: 'enzyme-activity', name: 'Enzyme Activity', subject: 'Biology', url: '../biology/enzyme-activity/index.html' },
-    { id: 'microscopy', name: 'Microscopy & Cell Drawing', subject: 'Biology', url: '../biology/microscopy/index.html' }
+    { id: 'microscopy', name: 'Microscopy & Cell Drawing', subject: 'Biology', url: '../biology/microscopy/index.html' },
+    { id: 'photosynthesis', name: 'Photosynthesis', subject: 'Biology', url: '../biology/photosynthesis/index.html' },
+    { id: 'diffusion', name: 'Diffusion', subject: 'Biology', url: '../biology/diffusion/index.html' }
   ];
 
   var subjectColors = {

@@ -85,9 +85,22 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   buildMatchGame();
 
-  $('match-game').addEventListener('change', function () {
-    // check if all filled
+  $('match-game').addEventListener('change', function (e) {
     var rows = $('match-game').querySelectorAll('.match-row');
+
+    /* Prevent duplicate selections: disable options already chosen in other selects */
+    var selects = $('match-game').querySelectorAll('select');
+    var chosen = [];
+    selects.forEach(function (s) { if (s.value) chosen.push(s.value); });
+    selects.forEach(function (s) {
+      var opts = s.querySelectorAll('option');
+      opts.forEach(function (opt) {
+        if (!opt.value) return; // skip placeholder
+        opt.disabled = (opt.value !== s.value && chosen.indexOf(opt.value) !== -1);
+      });
+    });
+
+    // check if all filled
     var allFilled = true;
     rows.forEach(function (r) { if (!r.querySelector('select').value) allFilled = false; });
     if (!allFilled) return;

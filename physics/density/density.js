@@ -105,10 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resizeCanvas() {
     const panel = dom.canvas.parentElement;
+    const dpr = window.devicePixelRatio || 1;
     const w = Math.min(panel.clientWidth - 32, 700);
     const h = Math.min(panel.clientHeight - 100, 480);
-    dom.canvas.width = w;
-    dom.canvas.height = h;
+    dom.canvas.width = w * dpr;
+    dom.canvas.height = h * dpr;
+    dom.canvas.style.width = w + 'px';
+    dom.canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     draw();
   }
   resizeCanvas();
@@ -700,8 +704,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ══════════════════════════════════════
 
   function draw() {
-    const W = dom.canvas.width;
-    const H = dom.canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const W = dom.canvas.width / dpr;
+    const H = dom.canvas.height / dpr;
     ctx.clearRect(0, 0, W, H);
 
     drawWorkbench(W, H);

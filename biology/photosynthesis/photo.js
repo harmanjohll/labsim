@@ -435,13 +435,15 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.timerTime.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
     dom.timerFill.style.width = Math.min(100, (state.simElapsed / TIMER_DURATION) * 100) + '%';
 
-    // Spawn bubbles based on rate
-    const bubbleInterval = 60 / state.bubbleRate; // seconds between bubbles (sim time)
-    while (state.lastBubbleTime + bubbleInterval <= state.simElapsed && state.simElapsed <= TIMER_DURATION) {
-      state.lastBubbleTime += bubbleInterval;
-      state.bubbleCount++;
-      dom.counterValue.textContent = state.bubbleCount;
-      spawnBubble();
+    // Spawn bubbles based on rate (guard against zero rate)
+    if (state.bubbleRate > 0) {
+      const bubbleInterval = 60 / state.bubbleRate; // seconds between bubbles (sim time)
+      while (state.lastBubbleTime + bubbleInterval <= state.simElapsed && state.simElapsed <= TIMER_DURATION) {
+        state.lastBubbleTime += bubbleInterval;
+        state.bubbleCount++;
+        dom.counterValue.textContent = state.bubbleCount;
+        spawnBubble();
+      }
     }
 
     // Update bubble positions
@@ -525,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.stroke();
 
     // ── Lamp glow cone ──
-    if (state.variable === 'light' || true) {
+    if (state.variable === 'light') {
       const glowIntensity = Math.min(0.15, 0.8 / (state.distance / 5));
       const grad = ctx.createRadialGradient(
         lampX + 22, lampY, 5,

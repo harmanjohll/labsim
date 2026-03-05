@@ -63,7 +63,8 @@ var LabTutorial = (function () {
       el.style.position = el.style.position || 'relative';
       el.style.zIndex = '10001';
       el.style.boxShadow = '0 0 0 4px rgba(67, 97, 238, 0.4), 0 0 0 9999px rgba(0, 0, 0, 0.4)';
-      el.style.borderRadius = '8px';
+      el.dataset.origBorderRadius = el.style.borderRadius || '';
+      el.style.borderRadius = el.style.borderRadius || '8px';
 
       /* Reset tooltip positioning */
       tooltip.style.transform = '';
@@ -112,6 +113,8 @@ var LabTutorial = (function () {
       for (var i = 0; i < highlighted.length; i++) {
         highlighted[i].style.zIndex = '';
         highlighted[i].style.boxShadow = '';
+        highlighted[i].style.borderRadius = highlighted[i].dataset.origBorderRadius || '';
+        delete highlighted[i].dataset.origBorderRadius;
       }
     }
 

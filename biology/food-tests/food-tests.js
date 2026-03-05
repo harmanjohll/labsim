@@ -468,7 +468,9 @@ document.addEventListener('DOMContentLoaded', () => {
       state.tubeContents[i] = { hasSample: false, reagents: [], heated: false, reacted: false };
     }
     document.querySelectorAll('.test-tube').forEach(t => t.classList.remove('selected'));
+    document.querySelectorAll('.reagent-bottle').forEach(b => b.classList.remove('selected'));
     state.selectedTube = null;
+    state.selectedBottle = null;
     addObservation('All', 'All test tubes washed and dried.', '—');
     toast('All test tubes washed.', 'info');
   }

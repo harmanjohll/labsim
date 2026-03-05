@@ -585,13 +585,6 @@
     return x >= region.x;
   }
 
-  /* Check if point is past barrier (in shadow zone for reflection) */
-  function isPastBarrier(x, barrier) {
-    if (!barrier) return false;
-    if (barrier.type === 'wall') return x > barrier.x + 3;
-    return false;
-  }
-
 
   /* ══════════════════════════════════════
      OVERLAYS
@@ -935,7 +928,7 @@
     freqSlider.value = D.frequencyDefault;
     freqDisplay.textContent = D.frequencyDefault + ' Hz';
     speedSlider.value = 1;
-    speedDisplay.textContent = '1.00x';
+    speedDisplay.textContent = '1.0x';
     btnPlay.disabled  = false;
     btnPause.disabled = true;
     overlay.classList.remove('hidden');
@@ -953,7 +946,10 @@
     if (state.scorer) state.scorer.reset();
 
     updateMeasurements();
+
+    /* Select default experiment without counting it as "explored" */
     selectExperiment('reflection');
+    state.exploredExps = {};
 
     toast('Practical reset');
   });

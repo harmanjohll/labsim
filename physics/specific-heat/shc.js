@@ -83,12 +83,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function resizeCanvas() {
     var panel = dom.canvas.parentElement;
+    var dpr = window.devicePixelRatio || 1;
     var w = Math.min(panel.clientWidth - 32, 600);
     var h = Math.min(panel.clientHeight - 120, 460);
     if (w < 300) w = 300;
     if (h < 280) h = 280;
-    dom.canvas.width  = w;
-    dom.canvas.height = h;
+    dom.canvas.width  = w * dpr;
+    dom.canvas.height = h * dpr;
+    dom.canvas.style.width = w + 'px';
+    dom.canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawApparatus();
   }
   resizeCanvas();
@@ -228,16 +232,63 @@ document.addEventListener('DOMContentLoaded', function () {
       var isIndependent = typeof LabRecordMode !== 'undefined' && !LabRecordMode.isGuided();
 
       if (isIndependent) {
-        // In independent mode, prompt student to enter the temperature reading
-        var userTemp = prompt('Time = ' + state.simTime + ' s. Read the thermometer and enter the temperature (\u00B0C):');
-        if (userTemp !== null) {
-          var tempVal = parseFloat(userTemp);
+        // Pause timer while student enters reading (non-blocking)
+        var capturedTime = state.simTime;
+        clearInterval(state.timerHandle);
+        state.timerHandle = null;
+
+        // Build inline prompt row in the data table area
+        var promptRow = document.createElement('tr');
+        promptRow.className = 'animate-fade-in';
+        var tdLabel = document.createElement('td');
+        tdLabel.textContent = capturedTime + ' s';
+        var tdInput = document.createElement('td');
+        var inp = document.createElement('input');
+        inp.type = 'number';
+        inp.step = '0.1';
+        inp.placeholder = 'Enter °C';
+        inp.className = 'calc-input';
+        inp.style.width = '90px';
+        inp.style.display = 'inline-block';
+        inp.style.marginRight = '4px';
+        var submitBtn = document.createElement('button');
+        submitBtn.textContent = 'Record';
+        submitBtn.className = 'btn btn-primary btn-xs';
+        tdInput.appendChild(inp);
+        tdInput.appendChild(submitBtn);
+        promptRow.appendChild(tdLabel);
+        promptRow.appendChild(tdInput);
+        dom.dataTbody.appendChild(promptRow);
+        dom.dataEmpty.style.display = 'none';
+        inp.focus();
+
+        function submitReading() {
+          var tempVal = parseFloat(inp.value);
           if (!isNaN(tempVal) && tempVal > 0) {
-            recordReading(state.simTime, tempVal);
+            promptRow.remove();
+            recordReading(capturedTime, tempVal);
           } else {
-            toast('Invalid temperature. Reading skipped.', 'warn');
+            toast('Invalid temperature. Please enter a valid number.', 'warn');
+            inp.focus();
+            return;
+          }
+
+          drawApparatus();
+          if (typeof LabAudio !== 'undefined') LabAudio.record();
+
+          if (state.readings.length >= TOTAL_READINGS) {
+            completeCollection();
+          } else {
+            // Resume collection
+            startCollection();
           }
         }
+
+        submitBtn.addEventListener('click', submitReading);
+        inp.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') submitReading();
+        });
+        return; // Exit interval callback; timer is paused
       } else {
         // Record the reading automatically
         recordReading(state.simTime, state.currentTemp);
@@ -449,8 +500,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // ══════════════════════════════════════
 
   function drawApparatus() {
-    var W = dom.canvas.width;
-    var H = dom.canvas.height;
+    var dpr = window.devicePixelRatio || 1;
+    var W = dom.canvas.width / dpr;
+    var H = dom.canvas.height / dpr;
     ctx.clearRect(0, 0, W, H);
 
     var cx = W * 0.5;

@@ -220,6 +220,24 @@
           cell.title = 'In progress';
         }
 
+        /* Click cell to show detail toast */
+        (function (studentName, practicalId, progress) {
+          cell.style.cursor = 'pointer';
+          cell.addEventListener('click', function () {
+            var prac = PRACTICALS.filter(function (p) { return p.id === practicalId; })[0];
+            var pracName = prac ? prac.name : practicalId;
+            var detail;
+            if (!progress) {
+              detail = studentName + ' has not started ' + pracName + '.';
+            } else if (progress.completed) {
+              detail = studentName + ' completed ' + pracName + ' — Score: ' + (progress.bestScore || 0) + '%';
+            } else {
+              detail = studentName + ' has started ' + pracName + ' but not completed it.';
+            }
+            alert(detail);
+          });
+        })(student.name, id, p);
+
         td.appendChild(cell);
         tr.appendChild(td);
       });
@@ -327,14 +345,22 @@
   }
 
   /* --- Export --- */
+  function csvEscape(val) {
+    var s = String(val);
+    if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+
   function exportCSV() {
     var rows = [];
-    var header = ['Student'];
-    PRACTICALS.forEach(function (p) { header.push(p.name + ' (Status)'); header.push(p.name + ' (Score)'); });
+    var header = [csvEscape('Student')];
+    PRACTICALS.forEach(function (p) { header.push(csvEscape(p.name + ' (Status)')); header.push(csvEscape(p.name + ' (Score)')); });
     rows.push(header.join(','));
 
     classData.students.forEach(function (s) {
-      var row = ['"' + s.name.replace(/"/g, '""') + '"'];
+      var row = [csvEscape(s.name)];
       practicalIds.forEach(function (id) {
         var p = s.progress[id];
         if (!p) {

@@ -702,6 +702,11 @@ body {
 }
 
 @media (max-width: 640px) {
+  body {
+    overflow: auto;
+    height: auto;
+    min-height: 100vh;
+  }
   .burette-controls {
     flex-wrap: wrap;
     gap: var(--sp-2);

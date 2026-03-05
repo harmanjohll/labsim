@@ -172,10 +172,12 @@
 
     state.ratings[rating]++;
     state.totalStudied++;
-    state.streak++;
 
     if (rating === 'hard') {
+      state.streak = 0;
       state.hardCards.push(card);
+    } else {
+      state.streak++;
     }
 
     if (typeof LabAudio !== 'undefined') {

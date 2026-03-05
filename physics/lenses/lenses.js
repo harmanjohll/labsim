@@ -101,10 +101,10 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.tbody.appendChild(row);
 
     markProcedure('record');
-    if (n >= 2) markProcedure('repeat');
+    if (n >= 5) markProcedure('repeat');
 
     drawGraph();
-    if (n >= 3) {
+    if (n >= 5) {
       calculateF();
       markProcedure('graph');
     }
@@ -642,7 +642,11 @@ document.addEventListener('DOMContentLoaded', function () {
     el.className = 'toast toast-' + (type || 'info');
     el.textContent = msg;
     $('toast-container').appendChild(el);
-    setTimeout(function () { el.remove(); }, 3000);
+    requestAnimationFrame(function () { el.classList.add('visible'); });
+    setTimeout(function () {
+      el.classList.remove('visible');
+      setTimeout(function () { el.remove(); }, 300);
+    }, 3000);
     if (typeof LabAudio !== 'undefined') {
       if (type === 'success') LabAudio.success();
       else if (type === 'warn') LabAudio.warn();

@@ -162,10 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
       handDiv.appendChild(cardEl);
     });
 
-    if (player.id === 0) { benchDiv.style.cssText = 'bottom: 0; left: 50%; transform: translateX(-50%) translateY(48%);'; nameDiv.style.cssText += 'bottom: 13.5%; left: 50%; transform: translateX(-50%);'; }
-    else if (player.id === 1) { benchDiv.style.cssText = 'top: 0; left: 50%; transform: translateX(-50%) translateY(-48%);'; nameDiv.style.cssText += 'top: 13.5%; left: 50%; transform: translateX(-50%);'; }
-    else if (player.id === 2) { benchDiv.style.cssText = 'top: 50%; left: 0; transform: translateY(-50%) translateX(-48%);'; nameDiv.style.cssText += 'left: 13.5%; top: 50%; transform: translateY(-50%) rotate(-90deg);'; }
-    else if (player.id === 3) { benchDiv.style.cssText = 'top: 50%; right: 0; transform: translateY(-50%) translateX(48%);'; nameDiv.style.cssText += 'right: 13.5%; top: 50%; transform: translateY(-50%) rotate(90deg);'; }
+    if (player.id === 0) { benchDiv.style.cssText = 'bottom: 0; left: 50%; transform: translateX(-50%) translateY(48%);'; nameDiv.style.cssText = 'bottom: 13.5%; left: 50%; transform: translateX(-50%);'; }
+    else if (player.id === 1) { benchDiv.style.cssText = 'top: 0; left: 50%; transform: translateX(-50%) translateY(-48%);'; nameDiv.style.cssText = 'top: 13.5%; left: 50%; transform: translateX(-50%);'; }
+    else if (player.id === 2) { benchDiv.style.cssText = 'top: 50%; left: 0; transform: translateY(-50%) translateX(-48%);'; nameDiv.style.cssText = 'left: 13.5%; top: 50%; transform: translateY(-50%) rotate(-90deg);'; }
+    else if (player.id === 3) { benchDiv.style.cssText = 'top: 50%; right: 0; transform: translateY(-50%) translateX(48%);'; nameDiv.style.cssText = 'right: 13.5%; top: 50%; transform: translateY(-50%) rotate(90deg);'; }
 
     benchDiv.appendChild(handDiv);
   }

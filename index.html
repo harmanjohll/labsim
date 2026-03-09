@@ -8,62 +8,163 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared/design-system.css?v=5">
   <style>
-    body { background: var(--color-bg); }
+    body { background: var(--color-bg); margin: 0; }
 
-    .hero {
-      padding: var(--sp-12) 0 var(--sp-8);
-      text-align: center;
-    }
-    .hero-title {
-      font-size: var(--text-4xl);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-      margin-bottom: var(--sp-4);
-    }
-    .hero-title .accent { color: var(--color-primary); }
-    .hero-subtitle {
-      font-size: var(--text-lg);
-      color: var(--color-text-secondary);
-      max-width: 560px;
-      margin: 0 auto;
-      line-height: var(--leading-relaxed);
+    /* --- App Shell --- */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
     }
 
-    .section-title {
-      font-size: var(--text-xl);
+    /* --- Sidebar --- */
+    .sidebar {
+      width: 260px;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 40;
+    }
+    .sidebar-header {
+      padding: var(--sp-5) var(--sp-5) var(--sp-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .sidebar-brand {
       font-weight: 700;
-      margin-bottom: var(--sp-5);
+      font-size: var(--text-xl);
+      color: var(--color-text);
+      text-decoration: none;
+      display: block;
+      letter-spacing: -0.02em;
+    }
+    .sidebar-brand span { color: var(--color-primary); }
+    .sidebar-subtitle {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    .sidebar-nav { padding: var(--sp-3) 0; flex: 1; }
+    .nav-group { margin-bottom: var(--sp-1); }
+    .nav-group-label {
       display: flex;
       align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-5);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .nav-group-label .chevron {
+      margin-left: auto;
+      font-size: 10px;
+      transition: transform 0.2s;
+    }
+    .nav-group.collapsed .chevron { transform: rotate(-90deg); }
+    .nav-group.collapsed .nav-items { display: none; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-5) var(--sp-2) var(--sp-8);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+    .nav-item:hover { background: var(--color-surface-alt); color: var(--color-text); }
+    .nav-item.active { background: rgba(67, 97, 238, 0.08); color: var(--color-primary); font-weight: 500; }
+    .nav-item .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+    .sidebar-footer {
+      padding: var(--sp-3) var(--sp-5);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+
+    /* --- Main Content --- */
+    .main-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .main-topbar {
+      display: flex;
+      align-items: center;
+      padding: var(--sp-3) var(--sp-6);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      position: sticky;
+      top: 0;
+      z-index: 30;
       gap: var(--sp-3);
     }
-    .section-title .icon {
-      width: 32px;
-      height: 32px;
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: 1px solid var(--color-border);
       border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
+      padding: var(--sp-1) var(--sp-2);
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--color-text);
+    }
+    .main-topbar .page-title {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .main-topbar .spacer { flex: 1; }
+
+    .content-area { padding: var(--sp-6); max-width: 1200px; }
+
+    /* --- Content Sections --- */
+    .content-section { display: none; }
+    .content-section.active { display: block; }
+
+    .section-header {
+      margin-bottom: var(--sp-6);
+    }
+    .section-header h1 {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      margin-bottom: var(--sp-2);
+    }
+    .section-header p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: var(--leading-relaxed);
+      max-width: 600px;
     }
 
-    .practicals-grid {
+    .items-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: var(--sp-5);
-      margin-bottom: var(--sp-10);
     }
 
-    .practical-card {
+    .item-card {
       text-decoration: none;
       color: inherit;
     }
-    .practical-card:hover {
-      text-decoration: none;
-    }
-    .practical-card .card-illustration {
+    .item-card:hover { text-decoration: none; }
+    .item-card .card-illustration {
       height: 140px;
       display: flex;
       align-items: center;
@@ -72,11 +173,12 @@
       position: relative;
       overflow: hidden;
     }
-    .practical-card .card-illustration::after {
+    .item-card .card-illustration::after {
       content: '';
       position: absolute;
       inset: 0;
       background: linear-gradient(180deg, transparent 60%, rgba(255,255,255,0.8));
+      pointer-events: none;
     }
     .card-title {
       font-weight: 600;
@@ -96,899 +198,757 @@
       padding-top: var(--sp-3);
       border-top: 1px solid var(--color-border);
     }
-    .difficulty {
-      display: flex;
-      gap: 2px;
-    }
-    .difficulty-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: var(--radius-full);
-      background: var(--color-border);
-    }
-    .difficulty-dot.filled { background: var(--color-text-secondary); }
 
-    .card-coming-soon {
-      opacity: 0.55;
-      pointer-events: none;
-    }
-    .card-coming-soon .card-illustration {
-      filter: grayscale(0.5);
-    }
-    .coming-soon-badge {
-      position: absolute;
-      top: var(--sp-3);
-      right: var(--sp-3);
-      z-index: 2;
-      background: var(--color-text-muted);
-      color: #fff;
-      font-size: var(--text-xs);
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: var(--radius-full);
-    }
-
-    .footer {
+    /* Welcome hero */
+    .welcome-hero {
       text-align: center;
-      padding: var(--sp-8) 0;
-      color: var(--color-text-muted);
-      font-size: var(--text-sm);
-      border-top: 1px solid var(--color-border);
+      padding: var(--sp-10) 0 var(--sp-8);
     }
+    .welcome-hero h1 {
+      font-size: var(--text-3xl);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--sp-3);
+    }
+    .welcome-hero h1 .accent { color: var(--color-primary); }
+    .welcome-hero p {
+      font-size: var(--text-base);
+      color: var(--color-text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: var(--leading-relaxed);
+    }
+    .welcome-stats {
+      display: flex;
+      justify-content: center;
+      gap: var(--sp-8);
+      margin-top: var(--sp-6);
+    }
+    .stat { text-align: center; }
+    .stat-number { font-size: var(--text-2xl); font-weight: 700; color: var(--color-primary); }
+    .stat-label { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
 
-    @media (max-width: 640px) {
-      .hero { padding: var(--sp-8) 0 var(--sp-6); }
-      .practicals-grid {
-        grid-template-columns: 1fr;
+    /* Overlay for mobile */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 35;
+    }
+    .sidebar-overlay.active { display: block; }
+
+    /* --- Mobile --- */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -280px;
+        transition: left 0.25s ease;
       }
+      .sidebar.open { left: 0; }
+      .menu-toggle { display: block; }
+      .content-area { padding: var(--sp-4); }
+      .items-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation -->
-  <nav class="topbar">
-    <a href="index.html" class="topbar-brand" style="text-decoration:none;">Sci<span>Sim</span></a>
-    <div class="topbar-actions" style="gap: var(--sp-4);">
-      <a href="#practicals" style="font-size:var(--text-sm);color:var(--color-text-secondary);text-decoration:none;">Practicals</a>
-      <a href="#games" style="font-size:var(--text-sm);color:var(--color-text-secondary);text-decoration:none;">Games</a>
-      <a href="#tools" style="font-size:var(--text-sm);color:var(--color-text-secondary);text-decoration:none;">Tools</a>
-      <span id="dark-mode-toggle"></span>
+  <div class="app-shell">
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-brand">Sci<span>Sim</span></a>
+        <div class="sidebar-subtitle">Interactive Science Platform</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-section="home">
+          <span class="nav-icon">&#127968;</span> Home
+        </button>
+
+        <!-- Simulations -->
+        <div class="nav-group" id="nav-simulations">
+          <div class="nav-group-label" onclick="this.parentElement.classList.toggle('collapsed')">
+            <span>Simulations</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="nav-items">
+            <button class="nav-item" data-section="chemistry">
+              <span class="nav-icon">&#9879;</span> Chemistry
+            </button>
+            <button class="nav-item" data-section="physics">
+              <span class="nav-icon">&#9889;</span> Physics
+            </button>
+            <button class="nav-item" data-section="biology">
+              <span class="nav-icon">&#127793;</span> Biology
+            </button>
+          </div>
+        </div>
+
+        <!-- Games -->
+        <div class="nav-group" id="nav-games">
+          <div class="nav-group-label" onclick="this.parentElement.classList.toggle('collapsed')">
+            <span>Games</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="nav-items">
+            <button class="nav-item" data-section="games">
+              <span class="nav-icon">&#127922;</span> Card Games
+            </button>
+          </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="nav-group" id="nav-tools">
+          <div class="nav-group-label" onclick="this.parentElement.classList.toggle('collapsed')">
+            <span>Tools</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="nav-items">
+            <button class="nav-item" data-section="tools">
+              <span class="nav-icon">&#128218;</span> Study Tools
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span id="dark-mode-toggle"></span>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main-content">
+      <header class="main-topbar">
+        <button class="menu-toggle" id="menu-toggle">&#9776;</button>
+        <span class="page-title" id="page-title">Home</span>
+        <span class="spacer"></span>
+      </header>
+
+      <div class="content-area">
+
+        <!-- HOME -->
+        <div class="content-section active" id="section-home">
+          <div class="welcome-hero">
+            <h1>Sci<span class="accent">Sim</span></h1>
+            <p>Interactive science practicals, simulations, and games. Build knowledge and confidence through hands-on learning.</p>
+            <div class="welcome-stats">
+              <div class="stat">
+                <div class="stat-number">20</div>
+                <div class="stat-label">Practicals</div>
+              </div>
+              <div class="stat">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Games</div>
+              </div>
+              <div class="stat">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Study Tools</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHEMISTRY -->
+        <div class="content-section" id="section-chemistry">
+          <div class="section-header">
+            <h1>Chemistry Practicals</h1>
+            <p>Master essential chemistry lab techniques with guided virtual practicals.</p>
+          </div>
+          <div class="items-grid">
+
+            <a href="chemistry/titration/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8ecff, #d5dcff);">
+                <svg width="80" height="100" viewBox="0 0 80 100" fill="none" style="position:relative;z-index:1;">
+                  <rect x="35" y="4" width="10" height="72" rx="3" fill="rgba(200,215,255,0.5)" stroke="#8898cc" stroke-width="1.5"/>
+                  <line x1="32" y1="16" x2="38" y2="16" stroke="#8898cc" stroke-width="1"/>
+                  <line x1="32" y1="28" x2="38" y2="28" stroke="#8898cc" stroke-width="1"/>
+                  <line x1="32" y1="40" x2="38" y2="40" stroke="#8898cc" stroke-width="1"/>
+                  <line x1="32" y1="52" x2="38" y2="52" stroke="#8898cc" stroke-width="1"/>
+                  <line x1="32" y1="64" x2="38" y2="64" stroke="#8898cc" stroke-width="1"/>
+                  <rect x="35" y="40" width="10" height="36" rx="0" fill="rgba(130,170,255,0.4)"/>
+                  <polygon points="38,76 42,76 40,84" fill="#8898cc"/>
+                  <path d="M20 96 L60 96 L52 78 L52 72 L54 70 L26 70 L28 72 L28 78 Z" fill="rgba(200,215,255,0.3)" stroke="#8898cc" stroke-width="1.5"/>
+                  <rect x="28" y="86" width="24" height="10" rx="0" fill="rgba(255,130,180,0.35)"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Chemistry</span></div>
+                <h3 class="card-title">Acid-Base Titration</h3>
+                <p class="card-desc">Pipette, burette, indicators, and endpoint detection.</p>
+              </div>
+            </a>
+
+            <a href="chemistry/qualitative-analysis/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="14" y="16" width="12" height="54" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
+                  <rect x="14" y="56" width="12" height="14" fill="rgba(100,160,240,0.45)"/>
+                  <rect x="32" y="16" width="12" height="54" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
+                  <rect x="32" y="52" width="12" height="18" fill="rgba(130,200,130,0.45)"/>
+                  <rect x="50" y="16" width="12" height="54" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
+                  <rect x="50" y="48" width="12" height="22" fill="rgba(220,200,100,0.45)"/>
+                  <rect x="6" y="72" width="64" height="8" rx="3" fill="#8B6914" opacity="0.7"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Chemistry</span></div>
+                <h3 class="card-title">Qualitative Analysis</h3>
+                <p class="card-desc">Identify unknown cations and anions through systematic tests.</p>
+              </div>
+            </a>
+
+            <a href="chemistry/electrolysis/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="20" y="30" width="50" height="40" rx="3" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.5"/>
+                  <rect x="20" y="50" width="50" height="20" fill="rgba(100,160,240,0.3)"/>
+                  <line x1="35" y1="18" x2="35" y2="50" stroke="#555" stroke-width="2"/>
+                  <line x1="55" y1="18" x2="55" y2="50" stroke="#555" stroke-width="2"/>
+                  <circle cx="35" cy="55" r="2" fill="#ff6b6b"/><circle cx="35" cy="60" r="2" fill="#ff6b6b"/>
+                  <circle cx="55" cy="52" r="2" fill="#4ecdc4"/><circle cx="55" cy="58" r="2" fill="#4ecdc4"/>
+                  <line x1="25" y1="18" x2="65" y2="18" stroke="#333" stroke-width="3"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Chemistry</span></div>
+                <h3 class="card-title">Electrolysis</h3>
+                <p class="card-desc">Electrolyse solutions and molten compounds with electrodes.</p>
+              </div>
+            </a>
+
+            <a href="chemistry/rates-of-reaction/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <path d="M25 70 Q30 40 45 35 Q60 30 65 15" fill="none" stroke="#e91e63" stroke-width="2.5"/>
+                  <line x1="20" y1="75" x2="75" y2="75" stroke="#888" stroke-width="1.5"/>
+                  <line x1="20" y1="75" x2="20" y2="10" stroke="#888" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Chemistry</span></div>
+                <h3 class="card-title">Rates of Reaction</h3>
+                <p class="card-desc">Investigate how concentration, temperature and catalysts affect rate.</p>
+              </div>
+            </a>
+
+            <a href="chemistry/chromatography/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #f3e8ff, #e9d5ff);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="25" y="10" width="40" height="65" rx="2" fill="#fff" stroke="#9b87b3" stroke-width="1.5"/>
+                  <line x1="30" y1="55" x2="60" y2="55" stroke="#9b87b3" stroke-width="1" stroke-dasharray="3 2"/>
+                  <circle cx="38" cy="55" r="3" fill="#e91e63" opacity="0.7"/>
+                  <circle cx="45" cy="38" r="4" fill="#e91e63" opacity="0.5"/>
+                  <circle cx="52" cy="55" r="3" fill="#2196f3" opacity="0.7"/>
+                  <circle cx="52" cy="28" r="4" fill="#2196f3" opacity="0.4"/>
+                  <rect x="25" y="65" width="40" height="10" fill="rgba(100,160,240,0.2)"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Chemistry</span></div>
+                <h3 class="card-title">Paper Chromatography</h3>
+                <p class="card-desc">Separate mixtures and calculate Rf values.</p>
+              </div>
+            </a>
+
+            <a href="chemistry/gas-tests/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e0f7fa, #b2ebf2);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <path d="M30 70 L38 40 L38 20 L52 20 L52 40 L60 70 Z" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.5"/>
+                  <rect x="38" y="10" width="14" height="10" fill="none" stroke="#7ca3b8" stroke-width="1.5"/>
+                  <circle cx="42" cy="55" r="3" fill="rgba(100,200,255,0.5)"/>
+                  <circle cx="50" cy="60" r="2" fill="rgba(100,200,255,0.5)"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Chemistry</span></div>
+                <h3 class="card-title">Gas Tests</h3>
+                <p class="card-desc">Test for hydrogen, oxygen, carbon dioxide, chlorine and ammonia.</p>
+              </div>
+            </a>
+
+            <a href="chemistry/salts/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="25" y="35" width="40" height="35" rx="3" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.5"/>
+                  <rect x="25" y="55" width="40" height="15" fill="rgba(200,230,200,0.5)"/>
+                  <circle cx="45" cy="25" r="8" fill="none" stroke="#7ca3b8" stroke-width="1.5"/>
+                  <rect x="30" y="60" width="6" height="6" rx="1" fill="rgba(255,255,255,0.6)"/>
+                  <rect x="42" y="58" width="4" height="4" rx="1" fill="rgba(255,255,255,0.6)"/>
+                  <rect x="52" y="61" width="5" height="5" rx="1" fill="rgba(255,255,255,0.6)"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Chemistry</span></div>
+                <h3 class="card-title">Preparation of Salts</h3>
+                <p class="card-desc">Crystallisation, filtration, and salt preparation methods.</p>
+              </div>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- PHYSICS -->
+        <div class="content-section" id="section-physics">
+          <div class="section-header">
+            <h1>Physics Practicals</h1>
+            <p>Explore fundamental physics concepts through interactive simulations.</p>
+          </div>
+          <div class="items-grid">
+
+            <a href="physics/ohms-law/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fff8e1, #ffecb3);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <line x1="15" y1="45" x2="30" y2="45" stroke="#f57f17" stroke-width="2"/>
+                  <rect x="30" y="38" width="30" height="14" rx="2" fill="none" stroke="#f57f17" stroke-width="2"/>
+                  <line x1="60" y1="45" x2="75" y2="45" stroke="#f57f17" stroke-width="2"/>
+                  <text x="45" y="49" text-anchor="middle" font-size="8" fill="#f57f17" font-weight="700">R</text>
+                  <circle cx="45" cy="70" r="10" fill="none" stroke="#f57f17" stroke-width="1.5"/>
+                  <text x="45" y="73" text-anchor="middle" font-size="7" fill="#f57f17">V</text>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-phys">Physics</span></div>
+                <h3 class="card-title">Ohm's Law</h3>
+                <p class="card-desc">Build circuits, measure V-I characteristics, and verify Ohm's law.</p>
+              </div>
+            </a>
+
+            <a href="physics/density/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="20" y="30" width="20" height="40" rx="2" fill="rgba(67,97,238,0.3)" stroke="#4361ee" stroke-width="1.5"/>
+                  <rect x="50" y="40" width="20" height="20" rx="2" fill="rgba(239,71,111,0.3)" stroke="#ef476f" stroke-width="1.5"/>
+                  <text x="30" y="54" text-anchor="middle" font-size="8" fill="#4361ee" font-weight="600">m</text>
+                  <text x="60" y="54" text-anchor="middle" font-size="8" fill="#ef476f" font-weight="600">V</text>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-phys">Physics</span></div>
+                <h3 class="card-title">Density</h3>
+                <p class="card-desc">Measure mass, volume, and calculate density of objects.</p>
+              </div>
+            </a>
+
+            <a href="physics/specific-heat/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="30" y="25" width="30" height="40" rx="3" fill="rgba(233,30,99,0.15)" stroke="#e91e63" stroke-width="1.5"/>
+                  <line x1="45" y1="20" x2="45" y2="30" stroke="#e91e63" stroke-width="1.5"/>
+                  <circle cx="45" cy="45" r="5" fill="#e91e63" opacity="0.3"/>
+                  <path d="M35 72 L40 68 L45 72 L50 68 L55 72" fill="none" stroke="#ff6b6b" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-phys">Physics</span></div>
+                <h3 class="card-title">Specific Heat Capacity</h3>
+                <p class="card-desc">Heat materials, record temperature changes, and calculate SHC.</p>
+              </div>
+            </a>
+
+            <a href="physics/waves/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e0f7fa, #b2ebf2);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <path d="M10 45 Q25 20 40 45 Q55 70 70 45 Q78 32 85 45" fill="none" stroke="#00bcd4" stroke-width="2.5"/>
+                  <path d="M10 50 Q25 25 40 50 Q55 75 70 50 Q78 37 85 50" fill="none" stroke="#00bcd4" stroke-width="1.5" opacity="0.4"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-phys">Physics</span></div>
+                <h3 class="card-title">Waves & Ripple Tank</h3>
+                <p class="card-desc">Explore wave properties — reflection, refraction, diffraction.</p>
+              </div>
+            </a>
+
+            <a href="physics/lenses/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #f3e8ff, #e9d5ff);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <ellipse cx="45" cy="45" rx="8" ry="30" fill="rgba(124,58,237,0.1)" stroke="#7c3aed" stroke-width="1.5"/>
+                  <line x1="10" y1="45" x2="80" y2="45" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3 2"/>
+                  <line x1="10" y1="30" x2="45" y2="45" stroke="#f59e0b" stroke-width="1.5"/>
+                  <line x1="45" y1="45" x2="80" y2="60" stroke="#f59e0b" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-phys">Physics</span></div>
+                <h3 class="card-title">Lenses & Light</h3>
+                <p class="card-desc">Investigate converging/diverging lenses and image formation.</p>
+              </div>
+            </a>
+
+            <a href="physics/pendulum/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8eaf6, #c5cae9);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <line x1="45" y1="10" x2="45" y2="60" stroke="#3f51b5" stroke-width="1.5"/>
+                  <circle cx="45" cy="65" r="8" fill="rgba(63,81,181,0.3)" stroke="#3f51b5" stroke-width="1.5"/>
+                  <line x1="45" y1="10" x2="65" y2="55" stroke="#3f51b5" stroke-width="1" stroke-dasharray="3 2" opacity="0.4"/>
+                  <circle cx="65" cy="60" r="6" fill="none" stroke="#3f51b5" stroke-width="1" opacity="0.4"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-phys">Physics</span></div>
+                <h3 class="card-title">Pendulum & Oscillations</h3>
+                <p class="card-desc">Investigate how length affects the period of a pendulum.</p>
+              </div>
+            </a>
+
+            <a href="physics/electromagnets/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="30" y="35" width="30" height="20" rx="3" fill="rgba(76,175,80,0.2)" stroke="#4caf50" stroke-width="1.5"/>
+                  <path d="M25 35 Q25 30 30 30 L60 30 Q65 30 65 35" fill="none" stroke="#ff9800" stroke-width="2"/>
+                  <path d="M25 55 Q25 60 30 60 L60 60 Q65 60 65 55" fill="none" stroke="#ff9800" stroke-width="2"/>
+                  <line x1="15" y1="45" x2="25" y2="45" stroke="#f44336" stroke-width="2"/>
+                  <line x1="65" y1="45" x2="75" y2="45" stroke="#2196f3" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-phys">Physics</span></div>
+                <h3 class="card-title">Electromagnets</h3>
+                <p class="card-desc">Build electromagnets, vary current and coils, test strength.</p>
+              </div>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- BIOLOGY -->
+        <div class="content-section" id="section-biology">
+          <div class="section-header">
+            <h1>Biology Practicals</h1>
+            <p>Explore living systems through interactive biology simulations.</p>
+          </div>
+          <div class="items-grid">
+
+            <a href="biology/microscopy/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="40" y="10" width="10" height="50" rx="2" fill="rgba(76,175,80,0.2)" stroke="#4caf50" stroke-width="1.5"/>
+                  <circle cx="45" cy="12" r="8" fill="none" stroke="#4caf50" stroke-width="1.5"/>
+                  <rect x="25" y="65" width="40" height="5" rx="2" fill="#4caf50" opacity="0.4"/>
+                  <rect x="30" y="70" width="30" height="8" rx="2" fill="#4caf50" opacity="0.3"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-bio">Biology</span></div>
+                <h3 class="card-title">Microscopy & Cell Drawing</h3>
+                <p class="card-desc">Focus, observe, and draw biological specimens under the microscope.</p>
+              </div>
+            </a>
+
+            <a href="biology/enzyme-activity/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <path d="M20 65 Q35 20 50 40 Q65 60 75 25" fill="none" stroke="#ff9800" stroke-width="2.5"/>
+                  <line x1="15" y1="70" x2="80" y2="70" stroke="#888" stroke-width="1"/>
+                  <line x1="15" y1="70" x2="15" y2="15" stroke="#888" stroke-width="1"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-bio">Biology</span></div>
+                <h3 class="card-title">Enzyme Activity</h3>
+                <p class="card-desc">Investigate how temperature and pH affect enzyme activity.</p>
+              </div>
+            </a>
+
+            <a href="biology/osmosis/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="20" y="25" width="50" height="45" rx="3" fill="rgba(33,150,243,0.1)" stroke="#2196f3" stroke-width="1.5"/>
+                  <line x1="45" y1="25" x2="45" y2="70" stroke="#2196f3" stroke-width="1" stroke-dasharray="3 2"/>
+                  <circle cx="32" cy="45" r="4" fill="#2196f3" opacity="0.3"/>
+                  <circle cx="36" cy="55" r="3" fill="#2196f3" opacity="0.3"/>
+                  <circle cx="58" cy="48" r="3" fill="#2196f3" opacity="0.15"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-bio">Biology</span></div>
+                <h3 class="card-title">Osmosis</h3>
+                <p class="card-desc">Investigate osmosis in potato cylinders and calculate percentage change.</p>
+              </div>
+            </a>
+
+            <a href="biology/diffusion/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <circle cx="30" cy="45" r="4" fill="#e91e63" opacity="0.7"/>
+                  <circle cx="40" cy="40" r="3" fill="#e91e63" opacity="0.5"/>
+                  <circle cx="50" cy="48" r="3" fill="#e91e63" opacity="0.35"/>
+                  <circle cx="60" cy="42" r="2" fill="#e91e63" opacity="0.2"/>
+                  <circle cx="68" cy="50" r="2" fill="#e91e63" opacity="0.1"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-bio">Biology</span></div>
+                <h3 class="card-title">Diffusion</h3>
+                <p class="card-desc">Observe diffusion in action and explore factors that affect it.</p>
+              </div>
+            </a>
+
+            <a href="biology/photosynthesis/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #a5d6a7);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <ellipse cx="45" cy="50" rx="20" ry="12" fill="rgba(76,175,80,0.3)" stroke="#4caf50" stroke-width="1.5"/>
+                  <line x1="45" y1="62" x2="45" y2="78" stroke="#4caf50" stroke-width="2"/>
+                  <circle cx="45" cy="20" r="10" fill="rgba(255,235,59,0.4)" stroke="#fdd835" stroke-width="1.5"/>
+                  <line x1="45" y1="30" x2="45" y2="38" stroke="#fdd835" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-bio">Biology</span></div>
+                <h3 class="card-title">Photosynthesis</h3>
+                <p class="card-desc">Investigate the rate of photosynthesis using pondweed experiments.</p>
+              </div>
+            </a>
+
+            <a href="biology/food-tests/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="20" y="20" width="12" height="50" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
+                  <rect x="20" y="50" width="12" height="20" fill="rgba(156,39,176,0.3)"/>
+                  <rect x="40" y="20" width="12" height="50" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
+                  <rect x="40" y="45" width="12" height="25" fill="rgba(244,67,54,0.3)"/>
+                  <rect x="60" y="20" width="12" height="50" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
+                  <rect x="60" y="50" width="12" height="20" fill="rgba(33,150,243,0.3)"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-bio">Biology</span></div>
+                <h3 class="card-title">Food Tests</h3>
+                <p class="card-desc">Test for starch, glucose, protein, and lipids using reagents.</p>
+              </div>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- GAMES -->
+        <div class="content-section" id="section-games">
+          <div class="section-header">
+            <h1>Science Games</h1>
+            <p>Reinforce your science knowledge with interactive card games. Play against AI opponents.</p>
+          </div>
+          <div class="items-grid">
+
+            <a href="games/precipitate-pursuit/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="20" y="20" width="24" height="50" rx="2" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.3"/>
+                  <rect x="20" y="45" width="24" height="25" fill="rgba(100,160,240,0.35)"/>
+                  <rect x="56" y="20" width="24" height="50" rx="2" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.3"/>
+                  <rect x="56" y="40" width="24" height="30" fill="rgba(255,200,100,0.4)"/>
+                  <line x1="44" y1="45" x2="56" y2="45" stroke="#8b8f9e" stroke-width="2" stroke-dasharray="3 2"/>
+                  <rect x="14" y="72" width="72" height="8" rx="3" fill="#8B6914" opacity="0.7"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Game</span></div>
+                <h3 class="card-title">Precipitate Pursuit</h3>
+                <p class="card-desc">Form precipitate sets and sabotage opponents using solubility rules.</p>
+                <div class="card-meta"><span class="text-xs" style="color:var(--color-text-muted)">4 players</span><span class="text-xs" style="color:var(--color-text-muted)">3 difficulty levels</span></div>
+              </div>
+            </a>
+
+            <a href="games/happy-elements/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="12" y="18" width="22" height="30" rx="3" fill="#fff" stroke="#4361ee" stroke-width="1.5" transform="rotate(-5 23 33)"/>
+                  <text x="23" y="38" text-anchor="middle" font-size="14" font-weight="700" fill="#4361ee">Li</text>
+                  <rect x="38" y="22" width="22" height="30" rx="3" fill="#fff" stroke="#06d6a0" stroke-width="1.5"/>
+                  <text x="49" y="42" text-anchor="middle" font-size="14" font-weight="700" fill="#06d6a0">Na</text>
+                  <rect x="64" y="18" width="22" height="30" rx="3" fill="#fff" stroke="#f77f00" stroke-width="1.5" transform="rotate(5 75 33)"/>
+                  <text x="75" y="38" text-anchor="middle" font-size="14" font-weight="700" fill="#f77f00">K</text>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Game</span></div>
+                <h3 class="card-title">Happy Elements</h3>
+                <p class="card-desc">Collect all 4 elements from the same periodic table group.</p>
+                <div class="card-meta"><span class="text-xs" style="color:var(--color-text-muted)">4 players</span><span class="text-xs" style="color:var(--color-text-muted)">3 difficulty levels</span></div>
+              </div>
+            </a>
+
+            <a href="games/organic-families/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
+                <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
+                  <circle cx="30" cy="40" r="8" fill="none" stroke="#4a5568" stroke-width="1.5"/>
+                  <text x="30" y="43" text-anchor="middle" font-size="7" font-weight="700" fill="#4a5568">C</text>
+                  <circle cx="50" cy="40" r="8" fill="none" stroke="#4a5568" stroke-width="1.5"/>
+                  <text x="50" y="43" text-anchor="middle" font-size="7" font-weight="700" fill="#4a5568">C</text>
+                  <circle cx="70" cy="40" r="8" fill="none" stroke="#4a5568" stroke-width="1.5"/>
+                  <text x="70" y="43" text-anchor="middle" font-size="7" font-weight="700" fill="#4a5568">C</text>
+                  <line x1="38" y1="40" x2="42" y2="40" stroke="#4a5568" stroke-width="1.5"/>
+                  <line x1="58" y1="40" x2="62" y2="40" stroke="#4a5568" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Game</span></div>
+                <h3 class="card-title">Organic Families</h3>
+                <p class="card-desc">Collect compounds from the same homologous series.</p>
+                <div class="card-meta"><span class="text-xs" style="color:var(--color-text-muted)">4-6 players</span><span class="text-xs" style="color:var(--color-text-muted)">2 difficulty levels</span></div>
+              </div>
+            </a>
+
+            <a href="games/reactivity-bridge/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8eaf6, #c5cae9);">
+                <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="15" y="22" width="18" height="28" rx="3" fill="#fff" stroke="#4361ee" stroke-width="1.5" transform="rotate(-8 24 36)"/>
+                  <text x="24" y="40" text-anchor="middle" font-size="11" font-weight="700" fill="#4361ee">K</text>
+                  <rect x="40" y="25" width="18" height="28" rx="3" fill="#fff" stroke="#ef476f" stroke-width="1.5"/>
+                  <text x="49" y="43" text-anchor="middle" font-size="9" font-weight="700" fill="#ef476f">Cu</text>
+                  <rect x="65" y="22" width="18" height="28" rx="3" fill="#fff" stroke="#06d6a0" stroke-width="1.5" transform="rotate(8 74 36)"/>
+                  <text x="74" y="40" text-anchor="middle" font-size="10" font-weight="700" fill="#06d6a0">Zn</text>
+                  <path d="M20 65 L50 58 L80 65" fill="none" stroke="var(--color-primary)" stroke-width="2" opacity="0.4"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag tag-chem">Game</span></div>
+                <h3 class="card-title">Reactivity Bridge</h3>
+                <p class="card-desc">A trick-taking bridge game using the reactivity series.</p>
+                <div class="card-meta"><span class="text-xs" style="color:var(--color-text-muted)">4 players (teams)</span><span class="text-xs" style="color:var(--color-text-muted)">3 difficulty levels</span></div>
+              </div>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- STUDY TOOLS -->
+        <div class="content-section" id="section-tools">
+          <div class="section-header">
+            <h1>Study Tools</h1>
+            <p>Supporting resources to help you learn, review, and track your progress.</p>
+          </div>
+          <div class="items-grid">
+
+            <a href="safety/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <polygon points="45,12 80,72 10,72" fill="none" stroke="#f59e0b" stroke-width="3"/>
+                  <line x1="45" y1="34" x2="45" y2="52" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
+                  <circle cx="45" cy="60" r="2.5" fill="#f59e0b"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag" style="background:#fff3e0;color:#b45309;">Safety</span></div>
+                <h3 class="card-title">Safety Guides</h3>
+                <p class="card-desc">Learn GHS hazard symbols, quizzes, and risk assessments.</p>
+              </div>
+            </a>
+
+            <a href="flashcards/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #eef1fd, #d5dcff);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="18" y="24" width="48" height="36" rx="4" fill="#fff" stroke="#4361ee" stroke-width="1.5" transform="rotate(-6 42 42)"/>
+                  <rect x="22" y="28" width="48" height="36" rx="4" fill="#fff" stroke="#4361ee" stroke-width="1.5" transform="rotate(-2 46 46)"/>
+                  <rect x="26" y="32" width="48" height="36" rx="4" fill="#fff" stroke="#4361ee" stroke-width="2"/>
+                  <text x="50" y="54" text-anchor="middle" font-size="14" font-weight="700" fill="#4361ee">Q</text>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag" style="background:#eef1fd;color:#4361ee;">Review</span></div>
+                <h3 class="card-title">Flashcards</h3>
+                <p class="card-desc">70+ flashcards across 8 decks with spaced repetition.</p>
+              </div>
+            </a>
+
+            <a href="nature-of-science/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #f3e8ff, #e9d5ff);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <circle cx="30" cy="50" r="12" fill="none" stroke="#7c3aed" stroke-width="2"/>
+                  <circle cx="50" cy="38" r="12" fill="none" stroke="#7c3aed" stroke-width="2"/>
+                  <circle cx="60" cy="55" r="12" fill="none" stroke="#7c3aed" stroke-width="2"/>
+                  <text x="36" y="32" font-size="8" font-weight="700" fill="#7c3aed">IV</text>
+                  <text x="56" y="70" font-size="8" font-weight="700" fill="#7c3aed">DV</text>
+                  <text x="16" y="64" font-size="8" font-weight="700" fill="#7c3aed">CV</text>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag" style="background:#f3e8ff;color:#7c3aed;">Skills</span></div>
+                <h3 class="card-title">Nature of Science</h3>
+                <p class="card-desc">Master variables, errors, fair testing, and investigations.</p>
+              </div>
+            </a>
+
+            <a href="dashboard/index.html" class="item-card card">
+              <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
+                  <rect x="15" y="55" width="12" height="20" rx="2" fill="rgba(6,214,160,0.5)"/>
+                  <rect x="31" y="40" width="12" height="35" rx="2" fill="rgba(67,97,238,0.5)"/>
+                  <rect x="47" y="30" width="12" height="45" rx="2" fill="rgba(247,127,0,0.5)"/>
+                  <rect x="63" y="20" width="12" height="55" rx="2" fill="rgba(124,58,237,0.5)"/>
+                  <line x1="12" y1="76" x2="78" y2="76" stroke="rgba(150,150,150,0.3)" stroke-width="1"/>
+                </svg>
+              </div>
+              <div class="card-body">
+                <div class="flex items-center gap-2 mb-2"><span class="tag" style="background:#e8f5e9;color:#06d6a0;">Progress</span></div>
+                <h3 class="card-title">Dashboard</h3>
+                <p class="card-desc">Track your completion, scores, and progress across all practicals.</p>
+              </div>
+            </a>
+
+          </div>
+        </div>
+
+      </div>
     </div>
-  </nav>
 
-  <!-- Hero -->
-  <section class="hero container">
-    <h1 class="hero-title">
-      Sci<span class="accent">Sim</span>
-    </h1>
-    <p class="hero-subtitle">
-      Interactive science practicals, simulations, and games.
-      Build knowledge and confidence through hands-on learning.
-    </p>
-    <div style="display:flex;gap:var(--sp-3);justify-content:center;margin-top:var(--sp-5);">
-      <a href="#practicals" class="btn btn-primary">Browse Practicals</a>
-      <a href="games/index.html" class="btn btn-outline">Play Games</a>
-    </div>
-  </section>
-
-  <main class="container">
-
-    <!-- Chemistry -->
-    <section id="practicals">
-      <h2 class="section-title">
-        <span class="icon" style="background: var(--chem-bg); color: var(--chem-color);">&#9879;</span>
-        Chemistry
-      </h2>
-      <div class="practicals-grid">
-
-        <a href="chemistry/titration/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8ecff, #d5dcff);">
-            <svg width="80" height="100" viewBox="0 0 80 100" fill="none" style="position:relative;z-index:1;">
-              <rect x="35" y="4" width="10" height="72" rx="3" fill="rgba(200,215,255,0.5)" stroke="#8898cc" stroke-width="1.5"/>
-              <line x1="32" y1="16" x2="38" y2="16" stroke="#8898cc" stroke-width="1"/>
-              <line x1="32" y1="28" x2="38" y2="28" stroke="#8898cc" stroke-width="1"/>
-              <line x1="32" y1="40" x2="38" y2="40" stroke="#8898cc" stroke-width="1"/>
-              <line x1="32" y1="52" x2="38" y2="52" stroke="#8898cc" stroke-width="1"/>
-              <line x1="32" y1="64" x2="38" y2="64" stroke="#8898cc" stroke-width="1"/>
-              <rect x="35" y="40" width="10" height="36" rx="0" fill="rgba(130,170,255,0.4)"/>
-              <polygon points="38,76 42,76 40,84" fill="#8898cc"/>
-              <path d="M20 96 L60 96 L52 78 L52 72 L54 70 L26 70 L28 72 L28 78 Z" fill="rgba(200,215,255,0.3)" stroke="#8898cc" stroke-width="1.5"/>
-              <rect x="28" y="86" width="24" height="10" rx="0" fill="rgba(255,130,180,0.35)"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Chemistry</span>
-            </div>
-            <h3 class="card-title">Acid-Base Titration</h3>
-            <p class="card-desc">
-              Pipette, burette, indicators, and endpoint detection.
-              Practice the full titration procedure with guided steps.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="chemistry/qualitative-analysis/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="14" y="16" width="12" height="54" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="14" y="56" width="12" height="14" fill="rgba(100,160,240,0.45)"/>
-              <ellipse cx="20" cy="70" rx="6" ry="4" fill="rgba(100,160,240,0.45)" stroke="#7ca3b8" stroke-width="1"/>
-              <rect x="32" y="16" width="12" height="54" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="32" y="52" width="12" height="18" fill="rgba(130,200,130,0.45)"/>
-              <ellipse cx="38" cy="70" rx="6" ry="4" fill="rgba(130,200,130,0.45)" stroke="#7ca3b8" stroke-width="1"/>
-              <rect x="50" y="16" width="12" height="54" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="50" y="48" width="12" height="22" fill="rgba(220,200,100,0.45)"/>
-              <rect x="50" y="58" width="12" height="6" fill="rgba(200,180,50,0.7)"/>
-              <ellipse cx="56" cy="70" rx="6" ry="4" fill="rgba(220,200,100,0.45)" stroke="#7ca3b8" stroke-width="1"/>
-              <rect x="6" y="72" width="64" height="8" rx="3" fill="#8B6914" opacity="0.7"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Chemistry</span>
-            </div>
-            <h3 class="card-title">Qualitative Analysis</h3>
-            <p class="card-desc">
-              Identify unknown cations and anions through systematic
-              chemical tests with NaOH, NH&#8323;, and more.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="chemistry/electrolysis/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="20" y="30" width="60" height="50" rx="2" fill="none" stroke="rgba(180,200,220,0.6)" stroke-width="1.5"/>
-              <rect x="21" y="45" width="58" height="34" rx="0" fill="rgba(50,140,220,0.25)"/>
-              <rect x="36" y="22" width="6" height="40" rx="1" fill="#4a4e5a" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
-              <rect x="58" y="22" width="6" height="40" rx="1" fill="#4a4e5a" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
-              <circle cx="33" cy="52" r="2" fill="rgba(220,230,240,0.7)"/>
-              <circle cx="35" cy="48" r="1.5" fill="rgba(220,230,240,0.5)"/>
-              <circle cx="31" cy="56" r="1.5" fill="rgba(220,230,240,0.5)"/>
-              <circle cx="65" cy="50" r="2" fill="rgba(220,230,240,0.7)"/>
-              <circle cx="67" cy="55" r="1.5" fill="rgba(220,230,240,0.5)"/>
-              <rect x="30" y="12" width="40" height="10" rx="3" fill="#3a3d4a" stroke="rgba(180,200,220,0.4)" stroke-width="1"/>
-              <text x="50" y="20" text-anchor="middle" font-size="6" font-weight="600" fill="rgba(255,255,255,0.7)">D.C.</text>
-              <line x1="39" y1="22" x2="39" y2="12" stroke="rgba(100,180,255,0.5)" stroke-width="1.5"/>
-              <line x1="61" y1="22" x2="61" y2="12" stroke="rgba(100,180,255,0.5)" stroke-width="1.5"/>
-              <text x="36" y="78" text-anchor="middle" font-size="7" font-weight="600" fill="rgba(255,255,255,0.5)">−</text>
-              <text x="64" y="78" text-anchor="middle" font-size="7" font-weight="600" fill="rgba(255,255,255,0.5)">+</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Chemistry</span>
-            </div>
-            <h3 class="card-title">Electrolysis</h3>
-            <p class="card-desc">
-              Electrodes, electrolytes, and selective discharge.
-              Observe products at cathode and anode.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="chemistry/rates-of-reaction/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <path d="M30 75 L40 35 L40 25 L42 23 L58 23 L60 25 L60 35 L70 75 Z" fill="rgba(200,215,255,0.2)" stroke="rgba(160,170,195,0.5)" stroke-width="1.5"/>
-              <rect x="40" y="55" width="20" height="20" rx="0" fill="rgba(180,210,255,0.35)"/>
-              <circle cx="48" cy="50" r="2" fill="rgba(220,230,240,0.7)"/>
-              <circle cx="55" cy="48" r="1.5" fill="rgba(220,230,240,0.5)"/>
-              <circle cx="52" cy="45" r="1.8" fill="rgba(220,230,240,0.6)"/>
-              <rect x="75" y="30" width="5" height="40" rx="1" fill="rgba(200,215,255,0.3)" stroke="rgba(160,170,195,0.4)" stroke-width="1"/>
-              <rect x="74" y="30" width="7" height="3" fill="#5c5f6e"/>
-              <text x="50" y="86" text-anchor="middle" font-size="7" fill="rgba(150,150,150,0.5)">CO&#x2082;</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Chemistry</span>
-            </div>
-            <h3 class="card-title">Rates of Reaction</h3>
-            <p class="card-desc">
-              Marble chips and acid — measure gas production with a syringe.
-              Investigate concentration and surface area effects.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="chemistry/salts/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e0f2f1, #b2dfdb);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <path d="M25 75 L35 40 L35 30 L65 30 L65 40 L75 75 Z" fill="rgba(200,215,255,0.15)" stroke="rgba(160,170,195,0.4)" stroke-width="1.5"/>
-              <rect x="35" y="50" width="30" height="25" rx="0" fill="rgba(80,160,230,0.3)"/>
-              <rect x="30" y="78" width="40" height="6" rx="2" fill="#d4d0c8" stroke="#aaa89e" stroke-width="0.8"/>
-              <rect x="38" y="38" width="8" height="8" rx="1" fill="#1a1a2e" opacity="0.6"/>
-              <rect x="50" y="42" width="6" height="6" rx="1" fill="#1a1a2e" opacity="0.4"/>
-              <rect x="44" y="46" width="5" height="5" rx="1" fill="#1a1a2e" opacity="0.3"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Chemistry</span>
-            </div>
-            <h3 class="card-title">Preparation of Salts</h3>
-            <p class="card-desc">
-              React copper oxide with sulfuric acid, filter, evaporate,
-              and crystallise to produce pure copper sulfate.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="chemistry/gas-tests/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="30" y="20" width="16" height="50" rx="0" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="30" y="50" width="16" height="20" fill="rgba(180,210,255,0.35)"/>
-              <circle cx="36" cy="48" r="2" fill="rgba(220,230,240,0.7)"/>
-              <circle cx="40" cy="44" r="1.5" fill="rgba(220,230,240,0.5)"/>
-              <circle cx="38" cy="40" r="1.8" fill="rgba(220,230,240,0.6)"/>
-              <line x1="46" y1="35" x2="56" y2="35" stroke="#8b8f9e" stroke-width="2"/>
-              <rect x="56" y="22" width="18" height="26" rx="2" fill="rgba(200,235,255,0.2)" stroke="#7ca3b8" stroke-width="1.2"/>
-              <rect x="56" y="38" width="18" height="10" fill="rgba(255,255,255,0.5)"/>
-              <line x1="60" y1="55" x2="60" y2="62" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
-              <circle cx="60" cy="64" r="3" fill="#f59e0b" opacity="0.6"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Chemistry</span>
-            </div>
-            <h3 class="card-title">Gas Tests</h3>
-            <p class="card-desc">
-              Test for O&#x2082;, CO&#x2082;, H&#x2082;, Cl&#x2082;, and NH&#x2083; using
-              splint tests, limewater, and litmus paper.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="chemistry/chromatography/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="30" y="25" width="40" height="55" rx="3" fill="none" stroke="rgba(180,200,220,0.5)" stroke-width="1.5"/>
-              <rect x="31" y="65" width="38" height="14" fill="rgba(180,210,255,0.2)"/>
-              <rect x="45" y="28" width="10" height="50" rx="0" fill="#fff" stroke="rgba(180,200,220,0.4)" stroke-width="0.8"/>
-              <line x1="43" y1="60" x2="57" y2="60" stroke="rgba(100,100,100,0.3)" stroke-width="0.5" stroke-dasharray="2 2"/>
-              <circle cx="50" cy="60" r="2.5" fill="rgba(30,30,100,0.5)"/>
-              <circle cx="50" cy="48" r="2" fill="#e53935"/>
-              <circle cx="50" cy="42" r="2" fill="#fdd835"/>
-              <circle cx="50" cy="53" r="2" fill="#1e88e5"/>
-              <line x1="43" y1="35" x2="57" y2="35" stroke="rgba(100,180,255,0.4)" stroke-width="8" opacity="0.3"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Chemistry</span>
-            </div>
-            <h3 class="card-title">Paper Chromatography</h3>
-            <p class="card-desc">
-              Separate mixtures of dyes and inks. Calculate R&#x2032; values
-              and identify unknown substances.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-    <!-- Physics -->
-    <section>
-      <h2 class="section-title">
-        <span class="icon" style="background: var(--phys-bg); color: var(--phys-color);">&#9883;</span>
-        Physics
-      </h2>
-      <div class="practicals-grid">
-
-        <a href="physics/lenses/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #fff8e1, #ffecb3);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <line x1="5" y1="45" x2="95" y2="45" stroke="rgba(150,150,150,0.3)" stroke-width="0.5" stroke-dasharray="3 3"/>
-              <path d="M50 15 Q58 30 58 45 Q58 60 50 75 Q42 60 42 45 Q42 30 50 15Z" fill="rgba(130,200,255,0.15)" stroke="rgba(130,200,255,0.6)" stroke-width="1.5"/>
-              <line x1="10" y1="45" x2="10" y2="30" stroke="#4fc3f7" stroke-width="2"/>
-              <polygon points="7,30 10,24 13,30" fill="#4fc3f7"/>
-              <line x1="10" y1="30" x2="50" y2="30" stroke="rgba(255,230,80,0.6)" stroke-width="1"/>
-              <line x1="50" y1="30" x2="80" y2="55" stroke="rgba(255,230,80,0.6)" stroke-width="1"/>
-              <line x1="10" y1="30" x2="50" y2="45" stroke="rgba(80,255,130,0.6)" stroke-width="1"/>
-              <line x1="50" y1="45" x2="80" y2="55" stroke="rgba(80,255,130,0.6)" stroke-width="1"/>
-              <line x1="80" y1="45" x2="80" y2="55" stroke="#ef5350" stroke-width="2"/>
-              <polygon points="77,55 80,61 83,55" fill="#ef5350"/>
-              <circle cx="35" cy="45" r="2.5" fill="rgba(255,200,50,0.7)"/>
-              <circle cx="65" cy="45" r="2.5" fill="rgba(255,200,50,0.7)"/>
-              <text x="35" y="56" text-anchor="middle" font-size="6" fill="rgba(150,150,150,0.6)">F</text>
-              <text x="65" y="56" text-anchor="middle" font-size="6" fill="rgba(150,150,150,0.6)">F'</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-phys">Physics</span>
-            </div>
-            <h3 class="card-title">Lenses &amp; Light</h3>
-            <p class="card-desc">
-              Converging lenses, image formation, and focal length
-              determination using the lens equation.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="physics/ohms-law/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="10" y="20" width="24" height="14" rx="2" fill="#e8a849" stroke="#c68a30" stroke-width="1.2"/>
-              <text x="22" y="30" text-anchor="middle" font-size="7" font-weight="600" fill="#7a5518">EMF</text>
-              <line x1="34" y1="27" x2="50" y2="27" stroke="#b0855a" stroke-width="1.5"/>
-              <circle cx="62" cy="27" r="10" fill="none" stroke="#c0392b" stroke-width="1.5"/>
-              <text x="62" y="30" text-anchor="middle" font-size="8" font-weight="700" fill="#c0392b">A</text>
-              <line x1="72" y1="27" x2="88" y2="27" stroke="#b0855a" stroke-width="1.5"/>
-              <line x1="88" y1="27" x2="88" y2="65" stroke="#b0855a" stroke-width="1.5"/>
-              <polyline points="72,65 74,60 78,70 82,60 86,70 88,65" fill="none" stroke="#6b7280" stroke-width="1.5"/>
-              <line x1="72" y1="65" x2="56" y2="65" stroke="#b0855a" stroke-width="1.5"/>
-              <circle cx="44" cy="65" r="10" fill="none" stroke="#2471a3" stroke-width="1.5"/>
-              <text x="44" y="68" text-anchor="middle" font-size="8" font-weight="700" fill="#2471a3">V</text>
-              <line x1="34" y1="65" x2="10" y2="65" stroke="#b0855a" stroke-width="1.5"/>
-              <line x1="10" y1="65" x2="10" y2="27" stroke="#b0855a" stroke-width="1.5"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-phys">Physics</span>
-            </div>
-            <h3 class="card-title">Ohm's Law</h3>
-            <p class="card-desc">
-              Investigate V-I characteristics. Vary EMF, record readings,
-              plot graphs, and calculate resistance.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="physics/pendulum/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
-            <svg width="80" height="90" viewBox="0 0 80 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="15" y="12" width="50" height="5" rx="2" fill="#9ca3af" opacity="0.8"/>
-              <circle cx="40" cy="14" r="3" fill="#b0b5c0"/>
-              <line x1="40" y1="14" x2="58" y2="64" stroke="#b0b5c0" stroke-width="1.5"/>
-              <circle cx="58" cy="66" r="8" fill="url(#bg)" stroke="#6b7280" stroke-width="1"/>
-              <line x1="40" y1="14" x2="40" y2="76" stroke="#b0b5c0" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.4"/>
-              <defs>
-                <radialGradient id="bg" cx="45%" cy="40%"><stop offset="0%" stop-color="#d4d7e0"/><stop offset="100%" stop-color="#6b7280"/></radialGradient>
-              </defs>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-phys">Physics</span>
-            </div>
-            <h3 class="card-title">Pendulum &amp; Oscillations</h3>
-            <p class="card-desc">
-              Investigate the relationship between pendulum length
-              and period. Plot T² vs L and determine g.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="physics/waves/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8eaf6, #c5cae9);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <path d="M10 50 Q20 30 30 50 Q40 70 50 50 Q60 30 70 50 Q80 70 90 50" fill="none" stroke="rgba(100,130,240,0.5)" stroke-width="2"/>
-              <path d="M10 55 Q20 35 30 55 Q40 75 50 55 Q60 35 70 55 Q80 75 90 55" fill="none" stroke="rgba(100,130,240,0.3)" stroke-width="1.5"/>
-              <rect x="5" y="35" width="4" height="30" rx="1" fill="rgba(100,130,240,0.4)"/>
-              <line x1="7" y1="42" x2="7" y2="58" stroke="rgba(100,130,240,0.7)" stroke-width="1.5"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-phys">Physics</span>
-            </div>
-            <h3 class="card-title">Waves &amp; Ripple Tank</h3>
-            <p class="card-desc">
-              Explore wave behaviour — reflection, refraction, and
-              diffraction in a simulated ripple tank.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="physics/specific-heat/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #fff8e1, #ffe082);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="28" y="30" width="44" height="35" rx="3" fill="#b0b5c0" stroke="#8b8f9e" stroke-width="1.5"/>
-              <rect x="44" y="25" width="4" height="15" rx="1" fill="#c0392b"/>
-              <rect x="56" y="22" width="2" height="48" rx="1" fill="rgba(200,215,255,0.4)" stroke="rgba(160,170,195,0.4)" stroke-width="0.5"/>
-              <rect x="55.5" y="22" width="3" height="3" rx="1" fill="#ef5350"/>
-              <line x1="42" y1="70" x2="42" y2="80" stroke="#b0855a" stroke-width="1.5"/>
-              <line x1="58" y1="70" x2="58" y2="80" stroke="#b0855a" stroke-width="1.5"/>
-              <rect x="22" y="66" width="56" height="5" rx="1" fill="rgba(200,200,200,0.3)" stroke="rgba(160,170,195,0.3)" stroke-width="0.5" stroke-dasharray="3 2"/>
-              <text x="50" y="52" text-anchor="middle" font-size="9" font-weight="700" fill="rgba(255,255,255,0.5)">Al</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-phys">Physics</span>
-            </div>
-            <h3 class="card-title">Specific Heat Capacity</h3>
-            <p class="card-desc">
-              Heat a metal block with an electrical heater. Plot temperature
-              rise and calculate specific heat capacity.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-    <!-- Biology -->
-    <section>
-      <h2 class="section-title">
-        <span class="icon" style="background: var(--bio-bg); color: var(--bio-color);">&#127793;</span>
-        Biology
-      </h2>
-      <div class="practicals-grid">
-
-        <a href="biology/food-tests/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="12" y="20" width="14" height="50" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="12" y="50" width="14" height="20" fill="rgba(30,60,180,0.55)"/>
-              <ellipse cx="19" cy="70" rx="7" ry="4" fill="rgba(30,60,180,0.55)" stroke="#7ca3b8" stroke-width="1"/>
-              <rect x="34" y="20" width="14" height="50" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="34" y="48" width="14" height="22" fill="rgba(210,80,40,0.55)"/>
-              <ellipse cx="41" cy="70" rx="7" ry="4" fill="rgba(210,80,40,0.55)" stroke="#7ca3b8" stroke-width="1"/>
-              <rect x="56" y="20" width="14" height="50" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="56" y="52" width="14" height="18" fill="rgba(120,80,200,0.45)"/>
-              <ellipse cx="63" cy="70" rx="7" ry="4" fill="rgba(120,80,200,0.45)" stroke="#7ca3b8" stroke-width="1"/>
-              <rect x="78" y="20" width="14" height="50" rx="0" fill="rgba(200,235,255,0.4)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="78" y="44" width="14" height="26" fill="rgba(240,240,240,0.7)"/>
-              <ellipse cx="85" cy="70" rx="7" ry="4" fill="rgba(240,240,240,0.7)" stroke="#7ca3b8" stroke-width="1"/>
-              <rect x="6" y="72" width="92" height="8" rx="3" fill="#8B6914" opacity="0.7"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-bio">Biology</span>
-            </div>
-            <h3 class="card-title">Food Tests</h3>
-            <p class="card-desc">
-              Test for starch, reducing sugars, proteins, and lipids
-              using iodine, Benedict's, Biuret, and emulsion tests.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="biology/osmosis/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e0f7fa, #b2ebf2);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="8" y="30" width="22" height="40" rx="2" fill="none" stroke="rgba(180,200,220,0.5)" stroke-width="1.3"/>
-              <rect x="9" y="42" width="20" height="27" fill="rgba(150,200,255,0.15)"/>
-              <rect x="13" y="48" width="12" height="16" rx="2" fill="#d4a843" stroke="#b8922e" stroke-width="0.8"/>
-              <rect x="28" y="30" width="22" height="40" rx="2" fill="none" stroke="rgba(180,200,220,0.5)" stroke-width="1.3"/>
-              <rect x="29" y="42" width="20" height="27" fill="rgba(150,200,255,0.2)"/>
-              <rect x="33" y="49" width="12" height="14" rx="2" fill="#d4a843" stroke="#b8922e" stroke-width="0.8"/>
-              <rect x="48" y="30" width="22" height="40" rx="2" fill="none" stroke="rgba(180,200,220,0.5)" stroke-width="1.3"/>
-              <rect x="49" y="42" width="20" height="27" fill="rgba(150,200,255,0.25)"/>
-              <rect x="53" y="50" width="12" height="12" rx="2" fill="#d4a843" stroke="#b8922e" stroke-width="0.8"/>
-              <rect x="68" y="30" width="22" height="40" rx="2" fill="none" stroke="rgba(180,200,220,0.5)" stroke-width="1.3"/>
-              <rect x="69" y="42" width="20" height="27" fill="rgba(150,200,255,0.35)"/>
-              <rect x="73" y="51" width="12" height="10" rx="2" fill="#c49a38" stroke="#a88425" stroke-width="0.8"/>
-              <text x="19" y="80" text-anchor="middle" font-size="6" fill="rgba(100,100,100,0.5)">0.0</text>
-              <text x="39" y="80" text-anchor="middle" font-size="6" fill="rgba(100,100,100,0.5)">0.4</text>
-              <text x="59" y="80" text-anchor="middle" font-size="6" fill="rgba(100,100,100,0.5)">0.8</text>
-              <text x="79" y="80" text-anchor="middle" font-size="6" fill="rgba(100,100,100,0.5)">1.0</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-bio">Biology</span>
-            </div>
-            <h3 class="card-title">Osmosis</h3>
-            <p class="card-desc">
-              Investigate osmosis using potato cylinders in sucrose
-              solutions. Calculate % mass change and find the isotonic point.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="biology/enzyme-activity/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #a5d6a7);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="15" y="32" width="12" height="38" rx="0" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.2"/>
-              <rect x="15" y="55" width="12" height="15" fill="rgba(30,60,180,0.45)"/>
-              <rect x="30" y="32" width="12" height="38" rx="0" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.2"/>
-              <rect x="30" y="52" width="12" height="18" fill="rgba(139,105,20,0.55)"/>
-              <rect x="45" y="32" width="12" height="38" rx="0" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.2"/>
-              <rect x="45" y="48" width="12" height="22" fill="rgba(212,168,67,0.55)"/>
-              <circle cx="75" cy="42" r="5" fill="#1a1a2e"/>
-              <circle cx="75" cy="52" r="5" fill="#8B6914"/>
-              <circle cx="75" cy="62" r="5" fill="#d4a843"/>
-              <text x="50" y="84" text-anchor="middle" font-size="7" fill="rgba(100,100,100,0.5)">37&#xB0;C</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-bio">Biology</span>
-            </div>
-            <h3 class="card-title">Enzyme Activity</h3>
-            <p class="card-desc">
-              Investigate how temperature affects amylase activity.
-              Use the starch-iodine test to find the optimum.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a href="biology/microscopy/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e0f7fa, #b2ebf2);">
-            <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
-              <circle cx="45" cy="45" r="28" fill="none" stroke="rgba(100,150,180,0.4)" stroke-width="2"/>
-              <circle cx="45" cy="45" r="24" fill="rgba(230,245,230,0.3)"/>
-              <rect x="30" y="34" width="14" height="10" rx="0" fill="none" stroke="rgba(80,140,80,0.5)" stroke-width="1"/>
-              <rect x="44" y="34" width="14" height="10" rx="0" fill="none" stroke="rgba(80,140,80,0.5)" stroke-width="1"/>
-              <rect x="30" y="44" width="14" height="10" rx="0" fill="none" stroke="rgba(80,140,80,0.5)" stroke-width="1"/>
-              <rect x="44" y="44" width="14" height="10" rx="0" fill="none" stroke="rgba(80,140,80,0.5)" stroke-width="1"/>
-              <circle cx="37" cy="39" r="3" fill="rgba(80,80,140,0.4)"/>
-              <circle cx="51" cy="39" r="3" fill="rgba(80,80,140,0.4)"/>
-              <circle cx="37" cy="49" r="3" fill="rgba(80,80,140,0.4)"/>
-              <circle cx="51" cy="49" r="3" fill="rgba(80,80,140,0.4)"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-bio">Biology</span>
-            </div>
-            <h3 class="card-title">Microscopy &amp; Cell Drawing</h3>
-            <p class="card-desc">
-              Observe plant and animal cells under the microscope.
-              Practice focusing, labelling, and biological drawing.
-            </p>
-            <div class="card-meta">
-              <span class="text-xs text-dim">Difficulty</span>
-              <div class="difficulty">
-                <span class="difficulty-dot filled"></span>
-                <span class="difficulty-dot"></span>
-                <span class="difficulty-dot"></span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-    <!-- Games -->
-    <section id="games">
-      <h2 class="section-title">
-        <span class="icon" style="background: var(--chem-bg); color: var(--chem-color);">&#127922;</span>
-        Games
-        <a href="games/index.html" style="margin-left:auto;font-size:var(--text-sm);font-weight:500;color:var(--color-primary);text-decoration:none;">View all &rarr;</a>
-      </h2>
-      <div class="practicals-grid">
-
-        <a href="games/precipitate-pursuit/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="20" y="20" width="24" height="50" rx="2" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="20" y="45" width="24" height="25" fill="rgba(100,160,240,0.35)"/>
-              <rect x="56" y="20" width="24" height="50" rx="2" fill="rgba(200,235,255,0.3)" stroke="#7ca3b8" stroke-width="1.3"/>
-              <rect x="56" y="40" width="24" height="30" fill="rgba(255,200,100,0.4)"/>
-              <line x1="44" y1="45" x2="56" y2="45" stroke="#8b8f9e" stroke-width="2" stroke-dasharray="3 2"/>
-              <circle cx="50" cy="45" r="4" fill="rgba(255,255,255,0.6)" stroke="#7ca3b8" stroke-width="1"/>
-              <text x="50" y="48" text-anchor="middle" font-size="5" font-weight="700" fill="#4a5568">ppt</text>
-              <rect x="14" y="72" width="72" height="8" rx="3" fill="#8B6914" opacity="0.7"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Game</span>
-            </div>
-            <h3 class="card-title">Precipitate Pursuit</h3>
-            <p class="card-desc">
-              Form precipitate sets and sabotage opponents using solubility rules.
-              A strategic card game for 4 players.
-            </p>
-          </div>
-        </a>
-
-        <a href="games/happy-elements/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="12" y="18" width="22" height="30" rx="3" fill="#fff" stroke="#4361ee" stroke-width="1.5" transform="rotate(-5 23 33)"/>
-              <text x="23" y="38" text-anchor="middle" font-size="14" font-weight="700" fill="#4361ee">Li</text>
-              <rect x="38" y="22" width="22" height="30" rx="3" fill="#fff" stroke="#06d6a0" stroke-width="1.5"/>
-              <text x="49" y="42" text-anchor="middle" font-size="14" font-weight="700" fill="#06d6a0">Na</text>
-              <rect x="64" y="18" width="22" height="30" rx="3" fill="#fff" stroke="#f77f00" stroke-width="1.5" transform="rotate(5 75 33)"/>
-              <text x="75" y="38" text-anchor="middle" font-size="14" font-weight="700" fill="#f77f00">K</text>
-              <rect x="30" y="55" width="40" height="6" rx="3" fill="var(--color-success)" opacity="0.4"/>
-              <text x="50" y="75" text-anchor="middle" font-size="8" fill="rgba(100,100,100,0.5)">Group 1</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Game</span>
-            </div>
-            <h3 class="card-title">Happy Elements</h3>
-            <p class="card-desc">
-              Collect all 4 elements from the same periodic table group.
-              Covers Groups 1, 2, 13-18.
-            </p>
-          </div>
-        </a>
-
-        <a href="games/organic-families/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #fce4ec, #f8bbd0);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <circle cx="30" cy="40" r="8" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-              <text x="30" y="43" text-anchor="middle" font-size="7" font-weight="700" fill="#4a5568">C</text>
-              <circle cx="50" cy="40" r="8" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-              <text x="50" y="43" text-anchor="middle" font-size="7" font-weight="700" fill="#4a5568">C</text>
-              <circle cx="70" cy="40" r="8" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-              <text x="70" y="43" text-anchor="middle" font-size="7" font-weight="700" fill="#4a5568">C</text>
-              <line x1="38" y1="40" x2="42" y2="40" stroke="#4a5568" stroke-width="1.5"/>
-              <line x1="58" y1="40" x2="62" y2="40" stroke="#4a5568" stroke-width="1.5"/>
-              <text x="50" y="70" text-anchor="middle" font-size="7" fill="rgba(100,100,100,0.5)">Alkanes</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Game</span>
-            </div>
-            <h3 class="card-title">Organic Families</h3>
-            <p class="card-desc">
-              Collect compounds from the same homologous series — alkanes, alkenes, alcohols, or carboxylic acids.
-            </p>
-          </div>
-        </a>
-
-        <a href="games/reactivity-bridge/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8eaf6, #c5cae9);">
-            <svg width="100" height="90" viewBox="0 0 100 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="15" y="22" width="18" height="28" rx="3" fill="#fff" stroke="#4361ee" stroke-width="1.5" transform="rotate(-8 24 36)"/>
-              <text x="24" y="40" text-anchor="middle" font-size="11" font-weight="700" fill="#4361ee">K</text>
-              <rect x="40" y="25" width="18" height="28" rx="3" fill="#fff" stroke="#ef476f" stroke-width="1.5"/>
-              <text x="49" y="43" text-anchor="middle" font-size="9" font-weight="700" fill="#ef476f">Cu</text>
-              <text x="49" y="49" text-anchor="middle" font-size="5" fill="#ef476f">2+</text>
-              <rect x="65" y="22" width="18" height="28" rx="3" fill="#fff" stroke="#06d6a0" stroke-width="1.5" transform="rotate(8 74 36)"/>
-              <text x="74" y="40" text-anchor="middle" font-size="10" font-weight="700" fill="#06d6a0">Zn</text>
-              <path d="M20 65 L50 58 L80 65" fill="none" stroke="var(--color-primary)" stroke-width="2" opacity="0.4"/>
-              <text x="50" y="78" text-anchor="middle" font-size="7" fill="rgba(100,100,100,0.5)">Bridge</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag tag-chem">Game</span>
-            </div>
-            <h3 class="card-title">Reactivity Bridge</h3>
-            <p class="card-desc">
-              A trick-taking bridge game using the reactivity series.
-              Play neutral and ionic cards in teams.
-            </p>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-    <!-- Study Tools -->
-    <section id="tools">
-      <h2 class="section-title">
-        <span class="icon" style="background: #f3e8ff; color: #7c3aed;">&#128218;</span>
-        Study Tools
-      </h2>
-      <div class="practicals-grid">
-
-        <a href="safety/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
-            <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
-              <polygon points="45,12 80,72 10,72" fill="none" stroke="#f59e0b" stroke-width="3"/>
-              <line x1="45" y1="34" x2="45" y2="52" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
-              <circle cx="45" cy="60" r="2.5" fill="#f59e0b"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag" style="background:#fff3e0;color:#b45309;">Safety</span>
-            </div>
-            <h3 class="card-title">Safety Guides</h3>
-            <p class="card-desc">
-              Learn GHS hazard symbols, test your knowledge with quizzes,
-              and build risk assessments for every practical.
-            </p>
-          </div>
-        </a>
-
-        <a href="flashcards/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #eef1fd, #d5dcff);">
-            <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="18" y="24" width="48" height="36" rx="4" fill="#fff" stroke="#4361ee" stroke-width="1.5" transform="rotate(-6 42 42)"/>
-              <rect x="22" y="28" width="48" height="36" rx="4" fill="#fff" stroke="#4361ee" stroke-width="1.5" transform="rotate(-2 46 46)"/>
-              <rect x="26" y="32" width="48" height="36" rx="4" fill="#fff" stroke="#4361ee" stroke-width="2"/>
-              <text x="50" y="54" text-anchor="middle" font-size="14" font-weight="700" fill="#4361ee">Q</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag" style="background:#eef1fd;color:#4361ee;">Review</span>
-            </div>
-            <h3 class="card-title">Flashcards</h3>
-            <p class="card-desc">
-              70+ flashcards across 8 decks. Flip, rate, and track your
-              knowledge with spaced repetition.
-            </p>
-          </div>
-        </a>
-
-        <a href="nature-of-science/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #f3e8ff, #e9d5ff);">
-            <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
-              <circle cx="30" cy="50" r="12" fill="none" stroke="#7c3aed" stroke-width="2"/>
-              <circle cx="50" cy="38" r="12" fill="none" stroke="#7c3aed" stroke-width="2"/>
-              <circle cx="60" cy="55" r="12" fill="none" stroke="#7c3aed" stroke-width="2"/>
-              <text x="36" y="32" font-size="8" font-weight="700" fill="#7c3aed">IV</text>
-              <text x="56" y="70" font-size="8" font-weight="700" fill="#7c3aed">DV</text>
-              <text x="16" y="64" font-size="8" font-weight="700" fill="#7c3aed">CV</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag" style="background:#f3e8ff;color:#7c3aed;">Skills</span>
-            </div>
-            <h3 class="card-title">Nature of Science</h3>
-            <p class="card-desc">
-              Master variables, errors, fair testing, and how to plan
-              and evaluate investigations.
-            </p>
-          </div>
-        </a>
-
-        <a href="dashboard/index.html" class="practical-card card">
-          <div class="card-illustration" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
-            <svg width="90" height="90" viewBox="0 0 90 90" fill="none" style="position:relative;z-index:1;">
-              <rect x="15" y="55" width="12" height="20" rx="2" fill="rgba(6,214,160,0.5)"/>
-              <rect x="31" y="40" width="12" height="35" rx="2" fill="rgba(67,97,238,0.5)"/>
-              <rect x="47" y="30" width="12" height="45" rx="2" fill="rgba(247,127,0,0.5)"/>
-              <rect x="63" y="20" width="12" height="55" rx="2" fill="rgba(124,58,237,0.5)"/>
-              <line x1="12" y1="76" x2="78" y2="76" stroke="rgba(150,150,150,0.3)" stroke-width="1"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="tag" style="background:#e8f5e9;color:#06d6a0;">Progress</span>
-            </div>
-            <h3 class="card-title">Dashboard</h3>
-            <p class="card-desc">
-              Track your completion, scores, flashcard streaks,
-              and progress across all practicals.
-            </p>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-  </main>
-
-  <footer class="footer container">
-    <p>Brought to you by Johlly Good Learning</p>
-  </footer>
+  </div>
 
   <script src="shared/dark-mode.js?v=5"></script>
+  <script>
+    // Sidebar navigation
+    const sections = document.querySelectorAll('.content-section');
+    const navItems = document.querySelectorAll('.nav-item[data-section]');
+    const pageTitle = document.getElementById('page-title');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const menuToggle = document.getElementById('menu-toggle');
+
+    const titles = {
+      home: 'Home',
+      chemistry: 'Chemistry Practicals',
+      physics: 'Physics Practicals',
+      biology: 'Biology Practicals',
+      games: 'Science Games',
+      tools: 'Study Tools'
+    };
+
+    function showSection(id) {
+      sections.forEach(s => s.classList.remove('active'));
+      navItems.forEach(n => n.classList.remove('active'));
+      const target = document.getElementById('section-' + id);
+      if (target) target.classList.add('active');
+      navItems.forEach(n => { if (n.dataset.section === id) n.classList.add('active'); });
+      pageTitle.textContent = titles[id] || id;
+      closeMobileMenu();
+      window.scrollTo(0, 0);
+      history.replaceState(null, '', '#' + id);
+    }
+
+    navItems.forEach(btn => {
+      btn.addEventListener('click', () => showSection(btn.dataset.section));
+    });
+
+    // Mobile menu
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    });
+    function closeMobileMenu() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+    overlay.addEventListener('click', closeMobileMenu);
+
+    // Handle hash on load
+    const hash = location.hash.replace('#', '');
+    if (hash && titles[hash]) showSection(hash);
+  </script>
 
 </body>
 </html>

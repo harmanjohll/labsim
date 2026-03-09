@@ -16,6 +16,10 @@
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
   height: calc(var(--board-size) * 0.13);
   aspect-ratio: 80/112;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: var(--color-text-muted);
 }
 #player-0-hand .game-card:hover {
   transform: translateY(-16px) scale(1.05);
@@ -23,7 +27,7 @@
 }
 .game-card.selected {
   transform: translateY(-24px) scale(1.05) !important;
-  box-shadow: 0 0 20px 5px rgba(67, 97, 238, 0.6);
+  box-shadow: 0 0 20px 5px rgba(74, 222, 128, 0.6);
 }
 
 /* Name entry screen */
@@ -189,13 +193,6 @@
 .bench { position: absolute; display: flex; align-items: center; justify-content: center; }
 .player-hand { display: flex; align-items: center; position: relative; }
 
-/* Cards in hand */
-.game-card {
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  background: var(--color-text-muted);
-}
 .game-card img { width: 100%; height: 100%; object-fit: cover; }
 .game-card.clickable { cursor: pointer; }
 

@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim – Diffusion Practical Data
+   SciSim – Diffusion Practical Data
    IIFE providing DIFFUSION_DATA for both experiments:
      1. KMnO₄ spreading in water at different temperatures
      2. Agar cube size investigation (SA:V ratio)

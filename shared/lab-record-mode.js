@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim Recording Mode Toggle
+   SciSim Recording Mode Toggle
    Switches between Guided (auto-record) and Independent
    (student manually records) data collection modes.
    ============================================================ */

@@ -45,7 +45,7 @@ function updatePlayerDisplays() {
   players[0].hand.sort((a,b) => a.group.localeCompare(b.group) || a.element.localeCompare(b.element));
   players[0].hand.forEach(card => {
     const cardDiv = document.createElement('div');
-    cardDiv.className = 'card';
+    cardDiv.className = 'playing-card';
     cardDiv.innerHTML = `<img src="${card.img}" alt="${card.element}" title="${card.element}">`;
     hand0.appendChild(cardDiv);
   });
@@ -55,7 +55,7 @@ function updatePlayerDisplays() {
     handDiv.innerHTML = '';
     players[i].hand.forEach(() => {
       const cardDiv = document.createElement('div');
-      cardDiv.className = 'card';
+      cardDiv.className = 'playing-card';
       cardDiv.innerHTML = `<img src="${baseURL}back-of-card.png" alt="card back">`;
       handDiv.appendChild(cardDiv);
     });
@@ -258,9 +258,10 @@ function checkGameEnd() {
 
 document.getElementById('start-game-button').addEventListener('click', () => {
   initializeGame();
-  nameEntryDiv.style.display = 'none';
+  nameEntryDiv.classList.add('hidden');
+  tableDiv.classList.remove('hidden');
   tableDiv.style.display = 'flex';
-  controlsDiv.style.display = 'block';
+  controlsDiv.classList.remove('hidden');
 });
 playerNameInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('start-game-button').click();

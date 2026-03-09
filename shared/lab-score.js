@@ -1,4 +1,4 @@
-/* LabSim shared scoring / mark scheme system */
+/* SciSim shared scoring / mark scheme system */
 var LabScore = (function () {
 
   /**

@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim Dark Mode Toggle
+   SciSim Dark Mode Toggle
    Adds a theme switcher that persists via localStorage
    ============================================================ */
 var LabTheme = (function () {

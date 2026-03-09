@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim — Procedural Metacognition Notebook
+   SciSim — Procedural Metacognition Notebook
    A guided reflection tool that helps students develop
    process knowledge by noting what they did well, what needs
    work, and what to watch for next time in the lab.

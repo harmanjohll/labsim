@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim Progress Tracker
+   SciSim Progress Tracker
    Tracks practical completion, scores, and milestones
    ============================================================ */
 var LabProgress = (function () {

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="Johll">
-  <title>LabSim – Interactive Science Practical Simulations</title>
+  <title>SciSim – Interactive Science Practicals & Games</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared/design-system.css?v=5">
   <style>
@@ -146,28 +146,36 @@
 </head>
 <body>
 
-  <!-- Theme toggle (top right) -->
-  <div style="position:fixed;top:var(--sp-3);right:var(--sp-4);z-index:100;">
-    <button class="theme-toggle" type="button"
-      style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:6px 10px;cursor:pointer;font-size:1.1rem;line-height:1;box-shadow:var(--shadow-sm);"
-      onclick="LabTheme.toggle()"></button>
-  </div>
+  <!-- Top Navigation -->
+  <nav class="topbar">
+    <a href="index.html" class="topbar-brand" style="text-decoration:none;">Sci<span>Sim</span></a>
+    <div class="topbar-actions" style="gap: var(--sp-4);">
+      <a href="#practicals" style="font-size:var(--text-sm);color:var(--color-text-secondary);text-decoration:none;">Practicals</a>
+      <a href="#games" style="font-size:var(--text-sm);color:var(--color-text-secondary);text-decoration:none;">Games</a>
+      <a href="#tools" style="font-size:var(--text-sm);color:var(--color-text-secondary);text-decoration:none;">Tools</a>
+      <span id="dark-mode-toggle"></span>
+    </div>
+  </nav>
 
   <!-- Hero -->
   <section class="hero container">
     <h1 class="hero-title">
-      Lab<span class="accent">Sim</span>
+      Sci<span class="accent">Sim</span>
     </h1>
     <p class="hero-subtitle">
-      Interactive science practical simulations. Build procedural knowledge
-      and confidence before stepping into the real laboratory.
+      Interactive science practicals, simulations, and games.
+      Build knowledge and confidence through hands-on learning.
     </p>
+    <div style="display:flex;gap:var(--sp-3);justify-content:center;margin-top:var(--sp-5);">
+      <a href="#practicals" class="btn btn-primary">Browse Practicals</a>
+      <a href="games/index.html" class="btn btn-outline">Play Games</a>
+    </div>
   </section>
 
   <main class="container">
 
     <!-- Chemistry -->
-    <section>
+    <section id="practicals">
       <h2 class="section-title">
         <span class="icon" style="background: var(--chem-bg); color: var(--chem-color);">&#9879;</span>
         Chemistry
@@ -765,10 +773,11 @@
     </section>
 
     <!-- Games -->
-    <section>
+    <section id="games">
       <h2 class="section-title">
         <span class="icon" style="background: var(--chem-bg); color: var(--chem-color);">&#127922;</span>
-        Chemistry Games
+        Games
+        <a href="games/index.html" style="margin-left:auto;font-size:var(--text-sm);font-weight:500;color:var(--color-primary);text-decoration:none;">View all &rarr;</a>
       </h2>
       <div class="practicals-grid">
 
@@ -877,7 +886,7 @@
     </section>
 
     <!-- Study Tools -->
-    <section>
+    <section id="tools">
       <h2 class="section-title">
         <span class="icon" style="background: #f3e8ff; color: #7c3aed;">&#128218;</span>
         Study Tools

@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim — Guide Panel Compact / Collapse
+   SciSim — Guide Panel Compact / Collapse
    When the guide toggle is clicked, the guide panel enters
    "compact mode": verbose procedure text is hidden but
    interactive controls (sliders, selectors, action buttons)

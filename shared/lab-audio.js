@@ -1,4 +1,4 @@
-/* LabSim shared audio feedback system – Web Audio API */
+/* SciSim shared audio feedback system – Web Audio API */
 var LabAudio = (function () {
   var ctx = null;
   var enabled = true;

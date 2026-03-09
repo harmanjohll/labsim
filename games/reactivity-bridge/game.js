@@ -59,7 +59,7 @@ function createCardElement(card, side, clickable=false, forceShow=false){
   const hide=!forceShow && side!=="south" && game.difficulty==="advanced";
   img.src= hide? backURL : baseURL+card.filename;
   img.alt= hide? "back" : `${card.symbol} (${card.state})`;
-  img.classList.add("card");
+  img.classList.add("playing-card");
   if(clickable && side==="south"){
     img.style.cursor="pointer";
     img.addEventListener("click",()=>{ if(seatingOrder[game.currentTurnIndex]==="south") playCard("south",card); });
@@ -312,4 +312,9 @@ function initializeGame(){
     document.getElementById("table-text").innerText="South leads";
   }
 }
-document.getElementById("startButton").addEventListener("click",initializeGame);
+document.getElementById("startButton").addEventListener("click", function() {
+  document.getElementById("start-screen").classList.add("hidden");
+  document.getElementById("game-info").classList.remove("hidden");
+  document.getElementById("game-container").classList.remove("hidden");
+  initializeGame();
+});

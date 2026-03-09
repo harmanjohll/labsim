@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="Johll">
-  <title>Happy Family: Periodic Table Edition – LabSim Games</title>
+  <title>Happy Elements – SciSim</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/design-system.css?v=5">
   <link rel="stylesheet" href="game.css?v=1">
@@ -13,7 +13,7 @@
 
   <!-- Top Navigation -->
   <nav class="topbar">
-    <a href="../../index.html" class="topbar-brand" style="text-decoration:none;">Lab<span>Sim</span></a>
+    <a href="../../index.html" class="topbar-brand" style="text-decoration:none;">Sci<span>Sim</span></a>
     <span class="topbar-breadcrumb">
       <a href="../index.html">Games</a>
       <span class="separator">/</span>
@@ -31,6 +31,16 @@
         <p>Collect all 4 elements of the same group to form a family!</p>
       </header>
       <div id="name-entry">
+        <div class="how-to-play">
+          <h3>How to Play</h3>
+          <ul>
+            <li>On your turn, ask any player for a specific element card</li>
+            <li>If they have it, you get the card and go again</li>
+            <li>If not, they say "Not at home!" and the turn passes</li>
+            <li>Complete a family by collecting all 4 elements from one group</li>
+            <li>The player with the most families wins!</li>
+          </ul>
+        </div>
         <label for="player-name-input">Your Name:</label>
         <input type="text" id="player-name-input" placeholder="Enter your name">
         <label for="difficulty">Difficulty:</label>
@@ -41,7 +51,7 @@
         </select>
         <button id="start-game-button">Start Game</button>
       </div>
-      <div id="table" style="display: none;">
+      <div id="table" class="hidden">
         <div class="computer-players-container">
           <div id="player-1" class="player-seat"><div class="player-name" id="name-1"></div><div class="completed-families" id="completed-1"></div><div class="hand computer" id="hand-1"></div></div>
           <div id="player-2" class="player-seat"><div class="player-name" id="name-2"></div><div class="completed-families" id="completed-2"></div><div class="hand computer" id="hand-2"></div></div>
@@ -49,7 +59,7 @@
         </div>
         <div id="player-0" class="player-seat"><div class="player-name" id="name-0">You</div><div class="completed-families" id="completed-0"></div><div class="hand" id="hand-0"></div></div>
       </div>
-      <div id="controls" style="display: none;"><div id="human-controls"></div></div>
+      <div id="controls" class="hidden"><div id="human-controls"></div></div>
       <div id="log"><p><em>Game log...</em></p></div>
     </div>
   </main>

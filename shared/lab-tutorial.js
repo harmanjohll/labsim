@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim Guided Tutorial Overlay
+   SciSim Guided Tutorial Overlay
    Step-by-step walkthrough tooltips for first-time visitors
    ============================================================ */
 var LabTutorial = (function () {

@@ -22,6 +22,40 @@
   color: var(--color-text-secondary);
 }
 
+/* How to Play */
+.how-to-play {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+  text-align: left;
+  width: 100%;
+  max-width: 500px;
+}
+.how-to-play h3 {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--sp-2);
+}
+.how-to-play ul { list-style: none; padding: 0; margin: 0; }
+.how-to-play li {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  padding: var(--sp-1) 0;
+  padding-left: var(--sp-4);
+  position: relative;
+  line-height: var(--leading-relaxed);
+}
+.how-to-play li::before {
+  content: '\2022';
+  color: var(--color-primary);
+  font-weight: bold;
+  position: absolute;
+  left: var(--sp-1);
+}
+
 /* Name entry */
 #name-entry, #human-controls {
   display: flex;
@@ -127,12 +161,12 @@
   min-height: 60px;
   margin-bottom: var(--sp-1);
 }
-#player-0 .hand .card {
+#player-0 .hand .playing-card {
   width: 80px; height: 120px;
   margin: 5px;
   transition: transform 0.2s ease;
 }
-#player-0 .hand .card:hover { transform: scale(1.05); }
+#player-0 .hand .playing-card:hover { transform: scale(1.05); }
 
 .hand.computer {
   display: flex;
@@ -140,15 +174,15 @@
   align-items: center;
   padding: 0 28px;
 }
-.hand .card { width: 40px; height: 60px; margin: 2px; }
-.hand.computer .card {
+.hand .playing-card { width: 40px; height: 60px; margin: 2px; }
+.hand.computer .playing-card {
   margin-left: -20px;
   border: 1px solid var(--color-surface);
   transition: transform 0.2s ease;
 }
-.hand.computer .card:first-child { margin-left: 0; }
-.hand.computer .card:hover { transform: translateY(-10px); z-index: 10; }
-.hand .card img {
+.hand.computer .playing-card:first-child { margin-left: 0; }
+.hand.computer .playing-card:hover { transform: translateY(-10px); z-index: 10; }
+.hand .playing-card img {
   width: 100%; height: 100%;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
@@ -191,5 +225,5 @@
 @media (max-width: 600px) {
   .game-header h1 { font-size: var(--text-xl); }
   .player-seat { flex-basis: 45%; max-width: 45%; }
-  #player-0 .hand .card { width: 60px; height: 90px; }
+  #player-0 .hand .playing-card { width: 60px; height: 90px; }
 }

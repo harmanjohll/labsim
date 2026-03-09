@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim Export Utility
+   SciSim Export Utility
    Export data tables and canvas graphs as PNG
    ============================================================ */
 var LabExport = (function () {

@@ -126,8 +126,8 @@
   display: flex;
   gap: calc(var(--bs) * 0.02);
 }
-.bench.north { top: 0; left: 50%; transform: translate(-50%, -50%); flex-direction: row; }
-.bench.south { bottom: 0; left: 50%; transform: translate(-50%, 50%); flex-direction: row; }
+.bench.north { top: 0; left: 48%; transform: translate(-50%, -50%); flex-direction: row; }
+.bench.south { bottom: 0; left: 48%; transform: translate(-50%, 50%); flex-direction: row; }
 .bench.west { left: 0; top: 50%; transform: translate(-50%, -50%); flex-direction: column; }
 .bench.east { right: 0; top: 50%; transform: translate(50%, -50%); flex-direction: column; }
 

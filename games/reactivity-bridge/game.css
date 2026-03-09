@@ -131,8 +131,8 @@
 .bench.west { left: 0; top: 50%; transform: translate(-50%, -50%); flex-direction: column; }
 .bench.east { right: 0; top: 50%; transform: translate(50%, -50%); flex-direction: column; }
 
-/* Cards */
-.card {
+/* Playing cards */
+.playing-card {
   height: calc(var(--bs) * 0.15);
   aspect-ratio: 80/112;
   display: block;
@@ -140,9 +140,15 @@
   box-shadow: var(--shadow-sm);
   transition: transform 0.2s, box-shadow 0.2s;
   background: var(--color-surface);
+  border: none;
 }
-.bench.west .card, .bench.east .card { transform: rotate(90deg); }
-.bench.south .card:hover { transform: translateY(-15px) scale(1.05); }
+.playing-card:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
+  border-color: transparent;
+}
+.bench.west .playing-card, .bench.east .playing-card { transform: rotate(90deg); }
+.bench.south .playing-card:hover { transform: translateY(-15px) scale(1.05); box-shadow: var(--shadow-md); }
 
 /* Name entry in topbar area */
 .game-controls {

@@ -45,7 +45,7 @@ function updatePlayerDisplays() {
   players[0].hand.sort((a,b) => a.group.localeCompare(b.group) || a.element.localeCompare(b.element));
   players[0].hand.forEach(card => {
     const cardDiv = document.createElement('div');
-    cardDiv.className = 'card';
+    cardDiv.className = 'playing-card';
     cardDiv.innerHTML = `<img src="${card.img}" alt="${card.element}" title="${card.element}">`;
     hand0.appendChild(cardDiv);
   });
@@ -55,7 +55,7 @@ function updatePlayerDisplays() {
     handDiv.innerHTML = '';
     players[i].hand.forEach(() => {
       const cardDiv = document.createElement('div');
-      cardDiv.className = 'card';
+      cardDiv.className = 'playing-card';
       cardDiv.innerHTML = `<img src="${baseURL}back-of-card.png" alt="card back">`;
       handDiv.appendChild(cardDiv);
     });

@@ -607,6 +607,7 @@ h4 { font-size: var(--text-lg); }
 .p-4 { padding: var(--sp-4); }
 .p-6 { padding: var(--sp-6); }
 .overflow-hidden { overflow: hidden; }
+.hidden { display: none !important; }
 .relative { position: relative; }
 .absolute { position: absolute; }
 .pointer { cursor: pointer; }

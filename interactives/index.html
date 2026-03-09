@@ -130,6 +130,44 @@
         </div>
       </a>
 
+      <!-- 3D Molecular Viewer -->
+      <a href="molecular-viewer/index.html" class="item-card card">
+        <div class="card-illustration" style="background: linear-gradient(135deg, #1a1a3e, #2a2a5e);">
+          <svg width="120" height="100" viewBox="0 0 120 100" fill="none" style="position:relative;z-index:1;">
+            <!-- Central atom -->
+            <circle cx="60" cy="50" r="16" fill="#333" stroke="#555" stroke-width="1.5"/>
+            <text x="60" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">C</text>
+            <!-- Surrounding atoms with bonds -->
+            <line x1="60" y1="34" x2="60" y2="14" stroke="rgba(180,190,220,0.5)" stroke-width="2"/>
+            <circle cx="60" cy="12" r="8" fill="#ccc" stroke="#999" stroke-width="1"/>
+            <text x="60" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="#555">H</text>
+            <line x1="46" y1="58" x2="28" y2="72" stroke="rgba(180,190,220,0.5)" stroke-width="2"/>
+            <circle cx="26" cy="74" r="8" fill="#ccc" stroke="#999" stroke-width="1"/>
+            <text x="26" y="78" text-anchor="middle" font-size="9" font-weight="700" fill="#555">H</text>
+            <line x1="74" y1="58" x2="92" y2="72" stroke="rgba(180,190,220,0.5)" stroke-width="2"/>
+            <circle cx="94" cy="74" r="8" fill="#ccc" stroke="#999" stroke-width="1"/>
+            <text x="94" y="78" text-anchor="middle" font-size="9" font-weight="700" fill="#555">H</text>
+            <line x1="50" y1="42" x2="30" y2="28" stroke="rgba(180,190,220,0.5)" stroke-width="2"/>
+            <circle cx="28" cy="26" r="8" fill="#ccc" stroke="#999" stroke-width="1"/>
+            <text x="28" y="30" text-anchor="middle" font-size="9" font-weight="700" fill="#555">H</text>
+            <!-- 3D rotation hint arc -->
+            <path d="M 95 18 A 20 20 0 0 1 105 30" stroke="rgba(67,97,238,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/>
+            <polygon points="105,30 101,24 108,26" fill="rgba(67,97,238,0.4)"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="tag tag-chem">Chemistry</span>
+            <span class="tag" style="background:#ede7f6;color:#7c4dff;">3D Viewer</span>
+          </div>
+          <h3 class="card-title">3D Molecular Viewer</h3>
+          <p class="card-desc">
+            Rotate and examine molecules in 3D. Explore VSEPR shapes, bond angles,
+            and polarity with ball-and-stick, space-filling, and wireframe views.
+          </p>
+        </div>
+      </a>
+
       <!-- Particle Dynamics -->
       <a href="particle-dynamics/index.html" class="item-card card">
         <div class="card-illustration" style="background: linear-gradient(135deg, #0a0a2e, #1a1a4e);">

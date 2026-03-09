@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="Johll">
-  <title>Reactivity Bridge – LabSim Games</title>
+  <title>Reactivity Bridge – SciSim</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/design-system.css?v=5">
   <link rel="stylesheet" href="game.css?v=1">
@@ -13,34 +13,53 @@
 
   <!-- Top Navigation -->
   <nav class="topbar" style="flex-shrink: 0;">
-    <a href="../../index.html" class="topbar-brand" style="text-decoration:none;">Lab<span>Sim</span></a>
+    <a href="../../index.html" class="topbar-brand" style="text-decoration:none;">Sci<span>Sim</span></a>
     <span class="topbar-breadcrumb">
       <a href="../index.html">Games</a>
       <span class="separator">/</span>
       Reactivity Bridge
     </span>
-    <div class="topbar-actions game-controls">
-      <label>Name: <input id="playerName" type="text" placeholder="Your name" value="South"></label>
-      <label>Difficulty:
-        <select id="difficulty">
-          <option value="beginner" selected>Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
-        </select>
-      </label>
-      <button id="startButton" class="btn btn-primary btn-sm">Start Game</button>
+    <div class="topbar-actions">
       <span id="dark-mode-toggle"></span>
     </div>
   </nav>
 
+  <!-- Start Screen -->
+  <div id="start-screen" class="start-screen">
+    <div class="start-panel">
+      <h1>Reactivity Bridge</h1>
+      <p>A trick-taking card game using the reactivity series. Play in teams of two (North-South vs West-East).</p>
+      <div class="how-to-play">
+        <h3>How to Play</h3>
+        <ul>
+          <li>Cards are either <strong>neutral</strong> atoms or <strong>ionic</strong> forms</li>
+          <li>You must follow the led state (neutral/ionic) if you can</li>
+          <li>Neutral cards: most reactive wins. Ionic cards: least reactive wins</li>
+          <li>Win tricks with your partner to beat the opposing team</li>
+        </ul>
+      </div>
+      <div class="start-form">
+        <label>Name: <input id="playerName" type="text" placeholder="Your name" value="South"></label>
+        <label>Difficulty:
+          <select id="difficulty">
+            <option value="beginner" selected>Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </label>
+        <button id="startButton" class="btn btn-primary" style="width:100%;margin-top:var(--sp-2);">Start Game</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Game Info -->
-  <div id="game-info">
+  <div id="game-info" class="hidden">
     <div id="scoreboard">Team NS: 0 | Team WE: 0</div>
     <div id="contract-display">No contract</div>
   </div>
 
   <!-- Main -->
-  <div id="game-container">
+  <div id="game-container" class="hidden">
     <div class="play-area">
       <div id="game-board">
         <div class="table">

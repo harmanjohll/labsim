@@ -1,5 +1,5 @@
 // Precipitate Pursuit – Game Logic
-// Refactored from monolithic HTML into LabSim module
+// Refactored from monolithic HTML into SciSim module
 
 document.addEventListener('DOMContentLoaded', () => {
 

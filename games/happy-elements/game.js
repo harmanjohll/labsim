@@ -267,9 +267,10 @@ function checkGameEnd() {
 
 document.getElementById('start-game-button').addEventListener('click', () => {
   initializeGame();
-  nameEntryDiv.style.display = 'none';
+  nameEntryDiv.classList.add('hidden');
+  tableDiv.classList.remove('hidden');
   tableDiv.style.display = 'flex';
-  controlsDiv.style.display = 'block';
+  controlsDiv.classList.remove('hidden');
 });
 playerNameInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('start-game-button').click();

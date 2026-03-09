@@ -312,4 +312,9 @@ function initializeGame(){
     document.getElementById("table-text").innerText="South leads";
   }
 }
-document.getElementById("startButton").addEventListener("click",initializeGame);
+document.getElementById("startButton").addEventListener("click", function() {
+  document.getElementById("start-screen").classList.add("hidden");
+  document.getElementById("game-info").classList.remove("hidden");
+  document.getElementById("game-container").classList.remove("hidden");
+  initializeGame();
+});

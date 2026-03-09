@@ -22,6 +22,40 @@
   color: var(--color-text-secondary);
 }
 
+/* How to Play */
+.how-to-play {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+  text-align: left;
+  width: 100%;
+  max-width: 500px;
+}
+.how-to-play h3 {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--sp-2);
+}
+.how-to-play ul { list-style: none; padding: 0; margin: 0; }
+.how-to-play li {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  padding: var(--sp-1) 0;
+  padding-left: var(--sp-4);
+  position: relative;
+  line-height: var(--leading-relaxed);
+}
+.how-to-play li::before {
+  content: '\2022';
+  color: var(--color-primary);
+  font-weight: bold;
+  position: absolute;
+  left: var(--sp-1);
+}
+
 #name-entry, #human-controls {
   display: flex;
   justify-content: center;

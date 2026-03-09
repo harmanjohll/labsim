@@ -1,5 +1,5 @@
 /* ============================================================
-   LabSim Design System
+   SciSim Design System
    A shared visual language for science practical simulations
    ============================================================ */
 
@@ -180,6 +180,16 @@ h4 { font-size: var(--text-lg); }
   color: #fff;
 }
 .btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+}
 
 .btn-success {
   background: var(--color-success);

@@ -142,13 +142,8 @@
   background: var(--color-surface);
   border: none;
 }
-.playing-card:hover {
-  transform: none;
-  box-shadow: var(--shadow-sm);
-  border-color: transparent;
-}
 .bench.west .playing-card, .bench.east .playing-card { transform: rotate(90deg); }
-.bench.south .playing-card:hover { transform: translateY(-15px) scale(1.05); box-shadow: var(--shadow-md); }
+.bench.south .playing-card:hover { transform: translateY(-15px) scale(1.05); box-shadow: var(--shadow-md); cursor: pointer; }
 
 /* Start Screen */
 .start-screen {

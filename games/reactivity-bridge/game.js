@@ -6,7 +6,6 @@ function updateBoardSize() {
   const w = board.clientWidth;
   board.style.setProperty('--bs', `${w}px`);
 }
-window.addEventListener('load', updateBoardSize);
 window.addEventListener('resize', updateBoardSize);
 
 const baseURL = 'images/';
@@ -104,6 +103,13 @@ function endGame(){
         : "It's a tie!";
   }
   document.getElementById("table-text").innerText=msg;
+  // Show a "Play Again" button
+  const btn=document.createElement("button");
+  btn.textContent="Play Again";
+  btn.className="btn btn-primary";
+  btn.style.cssText="margin-top:var(--sp-3);";
+  btn.addEventListener("click", ()=>{ btn.remove(); initializeGame(); });
+  document.getElementById("trick-history").appendChild(btn);
 }
 
 // Bidding Logic
@@ -312,9 +318,16 @@ function initializeGame(){
     document.getElementById("table-text").innerText="South leads";
   }
 }
-document.getElementById("startButton").addEventListener("click", function() {
+function startGame() {
   document.getElementById("start-screen").classList.add("hidden");
   document.getElementById("game-info").classList.remove("hidden");
   document.getElementById("game-container").classList.remove("hidden");
-  initializeGame();
-});
+  // Double-rAF ensures layout is fully resolved after removing display:none
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      updateBoardSize();
+      initializeGame();
+    });
+  });
+}
+document.getElementById("startButton").addEventListener("click", startGame);

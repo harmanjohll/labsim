@@ -23,6 +23,8 @@
   var WALL_COLOUR = "rgba(100,140,255,0.4)";
   var GRAVITY_STRENGTH = 0.08;
   var DT = 0.4;
+  var N_SUBSTEPS = 3;
+  var SUB_DT = DT / N_SUBSTEPS;
   var SPATIAL_CELL_FACTOR = 3;
 
   /* ---------- State ---------- */
@@ -204,7 +206,7 @@
     var r = s.sigma * 0.5;
     var speed = speedFromTemp();
     var angle = Math.random() * Math.PI * 2;
-    var factor = 0.3 + Math.random() * 1.4;
+    var factor = 0.4 + Math.random() * 0.8;
     return {
       x: c.x + r + Math.random() * (c.w - 2 * r),
       y: c.y + r + Math.random() * (c.h - 2 * r),
@@ -288,159 +290,227 @@
     var particleR = sig * 0.4;
     var targetSpeed = speedFromTemp();
 
-    // Phase-dependent thermostat coupling
+    /* Force clamp: cap |F/r| to prevent LJ divergence at close range.
+       At r = sigma, fOverR = 24*eps/sig^2 ≈ moderate.
+       We allow up to 100x that before clamping. */
+    var maxFOverR = 100 * eps / (sig * sig);
+
+    /* Minimum separation squared: below 0.4*sigma the repulsive wall
+       is so steep that numerical integration breaks down.
+       We enforce a hard floor and separate overlapping particles. */
+    var minSep = sig * 0.4;
+    var minSep2 = minSep * minSep;
+
+    // Phase-dependent thermostat coupling (stronger than before)
     var coupling;
     if (phase === "gas") {
-      coupling = 0.04;
+      coupling = 0.08;
     } else if (phase === "liquid") {
-      coupling = 0.02;
+      coupling = 0.06;
     } else {
-      coupling = 0.04;
+      coupling = 0.06;
     }
 
-    // Reset accelerations
-    for (var i = 0; i < particles.length; i++) {
-      particles[i].ax = 0;
-      particles[i].ay = 0;
-    }
+    /* Global velocity cap: prevents runaway in all phases.
+       Solid keeps its tighter cap (1.2x) applied separately. */
+    var globalMaxSpeed = targetSpeed * 3.0;
 
-    // Build spatial hash
-    buildSpatialHash(c);
+    /* ---- Sub-step loop for stability ---- */
+    for (var sub = 0; sub < N_SUBSTEPS; sub++) {
 
-    // Lennard-Jones forces
-    for (var i = 0; i < particles.length; i++) {
-      var pi = particles[i];
-      var neighbours = getNeighbourIndices(i, c);
-      for (var k = 0; k < neighbours.length; k++) {
-        var j = neighbours[k];
-        var pj = particles[j];
-        var dx = pj.x - pi.x;
-        var dy = pj.y - pi.y;
-        var r2 = dx * dx + dy * dy;
-        if (r2 < cutoff2 && r2 > 0.01) {
-          var r = Math.sqrt(r2);
-          var sr = sig / r;
-          var sr2 = sr * sr;
-          var sr6 = sr2 * sr2 * sr2;
-          var sr12 = sr6 * sr6;
-          // F(r) = 24*eps*(2*(sig/r)^13 - (sig/r)^7)/r
-          // F/r for unit vector: 24*eps*(2*sr^12 - sr^6)/r^2
-          var fOverR = 24 * eps * (2 * sr12 - sr6) / r2;
-          var fx = fOverR * dx;
-          var fy = fOverR * dy;
-          pi.ax += fx / s.mass;
-          pi.ay += fy / s.mass;
-          pj.ax -= fx / s.mass;
-          pj.ay -= fy / s.mass;
-        }
-      }
-    }
-
-    // Solid: strong spring anchoring to equilibrium positions
-    if (phase === "solid") {
-      var kSpring = 0.5 * eps;
-      var dampFactor = 0.88;
-      var maxDisp = 0.3 * sig;
-      var maxDisp2 = maxDisp * maxDisp;
-
+      // Reset accelerations
       for (var i = 0; i < particles.length; i++) {
-        var p = particles[i];
-        if (p.eqX !== undefined) {
-          var dx = p.x - p.eqX;
-          var dy = p.y - p.eqY;
+        particles[i].ax = 0;
+        particles[i].ay = 0;
+      }
 
-          // Clamp displacement from equilibrium
-          var d2 = dx * dx + dy * dy;
-          if (d2 > maxDisp2) {
-            var dMag = Math.sqrt(d2);
-            var clampRatio = maxDisp / dMag;
-            p.x = p.eqX + dx * clampRatio;
-            p.y = p.eqY + dy * clampRatio;
-            dx = p.x - p.eqX;
-            dy = p.y - p.eqY;
-            // Also kill radial velocity
-            var vDot = (p.vx * dx + p.vy * dy) / (dx * dx + dy * dy + 0.001);
-            if (vDot > 0) {
-              p.vx -= vDot * dx;
-              p.vy -= vDot * dy;
+      // Build spatial hash
+      buildSpatialHash(c);
+
+      // Lennard-Jones forces (with clamping)
+      for (var i = 0; i < particles.length; i++) {
+        var pi = particles[i];
+        var neighbours = getNeighbourIndices(i, c);
+        for (var k = 0; k < neighbours.length; k++) {
+          var j = neighbours[k];
+          var pj = particles[j];
+          var dx = pj.x - pi.x;
+          var dy = pj.y - pi.y;
+          var r2 = dx * dx + dy * dy;
+
+          /* Hard-core separation: if particles overlap below minSep,
+             push them apart immediately instead of relying on divergent LJ. */
+          if (r2 < minSep2 && r2 > 0.0001) {
+            var rr = Math.sqrt(r2);
+            var overlap = minSep - rr;
+            var nx = dx / rr;
+            var ny = dy / rr;
+            // Push each particle half the overlap distance apart
+            pi.x -= nx * overlap * 0.5;
+            pi.y -= ny * overlap * 0.5;
+            pj.x += nx * overlap * 0.5;
+            pj.y += ny * overlap * 0.5;
+            // Kill approach velocity
+            var relV = (pj.vx - pi.vx) * nx + (pj.vy - pi.vy) * ny;
+            if (relV < 0) {
+              pi.vx += relV * 0.5 * nx;
+              pi.vy += relV * 0.5 * ny;
+              pj.vx -= relV * 0.5 * nx;
+              pj.vy -= relV * 0.5 * ny;
             }
+            r2 = minSep2; // use floor distance for LJ
           }
 
-          // Spring force pulling back to equilibrium
-          p.ax += -kSpring * dx / s.mass;
-          p.ay += -kSpring * dy / s.mass;
+          if (r2 < cutoff2 && r2 > 0.0001) {
+            var r = Math.sqrt(r2);
+            var sr = sig / r;
+            var sr2 = sr * sr;
+            var sr6 = sr2 * sr2 * sr2;
+            var sr12 = sr6 * sr6;
+            var fOverR = 24 * eps * (2 * sr12 - sr6) / r2;
 
-          // Heavy velocity damping
-          p.vx *= dampFactor;
-          p.vy *= dampFactor;
+            // Clamp force to prevent divergence
+            if (fOverR > maxFOverR) fOverR = maxFOverR;
+            if (fOverR < -maxFOverR) fOverR = -maxFOverR;
+
+            var fx = fOverR * dx;
+            var fy = fOverR * dy;
+            pi.ax += fx / s.mass;
+            pi.ay += fy / s.mass;
+            pj.ax -= fx / s.mass;
+            pj.ay -= fy / s.mass;
+          }
         }
       }
-    }
 
-    // Integrate
+      // Solid: strong spring anchoring to equilibrium positions
+      if (phase === "solid") {
+        var kSpring = 0.5 * eps;
+        var dampFactor = 0.88;
+        var maxDisp = 0.3 * sig;
+        var maxDisp2 = maxDisp * maxDisp;
+
+        for (var i = 0; i < particles.length; i++) {
+          var p = particles[i];
+          if (p.eqX !== undefined) {
+            var dx = p.x - p.eqX;
+            var dy = p.y - p.eqY;
+
+            // Clamp displacement from equilibrium
+            var d2 = dx * dx + dy * dy;
+            if (d2 > maxDisp2) {
+              var dMag = Math.sqrt(d2);
+              var clampRatio = maxDisp / dMag;
+              p.x = p.eqX + dx * clampRatio;
+              p.y = p.eqY + dy * clampRatio;
+              dx = p.x - p.eqX;
+              dy = p.y - p.eqY;
+              // Also kill radial velocity
+              var vDot = (p.vx * dx + p.vy * dy) / (dx * dx + dy * dy + 0.001);
+              if (vDot > 0) {
+                p.vx -= vDot * dx;
+                p.vy -= vDot * dy;
+              }
+            }
+
+            // Spring force pulling back to equilibrium
+            p.ax += -kSpring * dx / s.mass;
+            p.ay += -kSpring * dy / s.mass;
+
+            // Heavy velocity damping
+            p.vx *= dampFactor;
+            p.vy *= dampFactor;
+          }
+        }
+      }
+
+      // Integrate (using SUB_DT for stability)
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+
+        // Gravity
+        if (gravityOn) {
+          p.ay += GRAVITY_STRENGTH;
+        }
+
+        // Update velocity
+        p.vx += p.ax * SUB_DT;
+        p.vy += p.ay * SUB_DT;
+
+        // Berendsen thermostat (per substep, scaled coupling)
+        var speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (speed > 0.01) {
+          var ratio = targetSpeed / speed;
+          // Emergency brake: if way over target, use much stronger coupling
+          var effCoupling = (speed > targetSpeed * 2) ? 0.3 : coupling;
+          var scale = 1 + (ratio - 1) * effCoupling;
+          p.vx *= scale;
+          p.vy *= scale;
+        }
+
+        // Phase-specific speed caps
+        if (phase === "solid") {
+          var maxSolidSpeed = targetSpeed * 1.2;
+          var sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+          if (sp > maxSolidSpeed) {
+            p.vx *= maxSolidSpeed / sp;
+            p.vy *= maxSolidSpeed / sp;
+          }
+        } else {
+          // Global cap for liquid/gas
+          var sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+          if (sp > globalMaxSpeed) {
+            p.vx *= globalMaxSpeed / sp;
+            p.vy *= globalMaxSpeed / sp;
+          }
+        }
+
+        // Update position
+        p.x += p.vx * SUB_DT;
+        p.y += p.vy * SUB_DT;
+
+        // Wall collisions
+        if (p.x - particleR < c.x) {
+          p.x = c.x + particleR;
+          p.vx = Math.abs(p.vx) * 0.8;
+          wallHits++;
+        }
+        if (p.x + particleR > c.x + c.w) {
+          p.x = c.x + c.w - particleR;
+          p.vx = -Math.abs(p.vx) * 0.8;
+          wallHits++;
+        }
+        if (p.y - particleR < c.y) {
+          p.y = c.y + particleR;
+          p.vy = Math.abs(p.vy) * 0.8;
+          wallHits++;
+        }
+        if (p.y + particleR > c.y + c.h) {
+          p.y = c.y + c.h - particleR;
+          p.vy = -Math.abs(p.vy) * 0.8;
+          wallHits++;
+        }
+      }
+    } /* end substep loop */
+
+    // Record trail position (once per frame, not per substep)
+    var maxTrailDist2 = sig * sig * 4; // max trail segment length squared
     for (var i = 0; i < particles.length; i++) {
       var p = particles[i];
-
-      // Gravity
-      if (gravityOn) {
-        p.ay += GRAVITY_STRENGTH;
-      }
-
-      // Update velocity
-      p.vx += p.ax * DT;
-      p.vy += p.ay * DT;
-
-      // Berendsen thermostat
-      var speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-      if (speed > 0.01) {
-        var ratio = targetSpeed / speed;
-        var scale = 1 + (ratio - 1) * coupling;
-        p.vx *= scale;
-        p.vy *= scale;
-      }
-
-      // Extra speed cap in solid
-      if (phase === "solid") {
-        var maxSolidSpeed = targetSpeed * 1.2;
-        var sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        if (sp > maxSolidSpeed) {
-          p.vx *= maxSolidSpeed / sp;
-          p.vy *= maxSolidSpeed / sp;
+      if (!p.trail) p.trail = [];
+      // If particle jumped too far, clear trail to avoid streaks
+      if (p.trail.length > 0) {
+        var last = p.trail[p.trail.length - 1];
+        var tdx = p.x - last.x;
+        var tdy = p.y - last.y;
+        if (tdx * tdx + tdy * tdy > maxTrailDist2) {
+          p.trail = [];
         }
       }
-
-      // Update position
-      p.x += p.vx * DT;
-      p.y += p.vy * DT;
-
-      // Record trail position
-      if (!p.trail) p.trail = [];
       p.trail.push({ x: p.x, y: p.y });
-      var maxTrail = phase === "solid" ? 3 : phase === "liquid" ? 5 : 8;
+      var maxTrail = phase === "solid" ? 3 : phase === "liquid" ? 4 : 5;
       while (p.trail.length > maxTrail) {
         p.trail.shift();
-      }
-
-      // Wall collisions
-      if (p.x - particleR < c.x) {
-        p.x = c.x + particleR;
-        p.vx = Math.abs(p.vx) * 0.8;
-        wallHits++;
-      }
-      if (p.x + particleR > c.x + c.w) {
-        p.x = c.x + c.w - particleR;
-        p.vx = -Math.abs(p.vx) * 0.8;
-        wallHits++;
-      }
-      if (p.y - particleR < c.y) {
-        p.y = c.y + particleR;
-        p.vy = Math.abs(p.vy) * 0.8;
-        wallHits++;
-      }
-      if (p.y + particleR > c.y + c.h) {
-        p.y = c.y + c.h - particleR;
-        p.vy = -Math.abs(p.vy) * 0.8;
-        wallHits++;
       }
     }
 
@@ -759,33 +829,39 @@
         initParticles();
       } else if (lastPhase === "solid" && (phase === "liquid" || phase === "gas")) {
         // MELTING: leaving solid -> delete equilibrium, let particles flow
-        // Give particles some velocity to start flowing
         var speed = speedFromTemp();
         for (var i = 0; i < particles.length; i++) {
           var p = particles[i];
           delete p.eqX;
           delete p.eqY;
-          // Add random velocity for dramatic melting effect
           var angle = Math.random() * Math.PI * 2;
           var vMag = speed * (0.5 + Math.random() * 0.5);
           p.vx = Math.cos(angle) * vMag;
           p.vy = Math.sin(angle) * vMag;
+          p.trail = []; // clear trails on transition
         }
       } else if (lastPhase === "liquid" && phase === "gas") {
-        // BOILING: spread particles apart dramatically
+        // BOILING: spread particles apart (capped to prevent runaway)
         var c = getContainer();
         var speed = speedFromTemp();
+        var maxTransSpeed = speed * 2.5; // hard cap on transition velocity
         for (var i = 0; i < particles.length; i++) {
           var p = particles[i];
-          // Explode outward from center
           var cx = c.x + c.w / 2;
           var cy = c.y + c.h / 2;
           var dx = p.x - cx;
           var dy = p.y - cy;
           var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          var pushSpeed = speed * 1.5;
-          p.vx = (dx / dist) * pushSpeed + (Math.random() - 0.5) * speed;
-          p.vy = (dy / dist) * pushSpeed + (Math.random() - 0.5) * speed;
+          var pushSpeed = speed * 1.2;
+          p.vx = (dx / dist) * pushSpeed + (Math.random() - 0.5) * speed * 0.5;
+          p.vy = (dy / dist) * pushSpeed + (Math.random() - 0.5) * speed * 0.5;
+          // Cap resulting speed
+          var sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+          if (sp > maxTransSpeed) {
+            p.vx *= maxTransSpeed / sp;
+            p.vy *= maxTransSpeed / sp;
+          }
+          p.trail = []; // clear trails on transition
         }
       } else if (lastPhase === "gas" && phase === "liquid") {
         // CONDENSING: bring particles closer together
@@ -795,12 +871,12 @@
         var speed = speedFromTemp();
         for (var i = 0; i < particles.length; i++) {
           var p = particles[i];
-          // Move particles toward center
           var dx = cx - p.x;
           var dy = cy - p.y;
           var dist = Math.sqrt(dx * dx + dy * dy) || 1;
           p.vx = (dx / dist) * speed * 0.5 + (Math.random() - 0.5) * speed * 0.3;
           p.vy = (dy / dist) * speed * 0.5 + (Math.random() - 0.5) * speed * 0.3;
+          p.trail = []; // clear trails on transition
         }
       }
     }

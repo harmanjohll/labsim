@@ -1,0 +1,195 @@
+/* Happy Family: Periodic Table Edition — Game-specific styles */
+
+.game-container {
+  background: var(--color-surface);
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+  text-align: center;
+}
+
+.game-header h1 {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  margin-bottom: var(--sp-1);
+  color: var(--color-primary);
+}
+.game-header p {
+  font-size: var(--text-sm);
+  margin-bottom: var(--sp-5);
+  color: var(--color-text-secondary);
+}
+
+/* Name entry */
+#name-entry, #human-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+#name-entry label, #controls label {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+#name-entry input, #name-entry select,
+#controls input, #controls select {
+  font-size: var(--text-base);
+  font-family: var(--font-sans);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  height: 42px;
+}
+#name-entry input:focus, #name-entry select:focus,
+#controls input:focus, #controls select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+#name-entry button, #controls button {
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  height: 42px;
+  padding: var(--sp-2) var(--sp-5);
+  font-size: var(--text-base);
+  border-radius: var(--radius-md);
+}
+#name-entry button:hover, #controls button:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+}
+
+/* Game table */
+#table {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-5);
+}
+.player-seat {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-3);
+  flex: 1 1 250px;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+.player-seat.active {
+  box-shadow: 0 0 15px rgba(67, 97, 238, 0.5);
+  border-color: var(--color-primary);
+}
+#player-0 {
+  flex: 1 1 100%;
+  max-width: 100%;
+  background-color: var(--color-surface-alt);
+  order: 2;
+}
+.computer-players-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
+  width: 100%;
+  order: 1;
+}
+.player-name {
+  font-weight: 600;
+  font-size: var(--text-base);
+  margin-bottom: var(--sp-1);
+  color: var(--color-text);
+}
+
+/* Hands */
+.hand {
+  width: 100%;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-1);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 60px;
+  margin-bottom: var(--sp-1);
+}
+#player-0 .hand .card {
+  width: 80px; height: 120px;
+  margin: 5px;
+  transition: transform 0.2s ease;
+}
+#player-0 .hand .card:hover { transform: scale(1.05); }
+
+.hand.computer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 28px;
+}
+.hand .card { width: 40px; height: 60px; margin: 2px; }
+.hand.computer .card {
+  margin-left: -20px;
+  border: 1px solid var(--color-surface);
+  transition: transform 0.2s ease;
+}
+.hand.computer .card:first-child { margin-left: 0; }
+.hand.computer .card:hover { transform: translateY(-10px); z-index: 10; }
+.hand .card img {
+  width: 100%; height: 100%;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Completed families */
+.completed-families {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  min-height: 64px;
+}
+.completed-families img {
+  width: 40px; height: 60px;
+  border-radius: var(--radius-sm);
+}
+
+/* Game log */
+#log {
+  margin-top: var(--sp-5);
+  padding: var(--sp-4);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  height: 150px;
+  overflow-y: auto;
+  text-align: left;
+  color: var(--color-text);
+}
+#log p {
+  margin: 0 0 var(--sp-2) 0;
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--color-border);
+}
+#log p:last-child { border-bottom: none; }
+
+@media (max-width: 600px) {
+  .game-header h1 { font-size: var(--text-xl); }
+  .player-seat { flex-basis: 45%; max-width: 45%; }
+  #player-0 .hand .card { width: 60px; height: 90px; }
+}

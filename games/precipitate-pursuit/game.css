@@ -1,0 +1,220 @@
+/* Precipitate Pursuit — Game-specific styles (uses design-system.css) */
+
+/* Board sizing variable */
+:root {
+  --board-size: 500px;
+}
+
+/* Game log scrollbar */
+.game-log::-webkit-scrollbar { width: 8px; }
+.game-log::-webkit-scrollbar-track { background: var(--color-surface-alt); border-radius: 10px; }
+.game-log::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 10px; }
+.game-log::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* Playing cards */
+.game-card {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  height: calc(var(--board-size) * 0.13);
+  aspect-ratio: 80/112;
+}
+#player-0-hand .game-card:hover {
+  transform: translateY(-16px) scale(1.05);
+  z-index: 50;
+}
+.game-card.selected {
+  transform: translateY(-24px) scale(1.05) !important;
+  box-shadow: 0 0 20px 5px rgba(67, 97, 238, 0.6);
+}
+
+/* Name entry screen */
+.name-entry-screen {
+  max-width: 420px;
+  margin: var(--sp-8) auto;
+}
+.name-entry-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--sp-8);
+  text-align: center;
+}
+.name-entry-panel h1 {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  margin-bottom: var(--sp-2);
+  color: var(--color-text);
+}
+.name-entry-panel p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--sp-6);
+  font-size: var(--text-sm);
+}
+.name-entry-panel input,
+.name-entry-panel select {
+  width: 100%;
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  margin-bottom: var(--sp-3);
+}
+.name-entry-panel input:focus,
+.name-entry-panel select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+/* Game board */
+.game-board-wrapper {
+  flex-grow: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.game-board {
+  position: relative;
+  width: 90vmin;
+  height: 90vmin;
+  max-width: 600px;
+  max-height: 600px;
+}
+
+/* Central table */
+.central-table-outer {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%; height: 70%;
+  border-radius: var(--radius-xl);
+  background: var(--color-text-muted);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+}
+@media (min-width: 768px) {
+  .central-table-outer { padding: 35px; }
+}
+.central-table-inner {
+  width: 100%; height: 100%;
+  background: var(--bench-bg);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  padding: var(--sp-4);
+  overflow: hidden;
+}
+
+/* Table sections */
+.table-section { width: 100%; display: flex; justify-content: center; align-items: center; text-align: center; color: #fff; }
+.table-section-top { height: 40%; }
+.table-divider { height: 1px; width: 75%; background: rgba(255,255,255,0.2); }
+.table-section-mid { height: 40%; flex-direction: column; }
+.table-section-bottom { height: 20%; padding-top: var(--sp-2); gap: var(--sp-2); border-top: 1px solid rgba(255,255,255,0.2); }
+@media (min-width: 768px) {
+  .table-section-bottom { gap: var(--sp-4); }
+}
+
+/* Pending set display */
+.pending-set-area { width: 75%; height: 100%; padding: var(--sp-1); display: flex; flex-direction: column; align-items: center; }
+.pending-set-cards { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--sp-2); margin-top: var(--sp-1); flex-grow: 1; }
+.pending-mini-card { width: 40px; height: 64px; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-xs); flex-shrink: 0; }
+.pending-mini-card img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Deck pile */
+.deck-pile { width: 25%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.deck-pile img { height: 64px; box-shadow: var(--shadow-md); border-radius: var(--radius-sm); }
+.deck-counter { font-weight: 700; font-size: var(--text-sm); margin-top: var(--sp-1); color: #fff; }
+
+/* Game log */
+.game-log-title { font-weight: 700; font-size: var(--text-sm); text-align: center; color: #fff; }
+@media (min-width: 768px) { .game-log-title { font-size: var(--text-base); } }
+.game-log { flex-grow: 1; height: 100%; overflow-y: auto; font-size: var(--text-xs); padding-right: var(--sp-2); text-align: center; color: rgba(255,255,255,0.85); }
+.game-log p { margin: var(--sp-1) 0; }
+
+/* Countdown */
+.countdown-text { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 700; color: #fff; }
+@media (min-width: 768px) { .countdown-text { font-size: var(--text-sm); } }
+
+/* Control buttons */
+.game-btn {
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all var(--dur-fast) ease;
+}
+@media (min-width: 768px) {
+  .game-btn { padding: var(--sp-2) var(--sp-4); font-size: var(--text-sm); }
+}
+.game-btn:disabled { background: var(--color-text-muted) !important; cursor: not-allowed; opacity: 0.6; }
+.game-btn-form { background: var(--color-success); }
+.game-btn-form:hover:not(:disabled) { background: var(--color-success-hover); }
+.game-btn-skip { background: var(--color-warning); }
+.game-btn-skip:hover:not(:disabled) { filter: brightness(0.9); }
+.game-btn-sabotage { background: var(--color-danger); }
+.game-btn-sabotage:hover:not(:disabled) { background: var(--color-danger-hover); }
+
+/* Player name tags */
+.player-name-tag {
+  position: absolute;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--radius-full);
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  z-index: 20;
+  white-space: nowrap;
+}
+@media (min-width: 768px) { .player-name-tag { font-size: var(--text-sm); } }
+.player-name-tag.active-player { box-shadow: 0 0 0 2px var(--color-success); }
+.player-name-tag.pending-player { box-shadow: 0 0 0 2px var(--color-primary); }
+
+/* Player benches */
+.bench { position: absolute; display: flex; align-items: center; justify-content: center; }
+.player-hand { display: flex; align-items: center; position: relative; }
+
+/* Cards in hand */
+.game-card {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: var(--color-text-muted);
+}
+.game-card img { width: 100%; height: 100%; object-fit: cover; }
+.game-card.clickable { cursor: pointer; }
+
+/* Message modal */
+.message-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 100;
+  padding: var(--sp-4);
+}
+.message-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--sp-6);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+.message-modal p { margin-bottom: var(--sp-4); font-size: var(--text-lg); color: var(--color-text); }

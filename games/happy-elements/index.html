@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Johll">
+  <title>Happy Family: Periodic Table Edition – LabSim Games</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/design-system.css?v=5">
+  <link rel="stylesheet" href="game.css?v=1">
+</head>
+<body style="background: var(--color-bg); min-height: 100vh;">
+
+  <!-- Top Navigation -->
+  <nav class="topbar">
+    <a href="../../index.html" class="topbar-brand" style="text-decoration:none;">Lab<span>Sim</span></a>
+    <span class="topbar-breadcrumb">
+      <a href="../index.html">Games</a>
+      <span class="separator">/</span>
+      Happy Elements
+    </span>
+    <div class="topbar-actions">
+      <span id="dark-mode-toggle"></span>
+    </div>
+  </nav>
+
+  <main style="padding: var(--sp-5);">
+    <div class="game-container">
+      <header class="game-header">
+        <h1>Happy Family: Periodic Table Edition</h1>
+        <p>Collect all 4 elements of the same group to form a family!</p>
+      </header>
+      <div id="name-entry">
+        <label for="player-name-input">Your Name:</label>
+        <input type="text" id="player-name-input" placeholder="Enter your name">
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+        <button id="start-game-button">Start Game</button>
+      </div>
+      <div id="table" style="display: none;">
+        <div class="computer-players-container">
+          <div id="player-1" class="player-seat"><div class="player-name" id="name-1"></div><div class="completed-families" id="completed-1"></div><div class="hand computer" id="hand-1"></div></div>
+          <div id="player-2" class="player-seat"><div class="player-name" id="name-2"></div><div class="completed-families" id="completed-2"></div><div class="hand computer" id="hand-2"></div></div>
+          <div id="player-3" class="player-seat"><div class="player-name" id="name-3"></div><div class="completed-families" id="completed-3"></div><div class="hand computer" id="hand-3"></div></div>
+        </div>
+        <div id="player-0" class="player-seat"><div class="player-name" id="name-0">You</div><div class="completed-families" id="completed-0"></div><div class="hand" id="hand-0"></div></div>
+      </div>
+      <div id="controls" style="display: none;"><div id="human-controls"></div></div>
+      <div id="log"><p><em>Game log...</em></p></div>
+    </div>
+  </main>
+
+  <script src="../../shared/dark-mode.js?v=5"></script>
+  <script src="game.js?v=1"></script>
+</body>
+</html>

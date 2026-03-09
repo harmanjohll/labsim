@@ -1,0 +1,230 @@
+/* Reactivity Bridge — Game-specific styles */
+
+/* Header info bar */
+#game-info {
+  padding: var(--sp-3);
+  text-align: center;
+  background: var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: 500;
+}
+#contract-display {
+  font-style: italic;
+  margin-top: var(--sp-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Layout */
+#game-container {
+  display: flex;
+  height: calc(100vh - 145px);
+  overflow: hidden;
+}
+.play-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background: var(--color-bg);
+}
+#trick-summary {
+  width: 300px;
+  background: var(--color-surface-alt);
+  border-left: 1px solid var(--color-border);
+  padding: var(--sp-5);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+#trick-summary h3 {
+  margin-bottom: var(--sp-4);
+  color: var(--color-text);
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: var(--sp-3);
+  font-size: var(--text-lg);
+}
+#trick-history div {
+  margin-bottom: var(--sp-2);
+  padding: var(--sp-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  #game-container { flex-direction: column; height: calc(100vh - 100px); }
+  .play-area { height: 70%; }
+  #trick-summary {
+    width: 100%; height: 30%;
+    border-left: none; border-top: 1px solid var(--color-border);
+  }
+}
+
+/* Board sizing */
+:root { --bs: 500px; }
+#game-board {
+  width: clamp(250px, 80%, 650px);
+  aspect-ratio: 1/1;
+  position: relative;
+  margin: 0 auto;
+  --bs: 500px;
+}
+
+/* Table (circular center) */
+.table {
+  position: absolute;
+  width: calc(var(--bs) * 0.6);
+  height: calc(var(--bs) * 0.6);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bench-bg);
+  border-radius: 50%;
+  border: clamp(5px, 1.5vmin, 10px) solid var(--color-border-strong);
+  box-shadow: var(--shadow-xl), inset 0 0 25px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#table-text {
+  pointer-events: none;
+  font-size: clamp(1rem, 6vmin, 2.5rem);
+  font-weight: bold;
+  color: rgba(255,255,255,0.4);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+/* Trick slots */
+.trick-slot {
+  position: absolute;
+  width: calc(var(--bs) * 0.12);
+  aspect-ratio: 80/112;
+  border: 2px dashed rgba(255,255,255,0.3);
+  border-radius: var(--radius-md);
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.7rem, 2.5vmin, 1rem);
+  color: #fff;
+  font-weight: bold;
+}
+#slot-north { top: 20%; left: 50%; transform: translateX(-50%); }
+#slot-south { bottom: 20%; left: 50%; transform: translateX(-50%); }
+#slot-west { left: 20%; top: 50%; transform: translateY(-50%); }
+#slot-east { right: 20%; top: 50%; transform: translateY(-50%); }
+
+/* Benches */
+.bench {
+  position: absolute;
+  display: flex;
+  gap: calc(var(--bs) * 0.02);
+}
+.bench.north { top: 0; left: 50%; transform: translate(-50%, -50%); flex-direction: row; }
+.bench.south { bottom: 0; left: 50%; transform: translate(-50%, 50%); flex-direction: row; }
+.bench.west { left: 0; top: 50%; transform: translate(-50%, -50%); flex-direction: column; }
+.bench.east { right: 0; top: 50%; transform: translate(50%, -50%); flex-direction: column; }
+
+/* Cards */
+.card {
+  height: calc(var(--bs) * 0.15);
+  aspect-ratio: 80/112;
+  display: block;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--color-surface);
+}
+.bench.west .card, .bench.east .card { transform: rotate(90deg); }
+.bench.south .card:hover { transform: translateY(-15px) scale(1.05); }
+
+/* Name entry in topbar area */
+.game-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  align-items: center;
+}
+.game-controls label {
+  font-weight: 500;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.game-controls input,
+.game-controls select {
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+.game-controls input:focus,
+.game-controls select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+/* Bidding Modal */
+#bidding-modal-overlay {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+#bidding-modal {
+  background: var(--color-surface);
+  padding: var(--sp-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  border: 1px solid var(--color-border);
+}
+#bidding-modal h2 {
+  margin-bottom: var(--sp-5);
+  color: var(--color-text);
+}
+#bid-history {
+  max-height: 120px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-5);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+#player-bid-controls button {
+  padding: var(--sp-3) var(--sp-4);
+  margin: var(--sp-1);
+  font-size: var(--text-base);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s;
+}
+.bid-btn {
+  background-color: var(--color-primary);
+  color: white;
+}
+.bid-btn:hover { background-color: var(--color-primary-hover); }
+.pass-btn {
+  background-color: var(--color-danger);
+  color: white;
+}
+.pass-btn:hover { background-color: var(--color-danger-hover); }

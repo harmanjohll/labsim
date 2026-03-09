@@ -561,7 +561,13 @@
   /* =========================================================================
      STATE
      ========================================================================= */
-  var rotX = 0.3, rotY = 0.5;
+  /* Orientation quaternion — initialised to match old rotX=0.3, rotY=0.5 */
+  var orientation = (function () {
+    var qy = quatFromAxisAngle(0, 1, 0, 0.5);
+    var qx = quatFromAxisAngle(1, 0, 0, 0.3);
+    return quatNormalize(quatMultiply(qx, qy));
+  })();
+  var defaultOrientation = orientation.slice();
   var panX = 0, panY = 0;
   var zoom = 100;
   var renderStyle = "ball-stick";
@@ -591,16 +597,52 @@
   window.addEventListener("resize", resizeCanvas);
 
   /* =========================================================================
-     3D MATH
+     3D MATH — QUATERNION ROTATION
      ========================================================================= */
-  function rotatePoint(x, y, z, rx, ry) {
-    var cosY = Math.cos(ry), sinY = Math.sin(ry);
-    var x1 = x * cosY + z * sinY;
-    var z1 = -x * sinY + z * cosY;
-    var cosX = Math.cos(rx), sinX = Math.sin(rx);
-    var y1 = y * cosX - z1 * sinX;
-    var z2 = y * sinX + z1 * cosX;
-    return { x: x1, y: y1, z: z2 };
+
+  /* Quaternion represented as [w, x, y, z] where w is scalar part */
+
+  function quatFromAxisAngle(ax, ay, az, angle) {
+    var halfA = angle * 0.5;
+    var s = Math.sin(halfA);
+    var len = Math.sqrt(ax * ax + ay * ay + az * az);
+    if (len < 1e-12) { return [1, 0, 0, 0]; }
+    var inv = s / len;
+    return [Math.cos(halfA), ax * inv, ay * inv, az * inv];
+  }
+
+  function quatMultiply(a, b) {
+    return [
+      a[0]*b[0] - a[1]*b[1] - a[2]*b[2] - a[3]*b[3],
+      a[0]*b[1] + a[1]*b[0] + a[2]*b[3] - a[3]*b[2],
+      a[0]*b[2] - a[1]*b[3] + a[2]*b[0] + a[3]*b[1],
+      a[0]*b[3] + a[1]*b[2] - a[2]*b[1] + a[3]*b[0]
+    ];
+  }
+
+  function quatNormalize(q) {
+    var len = Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+    if (len < 1e-12) { return [1, 0, 0, 0]; }
+    var inv = 1 / len;
+    return [q[0]*inv, q[1]*inv, q[2]*inv, q[3]*inv];
+  }
+
+  function quatRotatePoint(px, py, pz, q) {
+    /* p' = q * p * q^-1   (for unit quaternion, q^-1 = conjugate)
+       Expanded to avoid constructing intermediate quaternions. */
+    var qw = q[0], qx = q[1], qy = q[2], qz = q[3];
+
+    /* t = 2 * cross(q.xyz, p) */
+    var tx = 2 * (qy * pz - qz * py);
+    var ty = 2 * (qz * px - qx * pz);
+    var tz = 2 * (qx * py - qy * px);
+
+    /* p' = p + qw * t + cross(q.xyz, t) */
+    return {
+      x: px + qw * tx + (qy * tz - qz * ty),
+      y: py + qw * ty + (qz * tx - qx * tz),
+      z: pz + qw * tz + (qx * ty - qy * tx)
+    };
   }
 
   function project(x, y, z) {
@@ -662,8 +704,7 @@
       currentMol.atoms.push({ el: a.el, x: a.x - cx, y: a.y - cy, z: a.z - cz });
     }
 
-    rotX = 0.3;
-    rotY = 0.5;
+    orientation = defaultOrientation.slice();
     panX = 0;
     panY = 0;
     autoFitZoom();
@@ -699,7 +740,7 @@
     var transformed = [];
     for (i = 0; i < atoms.length; i++) {
       var a = atoms[i];
-      var r = rotatePoint(a.x * zoom, a.y * zoom, a.z * zoom, rotX, rotY);
+      var r = quatRotatePoint(a.x * zoom, a.y * zoom, a.z * zoom, orientation);
       var p = project(r.x, r.y, r.z);
       var elData = ELEMENTS[a.el] || { color: "#CCCCCC", vdw: 150, cov: 70 };
       transformed.push({
@@ -891,8 +932,18 @@
       panX += dx;
       panY += dy;
     } else {
-      rotY += dx * 0.008;
-      rotX += dy * 0.008;
+      /* Build an incremental rotation quaternion from the drag delta.
+         Horizontal drag → rotate around screen-space Y axis.
+         Vertical drag   → rotate around screen-space X axis.
+         The axis is perpendicular to the drag direction in screen space. */
+      var angle = Math.sqrt(dx * dx + dy * dy) * 0.008;
+      if (angle > 1e-6) {
+        /* Axis in screen space: perpendicular to (dx, dy) is (dy, -dx, 0)
+           but for intuitive "turntable" feel we use (0,1,0) for dx
+           and (1,0,0) for dy, combined as a single rotation. */
+        var qDelta = quatFromAxisAngle(dy, dx, 0, angle);
+        orientation = quatNormalize(quatMultiply(qDelta, orientation));
+      }
     }
   });
 
@@ -936,8 +987,11 @@
       var dy = e.touches[0].clientY - lastY;
       lastX = e.touches[0].clientX;
       lastY = e.touches[0].clientY;
-      rotY += dx * 0.008;
-      rotX += dy * 0.008;
+      var angle = Math.sqrt(dx * dx + dy * dy) * 0.008;
+      if (angle > 1e-6) {
+        var qDelta = quatFromAxisAngle(dy, dx, 0, angle);
+        orientation = quatNormalize(quatMultiply(qDelta, orientation));
+      }
     } else if (e.touches.length === 2) {
       var tdx = e.touches[0].clientX - e.touches[1].clientX;
       var tdy = e.touches[0].clientY - e.touches[1].clientY;
@@ -978,8 +1032,7 @@
   chkSpin.addEventListener("change", function () { autoSpin = this.checked; });
 
   btnReset.addEventListener("click", function () {
-    rotX = 0.3;
-    rotY = 0.5;
+    orientation = defaultOrientation.slice();
     panX = 0;
     panY = 0;
     autoFitZoom();
@@ -1009,7 +1062,8 @@
      ========================================================================= */
   function tick() {
     if (autoSpin && !dragging) {
-      rotY += 0.006;
+      var qSpin = quatFromAxisAngle(0, 1, 0, 0.006);
+      orientation = quatNormalize(quatMultiply(qSpin, orientation));
     }
     render();
     requestAnimationFrame(tick);

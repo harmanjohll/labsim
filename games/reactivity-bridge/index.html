@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Johll">
+  <title>Reactivity Bridge – LabSim Games</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/design-system.css?v=5">
+  <link rel="stylesheet" href="game.css?v=1">
+</head>
+<body style="background: var(--color-bg); min-height: 100vh; overflow: hidden;">
+
+  <!-- Top Navigation -->
+  <nav class="topbar" style="flex-shrink: 0;">
+    <a href="../../index.html" class="topbar-brand" style="text-decoration:none;">Lab<span>Sim</span></a>
+    <span class="topbar-breadcrumb">
+      <a href="../index.html">Games</a>
+      <span class="separator">/</span>
+      Reactivity Bridge
+    </span>
+    <div class="topbar-actions game-controls">
+      <label>Name: <input id="playerName" type="text" placeholder="Your name" value="South"></label>
+      <label>Difficulty:
+        <select id="difficulty">
+          <option value="beginner" selected>Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </label>
+      <button id="startButton" class="btn btn-primary btn-sm">Start Game</button>
+      <span id="dark-mode-toggle"></span>
+    </div>
+  </nav>
+
+  <!-- Game Info -->
+  <div id="game-info">
+    <div id="scoreboard">Team NS: 0 | Team WE: 0</div>
+    <div id="contract-display">No contract</div>
+  </div>
+
+  <!-- Main -->
+  <div id="game-container">
+    <div class="play-area">
+      <div id="game-board">
+        <div class="table">
+          <div id="table-text">Table</div>
+        </div>
+        <div class="trick-slot" id="slot-north">N</div>
+        <div class="trick-slot" id="slot-east">E</div>
+        <div class="trick-slot" id="slot-south">S</div>
+        <div class="trick-slot" id="slot-west">W</div>
+        <div class="bench north" id="bench-north"></div>
+        <div class="bench west"  id="bench-west"></div>
+        <div class="bench east"  id="bench-east"></div>
+        <div class="bench south" id="bench-south"></div>
+      </div>
+    </div>
+    <div id="trick-summary">
+      <h3>Trick Summary</h3>
+      <div id="trick-history"></div>
+    </div>
+  </div>
+
+  <!-- Bidding Modal -->
+  <div id="bidding-modal-overlay">
+    <div id="bidding-modal">
+      <h2>Bidding</h2>
+      <div id="bid-history"></div>
+      <p id="current-bid-text" style="margin-bottom: var(--sp-5); font-weight: bold;"></p>
+      <div id="player-bid-controls"></div>
+    </div>
+  </div>
+
+  <script src="../../shared/dark-mode.js?v=5"></script>
+  <script src="game.js?v=1"></script>
+</body>
+</html>

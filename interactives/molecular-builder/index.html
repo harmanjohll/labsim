@@ -7,7 +7,7 @@
   <title>Molecular Builder – SciSim</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/design-system.css?v=5">
-  <link rel="stylesheet" href="builder.css?v=2">
+  <link rel="stylesheet" href="builder.css?v=3">
 </head>
 <body>
 
@@ -31,7 +31,8 @@
       <h2 class="palette-title" style="margin-top:var(--sp-4);">Mode</h2>
       <div class="mode-tools">
         <button class="mode-btn active" data-mode="bond" title="Bond tool (B)">Bond</button>
-        <button class="mode-btn" data-mode="move" title="Move tool (V)">Move</button>
+        <button class="mode-btn" data-mode="move" title="Move / Select (V)">Move</button>
+        <button class="mode-btn" data-mode="rotate" title="Rotate selection (R)">Rotate</button>
         <button class="mode-btn" data-mode="delete" title="Delete tool (X)">Delete</button>
       </div>
 
@@ -50,14 +51,15 @@
 
       <h2 class="palette-title" style="margin-top:var(--sp-4);">Shortcuts</h2>
       <div class="shortcut-hints">
-        <kbd>B</kbd> Bond &nbsp; <kbd>V</kbd> Move &nbsp; <kbd>X</kbd> Delete<br>
+        <kbd>B</kbd> Bond &nbsp; <kbd>V</kbd> Move &nbsp; <kbd>R</kbd> Rotate &nbsp; <kbd>X</kbd> Delete<br>
         <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Bond order<br>
-        <kbd>H</kbd> Fill hydrogens<br>
-        <kbd>L</kbd> Clean geometry<br>
-        <kbd>Del</kbd> Delete hovered<br>
+        <kbd>H</kbd> Fill H &nbsp; <kbd>L</kbd> Clean geometry<br>
+        <kbd>Ctrl</kbd>+<kbd>A</kbd> Select all &nbsp; <kbd>Esc</kbd> Deselect<br>
+        <kbd>Del</kbd> Delete hovered/selected<br>
+        Scroll wheel rotates selection<br>
         <kbd>Shift</kbd>+click bond: wedge/dash<br>
-        Double-click bond: cycle order<br>
-        Double-click atom: add H
+        Double-click atom: add H<br>
+        In Move: drag-box to select, Shift+click to toggle
       </div>
     </aside>
 
@@ -65,8 +67,9 @@
     <div class="canvas-wrap">
       <canvas id="mol-canvas"></canvas>
       <div class="canvas-hint" id="canvas-hint">
-        Click the canvas to place an atom, or drag from one atom to another to draw a bond.<br>
-        Drag an atom from the palette to choose an element.
+        Click to place atoms. Drag between atoms to bond them.<br>
+        Use Move mode to select and drag entire molecules.<br>
+        Presets add molecules — have up to 20 on the canvas.
       </div>
     </div>
 
@@ -100,18 +103,23 @@
       </div>
 
       <div class="info-section">
+        <label class="info-label">On Canvas</label>
+        <div class="info-value" id="info-molcount" style="font-size:var(--text-sm);font-weight:400;">&mdash;</div>
+      </div>
+
+      <div class="info-section">
         <label class="info-label">Atom Detail</label>
         <div class="atom-list" id="info-atoms">&mdash;</div>
       </div>
 
-      <h2 class="panel-heading" style="margin-top:var(--sp-5);">Presets</h2>
+      <h2 class="panel-heading" style="margin-top:var(--sp-5);">Presets (click to add)</h2>
       <div class="preset-buttons" id="preset-buttons"></div>
     </aside>
 
   </main>
 
   <script src="../../shared/dark-mode.js?v=5"></script>
-  <script src="builder.js?v=2"></script>
+  <script src="builder.js?v=3"></script>
 
 </body>
 </html>

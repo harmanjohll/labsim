@@ -1,7 +1,12 @@
 /* ======================================================
-   Molecular Builder – SciSim Interactive  v2
-   2D molecular editor with VSEPR geometry, wedge/dash bonds,
-   click-and-drag bonding, and auto-layout
+   Molecular Builder – SciSim Interactive  v3
+   2D molecular editor with:
+   - VSEPR geometry engine
+   - Rotation (R key + drag, or scroll on selection)
+   - Multi-select (Shift+click, or drag-box in Move mode)
+   - Multiple molecules on canvas (presets ADD, don't replace)
+   - Wedge/dash stereochemistry bonds
+   - Up to 20 molecules
    ====================================================== */
 
 (function () {
@@ -9,37 +14,41 @@
 
   /* ===== Atom database ===== */
   const ATOMS = [
-    { symbol: "H",  name: "Hydrogen",   valence: 1, mass: 1.008,  radius: 25, color: "#d0d0d0", text: "#333",  covalentR: 31  },
-    { symbol: "C",  name: "Carbon",     valence: 4, mass: 12.011, radius: 30, color: "#333333", text: "#fff",  covalentR: 76  },
-    { symbol: "N",  name: "Nitrogen",   valence: 3, mass: 14.007, radius: 28, color: "#3050d0", text: "#fff",  covalentR: 71  },
-    { symbol: "O",  name: "Oxygen",     valence: 2, mass: 15.999, radius: 27, color: "#d03030", text: "#fff",  covalentR: 66  },
-    { symbol: "F",  name: "Fluorine",   valence: 1, mass: 18.998, radius: 24, color: "#10b020", text: "#fff",  covalentR: 57  },
-    { symbol: "S",  name: "Sulfur",     valence: 2, mass: 32.06,  radius: 30, color: "#c4a800", text: "#fff",  covalentR: 105 },
-    { symbol: "Cl", name: "Chlorine",   valence: 1, mass: 35.45,  radius: 28, color: "#06d6a0", text: "#fff",  covalentR: 102 },
-    { symbol: "Br", name: "Bromine",    valence: 1, mass: 79.904, radius: 29, color: "#a52a2a", text: "#fff",  covalentR: 120 },
-    { symbol: "P",  name: "Phosphorus", valence: 3, mass: 30.974, radius: 28, color: "#ff8c00", text: "#fff",  covalentR: 107 },
+    { symbol: "H",  name: "Hydrogen",   valence: 1, mass: 1.008,  radius: 20, color: "#d0d0d0", text: "#333",  covalentR: 31  },
+    { symbol: "C",  name: "Carbon",     valence: 4, mass: 12.011, radius: 26, color: "#333333", text: "#fff",  covalentR: 76  },
+    { symbol: "N",  name: "Nitrogen",   valence: 3, mass: 14.007, radius: 24, color: "#3050d0", text: "#fff",  covalentR: 71  },
+    { symbol: "O",  name: "Oxygen",     valence: 2, mass: 15.999, radius: 23, color: "#d03030", text: "#fff",  covalentR: 66  },
+    { symbol: "F",  name: "Fluorine",   valence: 1, mass: 18.998, radius: 20, color: "#10b020", text: "#fff",  covalentR: 57  },
+    { symbol: "S",  name: "Sulfur",     valence: 2, mass: 32.06,  radius: 26, color: "#c4a800", text: "#fff",  covalentR: 105 },
+    { symbol: "Cl", name: "Chlorine",   valence: 1, mass: 35.45,  radius: 24, color: "#06d6a0", text: "#fff",  covalentR: 102 },
+    { symbol: "Br", name: "Bromine",    valence: 1, mass: 79.904, radius: 25, color: "#a52a2a", text: "#fff",  covalentR: 120 },
+    { symbol: "P",  name: "Phosphorus", valence: 3, mass: 30.974, radius: 24, color: "#ff8c00", text: "#fff",  covalentR: 107 },
   ];
 
-  const BOND_LENGTH = 70;      // default px between atom centres
-  const BOND_HIT_DIST = 10;    // click tolerance for bond selection
+  const BOND_HIT_DIST = 10;
 
-  /* ===== Interaction modes ===== */
-  const MODE = { BOND: "bond", MOVE: "move", DELETE: "delete" };
+  /* ===== Modes ===== */
+  const MODE = { BOND: "bond", MOVE: "move", DELETE: "delete", ROTATE: "rotate" };
 
   /* ===== State ===== */
-  let atoms = [];           // { id, symbol, x, y, data, lonePairs }
-  let bonds = [];           // { from, to, order, stereo:"none"|"wedge"|"dash" }
+  let atoms = [];       // { id, symbol, x, y, data }
+  let bonds = [];       // { from, to, order, stereo }
   let nextId = 1;
   let mode = MODE.BOND;
-  let selectedElement = ATOMS[1];  // Carbon default
+  let selectedElement = ATOMS[1]; // Carbon
   let selectedBondOrder = 1;
 
+  // Selection
+  let selected = new Set();      // atom ids
+  let selectionBox = null;       // { x0, y0, x1, y1 } for drag-select
+
   // Interaction transients
-  let dragging = null;      // { atom, ox, oy, startX, startY, moved }
+  let dragging = null;           // { startX, startY, atoms:[{id,ox,oy}], moved }
+  let linkPreview = null;        // { fromAtom, mx, my, snapAtom }
+  let ghostDrag = null;          // palette→canvas
+  let rotating = null;           // { cx, cy, startAngle, atomAngles:[{id, angle, dist}] }
   let hoveredAtom = null;
   let hoveredBond = null;
-  let linkPreview = null;   // { fromAtom, mx, my, snapAtom }
-  let ghostDrag = null;     // palette→canvas drag
 
   /* ===== DOM ===== */
   const canvas = document.getElementById("mol-canvas");
@@ -52,6 +61,7 @@
   const infoWarnings = document.getElementById("info-warnings");
   const infoAtoms = document.getElementById("info-atoms");
   const infoGeometry = document.getElementById("info-geometry");
+  const infoMolCount = document.getElementById("info-molcount");
   const presetEl = document.getElementById("preset-buttons");
 
   /* ===== Palette ===== */
@@ -61,16 +71,13 @@
     el.style.setProperty("--atom-color", a.color);
     el.style.setProperty("--atom-bg", a.color + "18");
     el.innerHTML = `<span class="symbol">${a.symbol}</span><span class="valence">${a.valence}</span>`;
-    el.title = `${a.name} (valence ${a.valence})`;
+    el.title = `${a.name} – valence ${a.valence}`;
 
     el.addEventListener("pointerdown", e => {
       e.preventDefault();
-      // Select this element
       selectedElement = a;
       document.querySelectorAll(".palette-atom").forEach(p => p.classList.remove("selected"));
       el.classList.add("selected");
-
-      // Start ghost drag to canvas
       ghostDrag = { data: a, x: e.clientX, y: e.clientY };
       document.addEventListener("pointermove", onGhostMove);
       document.addEventListener("pointerup", onGhostUp);
@@ -91,10 +98,7 @@
     document.removeEventListener("pointermove", onGhostMove);
     document.removeEventListener("pointerup", onGhostUp);
     const pos = clientToCanvas(e.clientX, e.clientY);
-    const rect = canvas.getBoundingClientRect();
-    const inCanvas = e.clientX >= rect.left && e.clientX <= rect.right &&
-                     e.clientY >= rect.top && e.clientY <= rect.bottom;
-    if (inCanvas) {
+    if (isInCanvas(e.clientX, e.clientY)) {
       addAtom(ghostDrag.data, pos.x, pos.y);
       updateInfo();
     }
@@ -105,9 +109,7 @@
   /* ===== Mode / tool buttons ===== */
   document.querySelectorAll(".mode-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      mode = btn.dataset.mode;
-      document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
+      setMode(btn.dataset.mode);
     });
   });
 
@@ -120,12 +122,16 @@
   });
 
   document.getElementById("btn-clear").addEventListener("click", () => {
-    atoms = []; bonds = []; nextId = 1;
+    atoms = []; bonds = []; nextId = 1; selected.clear();
     updateInfo(); draw();
   });
 
   document.getElementById("btn-clean").addEventListener("click", () => {
-    cleanGeometry();
+    if (selected.size > 0) {
+      cleanGeometrySubset(selected);
+    } else {
+      cleanGeometryAll();
+    }
     draw();
   });
 
@@ -139,8 +145,11 @@
     };
   }
 
-  function canvasCoords(e) {
-    return clientToCanvas(e.clientX, e.clientY);
+  function canvasCoords(e) { return clientToCanvas(e.clientX, e.clientY); }
+
+  function isInCanvas(cx, cy) {
+    const rect = canvas.getBoundingClientRect();
+    return cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom;
   }
 
   /* ===== Canvas sizing ===== */
@@ -163,7 +172,6 @@
   }
 
   function getAtomAt(x, y) {
-    // Search in reverse so top-drawn atoms are hit first
     for (let i = atoms.length - 1; i >= 0; i--) {
       const a = atoms[i];
       const dx = a.x - x, dy = a.y - y;
@@ -213,38 +221,63 @@
     return ns;
   }
 
-  function freeValence(atom) {
-    return atom.data.valence - bondOrderSum(atom.id);
+  function freeValence(atom) { return atom.data.valence - bondOrderSum(atom.id); }
+
+  /* ===== Connected components (molecules) ===== */
+  function getMolecules() {
+    const visited = new Set();
+    const molecules = [];
+    for (const a of atoms) {
+      if (visited.has(a.id)) continue;
+      const mol = [];
+      const queue = [a.id];
+      visited.add(a.id);
+      while (queue.length) {
+        const id = queue.shift();
+        mol.push(id);
+        for (const n of neighbours(id)) {
+          if (!visited.has(n.atom.id)) {
+            visited.add(n.atom.id);
+            queue.push(n.atom.id);
+          }
+        }
+      }
+      molecules.push(mol);
+    }
+    return molecules;
+  }
+
+  function getMoleculeOf(atomId) {
+    const visited = new Set();
+    const queue = [atomId];
+    visited.add(atomId);
+    while (queue.length) {
+      const id = queue.shift();
+      for (const n of neighbours(id)) {
+        if (!visited.has(n.atom.id)) {
+          visited.add(n.atom.id);
+          queue.push(n.atom.id);
+        }
+      }
+    }
+    return visited;
   }
 
   /* ============================================================
      VSEPR Geometry Engine
-     Computes ideal angles for atoms in 2D projection
      ============================================================ */
 
-  // Given an atom and its existing neighbour angles, compute the next
-  // ideal angle for placing a new substituent.
   function nextBondAngle(atom) {
     const nbrs = neighbours(atom.id);
-    if (nbrs.length === 0) return -Math.PI / 6; // default: 30° above horizontal (like ChemDraw)
+    if (nbrs.length === 0) return -Math.PI / 6;
 
-    // Collect angles of existing neighbours
     const angles = nbrs.map(n => Math.atan2(n.atom.y - atom.y, n.atom.x - atom.x));
-
-    // Desired total steric number for this atom
-    const lonePairs = computeLonePairs(atom);
-    const stericN = nbrs.length + lonePairs + 1; // +1 for the new bond
-
-    // VSEPR ideal separations
+    const lp = computeLonePairs(atom);
+    const stericN = nbrs.length + lp + 1;
     const idealSep = idealAngleSeparation(stericN);
 
-    // Find the largest gap among existing angles, place new bond in its middle
-    if (angles.length === 1) {
-      // One existing bond: place new one at idealSep from it
-      return angles[0] + idealSep;
-    }
+    if (angles.length === 1) return angles[0] + idealSep;
 
-    // Sort and find largest angular gap
     angles.sort((a, b) => a - b);
     let bestGap = -1, bestMid = 0;
     for (let i = 0; i < angles.length; i++) {
@@ -252,145 +285,151 @@
       const a2 = angles[(i + 1) % angles.length];
       let gap = a2 - a1;
       if (i === angles.length - 1) gap += Math.PI * 2;
-      if (gap > bestGap) {
-        bestGap = gap;
-        bestMid = a1 + gap / 2;
-      }
+      if (gap > bestGap) { bestGap = gap; bestMid = a1 + gap / 2; }
     }
     return bestMid;
   }
 
   function computeLonePairs(atom) {
     const used = bondOrderSum(atom.id);
-    // Simple lone pair model: (valence electrons - bonding electrons) / 2
-    const valElectrons = { H: 1, C: 4, N: 5, O: 6, F: 7, S: 6, Cl: 7, Br: 7, P: 5 };
-    const ve = valElectrons[atom.symbol] || 4;
+    const ve = { H: 1, C: 4, N: 5, O: 6, F: 7, S: 6, Cl: 7, Br: 7, P: 5 }[atom.symbol] || 4;
     return Math.max(0, Math.floor((ve - used) / 2));
   }
 
-  function idealAngleSeparation(stericN) {
-    // Returns ideal angle between substituents for given steric number
-    switch (stericN) {
-      case 1: return Math.PI;          // doesn't matter
-      case 2: return Math.PI;          // linear 180°
-      case 3: return 2 * Math.PI / 3;  // trigonal planar 120°
-      case 4: return 109.5 * Math.PI / 180; // tetrahedral
-      case 5: return 90 * Math.PI / 180;    // trig bipyramidal (approx)
-      case 6: return 90 * Math.PI / 180;    // octahedral
-      default: return 2 * Math.PI / stericN;
+  function idealAngleSeparation(sn) {
+    switch (sn) {
+      case 1: case 2: return Math.PI;
+      case 3: return 2 * Math.PI / 3;
+      case 4: return 109.5 * Math.PI / 180;
+      case 5: return 90 * Math.PI / 180;
+      case 6: return 90 * Math.PI / 180;
+      default: return 2 * Math.PI / sn;
     }
   }
 
-  // Molecular geometry label for display
   function geometryLabel(atom) {
-    const nbrs = neighbours(atom.id);
+    const bn = neighbours(atom.id).length;
     const lp = computeLonePairs(atom);
-    const bn = nbrs.length;
-    const sn = bn + lp;
     if (bn <= 1) return "";
-
     const labels = {
-      "2-0": "Linear",
-      "2-1": "Bent",
-      "2-2": "Bent",
-      "3-0": "Trigonal planar",
-      "3-1": "Trigonal pyramidal",
-      "4-0": "Tetrahedral",
-      "4-1": "See-saw",
-      "4-2": "Square planar",
-      "1-0": "Terminal",
-      "1-1": "Terminal",
-      "1-2": "Terminal",
-      "1-3": "Terminal",
+      "2-0": "Linear", "2-1": "Bent", "2-2": "Bent",
+      "3-0": "Trigonal planar", "3-1": "Trigonal pyramidal",
+      "4-0": "Tetrahedral", "4-1": "See-saw", "4-2": "Square planar",
     };
-    return labels[bn + "-" + lp] || (sn + " steric");
+    return labels[bn + "-" + lp] || ((bn + lp) + " steric");
   }
 
-  /* ===== Auto-layout: Clean Geometry =====
-     Recalculates positions using BFS from the heaviest atom,
-     placing neighbours at correct VSEPR angles. */
+  function bondLength(a1, a2) {
+    const d1 = a1.data || a1;
+    const d2 = a2.data || a2;
+    return Math.max(50, Math.min(80, (d1.covalentR + d2.covalentR) * 0.5));
+  }
 
-  function cleanGeometry() {
-    if (atoms.length === 0) return;
+  function angleDiff(a, b) {
+    let d = a - b;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    return d;
+  }
 
-    // Find a good root: heaviest atom, or atom with most bonds
-    const root = atoms.reduce((best, a) => {
-      const score = neighbours(a.id).length * 100 + a.data.mass;
-      return score > (best._score || 0) ? Object.assign(a, { _score: score }) : best;
-    }, atoms[0]);
+  /* ===== Clean geometry ===== */
+  function cleanGeometryAll() {
+    const mols = getMolecules();
+    const dpr = window.devicePixelRatio || 1;
+    const cw = canvas.width / dpr, ch = canvas.height / dpr;
+
+    // Arrange molecules in a grid
+    const cols = Math.ceil(Math.sqrt(mols.length));
+    const cellW = cw / cols;
+    const rows = Math.ceil(mols.length / cols);
+    const cellH = ch / rows;
+
+    mols.forEach((mol, idx) => {
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const cx = cellW * (col + 0.5);
+      const cy = cellH * (row + 0.5);
+      layoutMolecule(mol, cx, cy);
+    });
+    updateInfo();
+  }
+
+  function cleanGeometrySubset(idSet) {
+    // Find center of selected atoms
+    let sx = 0, sy = 0, n = 0;
+    for (const id of idSet) {
+      const a = atomById(id);
+      if (a) { sx += a.x; sy += a.y; n++; }
+    }
+    if (n === 0) return;
+    // Get the connected molecules that include selected atoms
+    const molIds = new Set();
+    for (const id of idSet) {
+      const mol = getMoleculeOf(id);
+      for (const mid of mol) molIds.add(mid);
+    }
+    layoutMolecule([...molIds], sx / n, sy / n);
+    updateInfo();
+  }
+
+  function layoutMolecule(molIds, cx, cy) {
+    if (molIds.length === 0) return;
+
+    // BFS from the heaviest/most-connected atom
+    let root = null, bestScore = -1;
+    for (const id of molIds) {
+      const a = atomById(id);
+      if (!a) continue;
+      const score = neighbours(id).length * 100 + a.data.mass;
+      if (score > bestScore) { bestScore = score; root = a; }
+    }
+    if (!root) return;
 
     const visited = new Set();
     const queue = [root.id];
     visited.add(root.id);
+    root.x = cx;
+    root.y = cy;
 
-    // Centre root
-    const dpr = window.devicePixelRatio || 1;
-    const cw = canvas.width / dpr;
-    const ch = canvas.height / dpr;
-    root.x = cw / 2;
-    root.y = ch / 2;
-
-    while (queue.length > 0) {
-      const currentId = queue.shift();
-      const current = atomById(currentId);
-      const nbrs = neighbours(currentId);
-
-      // Collect already-placed and unplaced neighbours
+    while (queue.length) {
+      const cid = queue.shift();
+      const current = atomById(cid);
+      const nbrs = neighbours(cid);
       const placed = [], unplaced = [];
       for (const n of nbrs) {
         if (visited.has(n.atom.id)) placed.push(n);
         else unplaced.push(n);
       }
-
       if (unplaced.length === 0) continue;
 
       const lp = computeLonePairs(current);
-      const totalPositions = nbrs.length + lp;
+      const totalPos = nbrs.length + lp;
+      let refAngle = placed.length > 0
+        ? Math.atan2(current.y - placed[0].atom.y, current.x - placed[0].atom.x)
+        : -Math.PI / 6;
 
-      // Reference angle: if we have a placed parent, start opposite to it
-      let refAngle;
-      if (placed.length > 0) {
-        const parent = placed[0].atom;
-        refAngle = Math.atan2(current.y - parent.y, current.x - parent.x);
-      } else {
-        refAngle = -Math.PI / 6; // default angle
-      }
-
-      // Compute evenly-spaced slots
-      const sep = 2 * Math.PI / Math.max(totalPositions, 2);
+      const sep = 2 * Math.PI / Math.max(totalPos, 2);
       const slots = [];
-      for (let i = 0; i < totalPositions; i++) {
-        slots.push(refAngle + sep * i);
-      }
+      for (let i = 0; i < totalPos; i++) slots.push(refAngle + sep * i);
 
-      // Remove slots occupied by already-placed neighbours
       const usedSlots = new Set();
       for (const p of placed) {
         const ang = Math.atan2(p.atom.y - current.y, p.atom.x - current.x);
-        let bestIdx = 0, bestDiff = Infinity;
+        let bi = 0, bd = Infinity;
         for (let i = 0; i < slots.length; i++) {
           if (usedSlots.has(i)) continue;
-          const diff = Math.abs(angleDiff(ang, slots[i]));
-          if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
+          const d = Math.abs(angleDiff(ang, slots[i]));
+          if (d < bd) { bd = d; bi = i; }
         }
-        usedSlots.add(bestIdx);
+        usedSlots.add(bi);
       }
 
-      // Also reserve slots for lone pairs (put them in remaining slots first)
       const freeSlots = [];
       for (let i = 0; i < slots.length; i++) {
         if (!usedSlots.has(i)) freeSlots.push(slots[i]);
       }
+      const bondSlots = freeSlots.slice(lp);
 
-      // Assign lone pair slots first (take slots closest to "above")
-      const lpSlots = [];
-      const bondSlots = [];
-      for (let i = 0; i < freeSlots.length; i++) {
-        if (i < lp) lpSlots.push(freeSlots[i]);
-        else bondSlots.push(freeSlots[i]);
-      }
-
-      // Place unplaced neighbours
       for (let i = 0; i < unplaced.length && i < bondSlots.length; i++) {
         const n = unplaced[i];
         const angle = bondSlots[i];
@@ -401,37 +440,78 @@
         queue.push(n.atom.id);
       }
     }
+  }
 
-    // Handle disconnected fragments
-    for (const a of atoms) {
-      if (!visited.has(a.id)) {
-        visited.add(a.id);
-      }
+  /* ===== Rotation ===== */
+  function startRotation(x, y) {
+    if (selected.size === 0) return false;
+
+    // Compute centre of selection
+    let cx = 0, cy = 0, n = 0;
+    for (const id of selected) {
+      const a = atomById(id);
+      if (a) { cx += a.x; cy += a.y; n++; }
+    }
+    if (n === 0) return false;
+    cx /= n; cy /= n;
+
+    const startAngle = Math.atan2(y - cy, x - cx);
+    const atomAngles = [];
+    for (const id of selected) {
+      const a = atomById(id);
+      if (!a) continue;
+      const ang = Math.atan2(a.y - cy, a.x - cx);
+      const dist = Math.hypot(a.x - cx, a.y - cy);
+      atomAngles.push({ id, angle: ang, dist });
     }
 
-    updateInfo();
+    rotating = { cx, cy, startAngle, atomAngles };
+    return true;
   }
 
-  function angleDiff(a, b) {
-    let d = a - b;
-    while (d > Math.PI) d -= 2 * Math.PI;
-    while (d < -Math.PI) d += 2 * Math.PI;
-    return d;
+  function applyRotation(x, y) {
+    if (!rotating) return;
+    const currentAngle = Math.atan2(y - rotating.cy, x - rotating.cx);
+    const delta = currentAngle - rotating.startAngle;
+
+    for (const aa of rotating.atomAngles) {
+      const a = atomById(aa.id);
+      if (!a) continue;
+      const newAngle = aa.angle + delta;
+      a.x = rotating.cx + Math.cos(newAngle) * aa.dist;
+      a.y = rotating.cy + Math.sin(newAngle) * aa.dist;
+    }
   }
 
-  function bondLength(a1, a2) {
-    // Scale bond length based on covalent radii
-    const sum = a1.data.covalentR + a2.data.covalentR;
-    return Math.max(55, Math.min(90, sum * 0.55));
+  /* ===== Angle snapping ===== */
+  function snapToIdealAngle(atom, rawAngle) {
+    const nbrs = neighbours(atom.id);
+    if (nbrs.length === 0) {
+      const snap30 = Math.round(rawAngle / (Math.PI / 6)) * (Math.PI / 6);
+      if (Math.abs(angleDiff(rawAngle, snap30)) < 0.15) return snap30;
+      return rawAngle;
+    }
+    const idealAngle = nextBondAngle(atom);
+    if (Math.abs(angleDiff(rawAngle, idealAngle)) < 0.4) return idealAngle;
+    const snap30 = Math.round(rawAngle / (Math.PI / 6)) * (Math.PI / 6);
+    if (Math.abs(angleDiff(rawAngle, snap30)) < 0.15) return snap30;
+    return rawAngle;
+  }
+
+  /* ===== Auto-fill H ===== */
+  function autoFillH(atom) {
+    const free = freeValence(atom);
+    if (free <= 0) return;
+    for (let i = 0; i < free; i++) {
+      const angle = nextBondAngle(atom);
+      const len = bondLength(atom, { covalentR: ATOMS[0].covalentR });
+      const h = addAtom(ATOMS[0], atom.x + Math.cos(angle) * len, atom.y + Math.sin(angle) * len);
+      bonds.push({ from: atom.id, to: h.id, order: 1, stereo: "none" });
+    }
   }
 
   /* ============================================================
      Canvas Interaction
-     Bond mode: click atom → drag to atom = bond
-                click atom → drag to empty = new bonded atom
-                click empty = place new atom
-     Move mode: drag atom to reposition
-     Delete mode: click atom/bond to remove
      ============================================================ */
 
   canvas.addEventListener("pointerdown", e => {
@@ -439,10 +519,12 @@
     const atom = getAtomAt(x, y);
     const bond = atom ? null : getBondAt(x, y);
 
+    // DELETE
     if (mode === MODE.DELETE) {
       if (atom) {
         atoms = atoms.filter(a => a.id !== atom.id);
         bonds = bonds.filter(b => b.from !== atom.id && b.to !== atom.id);
+        selected.delete(atom.id);
       } else if (bond) {
         bonds = bonds.filter(b => b !== bond);
       }
@@ -450,23 +532,58 @@
       return;
     }
 
-    if (mode === MODE.MOVE) {
-      if (atom) {
-        dragging = { atom, ox: x - atom.x, oy: y - atom.y, startX: atom.x, startY: atom.y, moved: false };
+    // ROTATE
+    if (mode === MODE.ROTATE) {
+      if (selected.size > 0) {
+        startRotation(x, y);
         canvas.setPointerCapture(e.pointerId);
       }
       return;
     }
 
-    // MODE.BOND
+    // MOVE
+    if (mode === MODE.MOVE) {
+      if (atom) {
+        // If shift-click, toggle selection
+        if (e.shiftKey) {
+          if (selected.has(atom.id)) selected.delete(atom.id);
+          else selected.add(atom.id);
+          draw();
+          return;
+        }
+
+        // If clicking on a selected atom, drag entire selection
+        // If clicking on unselected atom without shift, select just that molecule
+        if (!selected.has(atom.id)) {
+          selected.clear();
+          const mol = getMoleculeOf(atom.id);
+          for (const id of mol) selected.add(id);
+        }
+
+        // Start dragging all selected atoms
+        const dragAtoms = [];
+        for (const id of selected) {
+          const a = atomById(id);
+          if (a) dragAtoms.push({ id, ox: a.x - x, oy: a.y - y });
+        }
+        dragging = { startX: x, startY: y, atoms: dragAtoms, moved: false };
+        canvas.setPointerCapture(e.pointerId);
+      } else {
+        // Start selection box
+        if (!e.shiftKey) selected.clear();
+        selectionBox = { x0: x, y0: y, x1: x, y1: y };
+        canvas.setPointerCapture(e.pointerId);
+      }
+      draw();
+      return;
+    }
+
+    // BOND mode
     if (atom) {
-      // Start bond-draw from this atom
       linkPreview = { fromAtom: atom, mx: x, my: y, snapAtom: null };
       canvas.setPointerCapture(e.pointerId);
     } else if (bond) {
-      // Click on existing bond: cycle order or stereo
       if (e.shiftKey) {
-        // Cycle stereo: none → wedge → dash → none
         const stereos = ["none", "wedge", "dash"];
         const idx = stereos.indexOf(bond.stereo || "none");
         bond.stereo = stereos[(idx + 1) % stereos.length];
@@ -475,19 +592,36 @@
       }
       updateInfo(); draw();
     } else {
-      // Click on empty canvas: place new atom
-      addAtom(selectedElement, x, y);
-      updateInfo(); draw();
+      // Click empty canvas: place new atom
+      if (atoms.length < 500) { // safety limit
+        addAtom(selectedElement, x, y);
+        updateInfo(); draw();
+      }
     }
   });
 
   canvas.addEventListener("pointermove", e => {
     const { x, y } = canvasCoords(e);
 
+    if (rotating) {
+      applyRotation(x, y);
+      draw();
+      return;
+    }
+
     if (dragging) {
-      dragging.atom.x = x - dragging.ox;
-      dragging.atom.y = y - dragging.oy;
+      for (const da of dragging.atoms) {
+        const a = atomById(da.id);
+        if (a) { a.x = x + da.ox; a.y = y + da.oy; }
+      }
       dragging.moved = true;
+      draw();
+      return;
+    }
+
+    if (selectionBox) {
+      selectionBox.x1 = x;
+      selectionBox.y1 = y;
       draw();
       return;
     }
@@ -495,12 +629,11 @@
     if (linkPreview) {
       linkPreview.mx = x;
       linkPreview.my = y;
-      // Snap to nearby atom
       linkPreview.snapAtom = null;
       for (const a of atoms) {
         if (a.id === linkPreview.fromAtom.id) continue;
         const dx = a.x - x, dy = a.y - y;
-        if (dx * dx + dy * dy < a.data.radius * a.data.radius * 1.5) {
+        if (dx * dx + dy * dy < a.data.radius * a.data.radius * 1.8) {
           linkPreview.snapAtom = a;
           break;
         }
@@ -510,20 +643,26 @@
     }
 
     // Hover
-    const prev = hoveredAtom;
-    const prevB = hoveredBond;
+    const prev = hoveredAtom, prevB = hoveredBond;
     hoveredAtom = getAtomAt(x, y);
     hoveredBond = hoveredAtom ? null : getBondAt(x, y);
     if (hoveredAtom !== prev || hoveredBond !== prevB) draw();
 
     canvas.style.cursor =
       mode === MODE.DELETE ? "crosshair" :
-      mode === MODE.MOVE ? (hoveredAtom ? "grab" : "default") :
+      mode === MODE.ROTATE ? (selected.size > 0 ? "grab" : "default") :
+      mode === MODE.MOVE ? (hoveredAtom ? "grab" : "crosshair") :
       (hoveredAtom ? "pointer" : (hoveredBond ? "pointer" : "crosshair"));
   });
 
   canvas.addEventListener("pointerup", e => {
     const { x, y } = canvasCoords(e);
+
+    if (rotating) {
+      rotating = null;
+      draw();
+      return;
+    }
 
     if (dragging) {
       dragging = null;
@@ -531,10 +670,27 @@
       return;
     }
 
+    if (selectionBox) {
+      // Select all atoms within the box
+      const bx = Math.min(selectionBox.x0, selectionBox.x1);
+      const by = Math.min(selectionBox.y0, selectionBox.y1);
+      const bw = Math.abs(selectionBox.x1 - selectionBox.x0);
+      const bh = Math.abs(selectionBox.y1 - selectionBox.y0);
+      if (bw > 5 || bh > 5) { // only if actually dragged
+        for (const a of atoms) {
+          if (a.x >= bx && a.x <= bx + bw && a.y >= by && a.y <= by + bh) {
+            selected.add(a.id);
+          }
+        }
+      }
+      selectionBox = null;
+      draw();
+      return;
+    }
+
     if (linkPreview) {
       const from = linkPreview.fromAtom;
       if (linkPreview.snapAtom) {
-        // Bond to existing atom
         const to = linkPreview.snapAtom;
         const existing = findBond(from.id, to.id);
         if (existing) {
@@ -543,17 +699,12 @@
           bonds.push({ from: from.id, to: to.id, order: selectedBondOrder, stereo: "none" });
         }
       } else {
-        // Dragged into empty space: check if actually moved enough
         const dist = Math.hypot(x - from.x, y - from.y);
-        if (dist > 20) {
-          // Place new atom at the drag endpoint, bonded to source
-          // Snap to ideal angle if close
+        if (dist > 15) {
           let angle = Math.atan2(y - from.y, x - from.x);
           angle = snapToIdealAngle(from, angle);
-          const len = bondLength(from, { data: selectedElement });
-          const nx = from.x + Math.cos(angle) * len;
-          const ny = from.y + Math.sin(angle) * len;
-          const newAtom = addAtom(selectedElement, nx, ny);
+          const len = bondLength(from, selectedElement);
+          const newAtom = addAtom(selectedElement, from.x + Math.cos(angle) * len, from.y + Math.sin(angle) * len);
           bonds.push({ from: from.id, to: newAtom.id, order: selectedBondOrder, stereo: "none" });
         }
       }
@@ -563,7 +714,6 @@
     }
   });
 
-  // Double-click: cycle bond order or add H
   canvas.addEventListener("dblclick", e => {
     const { x, y } = canvasCoords(e);
     const bond = getBondAt(x, y);
@@ -574,49 +724,35 @@
     }
     const atom = getAtomAt(x, y);
     if (atom) {
-      // Fill remaining valence with hydrogens
       autoFillH(atom);
       updateInfo(); draw();
     }
   });
 
-  /* ===== Angle snapping ===== */
-  function snapToIdealAngle(atom, rawAngle) {
-    const nbrs = neighbours(atom.id);
-    if (nbrs.length === 0) {
-      // Snap to 30° increments (like ChemDraw)
-      const snap30 = Math.round(rawAngle / (Math.PI / 6)) * (Math.PI / 6);
-      if (Math.abs(angleDiff(rawAngle, snap30)) < 0.15) return snap30;
-      return rawAngle;
+  // Scroll to rotate selection
+  canvas.addEventListener("wheel", e => {
+    if (selected.size === 0) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.05 : -0.05;
+
+    let cx = 0, cy = 0, n = 0;
+    for (const id of selected) {
+      const a = atomById(id);
+      if (a) { cx += a.x; cy += a.y; n++; }
     }
+    if (n === 0) return;
+    cx /= n; cy /= n;
 
-    // Compute ideal placement angles
-    const lp = computeLonePairs(atom);
-    const totalPositions = nbrs.length + lp + 1;
-    const existingAngles = nbrs.map(n => Math.atan2(n.atom.y - atom.y, n.atom.x - atom.x));
-
-    // Try to snap to VSEPR ideal
-    const idealAngle = nextBondAngle(atom);
-    if (Math.abs(angleDiff(rawAngle, idealAngle)) < 0.4) return idealAngle;
-
-    // Snap to 30° grid
-    const snap30 = Math.round(rawAngle / (Math.PI / 6)) * (Math.PI / 6);
-    if (Math.abs(angleDiff(rawAngle, snap30)) < 0.15) return snap30;
-
-    return rawAngle;
-  }
-
-  /* ===== Auto-fill hydrogens ===== */
-  function autoFillH(atom) {
-    const free = freeValence(atom);
-    if (free <= 0) return;
-    for (let i = 0; i < free; i++) {
-      const angle = nextBondAngle(atom);
-      const len = bondLength(atom, { data: ATOMS[0] });
-      const h = addAtom(ATOMS[0], atom.x + Math.cos(angle) * len, atom.y + Math.sin(angle) * len);
-      bonds.push({ from: atom.id, to: h.id, order: 1, stereo: "none" });
+    for (const id of selected) {
+      const a = atomById(id);
+      if (!a) continue;
+      const ang = Math.atan2(a.y - cy, a.x - cx) + delta;
+      const dist = Math.hypot(a.x - cx, a.y - cy);
+      a.x = cx + Math.cos(ang) * dist;
+      a.y = cy + Math.sin(ang) * dist;
     }
-  }
+    draw();
+  }, { passive: false });
 
   /* ============================================================
      Drawing
@@ -628,8 +764,23 @@
     const h = canvas.height / dpr;
     ctx.clearRect(0, 0, w, h);
 
-    // Background grid
     drawGrid(w, h);
+
+    // Selection box
+    if (selectionBox) {
+      ctx.save();
+      ctx.fillStyle = "rgba(67,97,238,0.08)";
+      ctx.strokeStyle = "rgba(67,97,238,0.4)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      const bx = Math.min(selectionBox.x0, selectionBox.x1);
+      const by = Math.min(selectionBox.y0, selectionBox.y1);
+      const bw = Math.abs(selectionBox.x1 - selectionBox.x0);
+      const bh = Math.abs(selectionBox.y1 - selectionBox.y0);
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.strokeRect(bx, by, bw, bh);
+      ctx.restore();
+    }
 
     // Bonds
     for (const b of bonds) {
@@ -642,10 +793,7 @@
     if (linkPreview) {
       const from = linkPreview.fromAtom;
       let tx = linkPreview.mx, ty = linkPreview.my;
-      if (linkPreview.snapAtom) {
-        tx = linkPreview.snapAtom.x;
-        ty = linkPreview.snapAtom.y;
-      }
+      if (linkPreview.snapAtom) { tx = linkPreview.snapAtom.x; ty = linkPreview.snapAtom.y; }
       ctx.save();
       ctx.setLineDash([6, 4]);
       ctx.strokeStyle = "#4361ee";
@@ -657,22 +805,21 @@
       ctx.stroke();
       ctx.restore();
 
-      // Preview atom circle at endpoint (if not snapping)
       if (!linkPreview.snapAtom) {
         let angle = Math.atan2(ty - from.y, tx - from.x);
         angle = snapToIdealAngle(from, angle);
-        const len = bondLength(from, { data: selectedElement });
+        const len = bondLength(from, selectedElement);
         const px = from.x + Math.cos(angle) * len;
         const py = from.y + Math.sin(angle) * len;
         ctx.save();
-        ctx.globalAlpha = 0.35;
+        ctx.globalAlpha = 0.3;
         ctx.beginPath();
         ctx.arc(px, py, selectedElement.radius, 0, Math.PI * 2);
         ctx.fillStyle = selectedElement.color;
         ctx.fill();
         ctx.globalAlpha = 0.5;
         ctx.fillStyle = selectedElement.text;
-        ctx.font = "bold 13px Inter, sans-serif";
+        ctx.font = "bold 12px Inter, sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(selectedElement.symbol, px, py);
@@ -680,9 +827,25 @@
       }
     }
 
+    // Rotation pivot
+    if (rotating) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(rotating.cx, rotating.cy, 4, 0, Math.PI * 2);
+      ctx.fillStyle = "#4361ee";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(rotating.cx, rotating.cy, 20, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(67,97,238,0.3)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // Atoms
     for (const a of atoms) {
-      drawAtom(a, a === hoveredAtom);
+      drawAtom(a, a === hoveredAtom, selected.has(a.id));
     }
 
     // Ghost drag
@@ -695,7 +858,7 @@
       ctx.fillStyle = ghostDrag.data.color;
       ctx.fill();
       ctx.fillStyle = ghostDrag.data.text;
-      ctx.font = "bold 13px Inter, sans-serif";
+      ctx.font = "bold 12px Inter, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(ghostDrag.data.symbol, pos.x, pos.y);
@@ -720,35 +883,22 @@
     const dx = a2.x - a1.x, dy = a2.y - a1.y;
     const len = Math.hypot(dx, dy);
     if (len === 0) return;
-
-    // Unit vectors
-    const ux = dx / len, uy = dy / len;   // along bond
-    const nx = -uy, ny = ux;              // perpendicular
-
-    // Shorten bonds so they don't overlap atom circles
-    const r1 = a1.data.radius * 0.7;
-    const r2 = a2.data.radius * 0.7;
+    const ux = dx / len, uy = dy / len;
+    const nx = -uy, ny = ux;
+    const r1 = a1.data.radius * 0.65, r2 = a2.data.radius * 0.65;
     const x1 = a1.x + ux * r1, y1 = a1.y + uy * r1;
     const x2 = a2.x - ux * r2, y2 = a2.y - uy * r2;
 
     ctx.lineCap = "round";
 
-    if (stereo === "wedge") {
-      drawWedgeBond(x1, y1, x2, y2, nx, ny, highlighted);
-      return;
-    }
-    if (stereo === "dash") {
-      drawDashBond(x1, y1, x2, y2, nx, ny, highlighted);
-      return;
-    }
+    if (stereo === "wedge") { drawWedgeBond(x1, y1, x2, y2, nx, ny, highlighted); return; }
+    if (stereo === "dash") { drawDashBond(x1, y1, x2, y2, nx, ny, highlighted); return; }
 
-    // Normal bonds
     const color = highlighted ? "#4361ee" : "#555";
-    const w = highlighted ? 3 : 2;
     ctx.strokeStyle = color;
-    ctx.lineWidth = w;
+    ctx.lineWidth = highlighted ? 3 : 2;
+    const gap = 3.5;
 
-    const gap = 4;
     if (order === 1) {
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
     } else if (order === 2) {
@@ -762,35 +912,31 @@
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       for (const s of [-1, 1]) {
         ctx.beginPath();
-        ctx.moveTo(x1 + nx * gap * 1.5 * s, y1 + ny * gap * 1.5 * s);
-        ctx.lineTo(x2 + nx * gap * 1.5 * s, y2 + ny * gap * 1.5 * s);
+        ctx.moveTo(x1 + nx * gap * 1.4 * s, y1 + ny * gap * 1.4 * s);
+        ctx.lineTo(x2 + nx * gap * 1.4 * s, y2 + ny * gap * 1.4 * s);
         ctx.stroke();
       }
     }
   }
 
-  function drawWedgeBond(x1, y1, x2, y2, nx, ny, highlighted) {
-    // Filled triangle: narrow at x1, wide at x2
-    const halfW = 6;
+  function drawWedgeBond(x1, y1, x2, y2, nx, ny, hl) {
+    const hw = 5;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
-    ctx.lineTo(x2 + nx * halfW, y2 + ny * halfW);
-    ctx.lineTo(x2 - nx * halfW, y2 - ny * halfW);
+    ctx.lineTo(x2 + nx * hw, y2 + ny * hw);
+    ctx.lineTo(x2 - nx * hw, y2 - ny * hw);
     ctx.closePath();
-    ctx.fillStyle = highlighted ? "#4361ee" : "#555";
+    ctx.fillStyle = hl ? "#4361ee" : "#555";
     ctx.fill();
   }
 
-  function drawDashBond(x1, y1, x2, y2, nx, ny, highlighted) {
-    // Dashed wedge: series of lines getting wider
-    const steps = 8;
-    const maxW = 6;
-    ctx.strokeStyle = highlighted ? "#4361ee" : "#555";
+  function drawDashBond(x1, y1, x2, y2, nx, ny, hl) {
+    const steps = 7, maxW = 5;
+    ctx.strokeStyle = hl ? "#4361ee" : "#555";
     ctx.lineWidth = 1.5;
     for (let i = 1; i <= steps; i++) {
       const t = i / steps;
-      const cx = x1 + (x2 - x1) * t;
-      const cy = y1 + (y2 - y1) * t;
+      const cx = x1 + (x2 - x1) * t, cy = y1 + (y2 - y1) * t;
       const hw = maxW * t;
       ctx.beginPath();
       ctx.moveTo(cx + nx * hw, cy + ny * hw);
@@ -799,18 +945,31 @@
     }
   }
 
-  function drawAtom(atom, hovered) {
+  function drawAtom(atom, hovered, sel) {
     const r = atom.data.radius;
     const bc = bondOrderSum(atom.id);
     const over = bc > atom.data.valence;
 
+    // Selection highlight
+    if (sel) {
+      ctx.beginPath();
+      ctx.arc(atom.x, atom.y, r + 6, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(67,97,238,0.12)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(67,97,238,0.5)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 2]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
     // Shadow
     ctx.beginPath();
-    ctx.arc(atom.x, atom.y + 2, r, 0, Math.PI * 2);
+    ctx.arc(atom.x, atom.y + 1.5, r, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(0,0,0,0.06)";
     ctx.fill();
 
-    // Body gradient
+    // Body
     ctx.beginPath();
     ctx.arc(atom.x, atom.y, r, 0, Math.PI * 2);
     const grad = ctx.createRadialGradient(atom.x - r * 0.25, atom.y - r * 0.25, r * 0.1, atom.x, atom.y, r);
@@ -821,13 +980,12 @@
 
     // Border
     ctx.strokeStyle = over ? "#ef476f" : (hovered ? "#4361ee" : darken(atom.data.color, 20));
-    ctx.lineWidth = over ? 3 : (hovered ? 3 : 1.5);
+    ctx.lineWidth = over ? 2.5 : (hovered ? 2.5 : 1.5);
     ctx.stroke();
 
-    // Over-valence warning ring
     if (over) {
       ctx.beginPath();
-      ctx.arc(atom.x, atom.y, r + 5, 0, Math.PI * 2);
+      ctx.arc(atom.x, atom.y, r + 4, 0, Math.PI * 2);
       ctx.strokeStyle = "rgba(239,71,111,0.35)";
       ctx.lineWidth = 2;
       ctx.stroke();
@@ -838,119 +996,117 @@
     ctx.shadowColor = "rgba(0,0,0,0.4)";
     ctx.shadowBlur = 2;
     ctx.fillStyle = atom.data.text;
-    ctx.font = `bold ${Math.round(r * 0.7)}px Inter, sans-serif`;
+    ctx.font = `bold ${Math.round(r * 0.65)}px Inter, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(atom.symbol, atom.x, atom.y);
     ctx.restore();
 
-    // Free valence indicator
+    // Free valence
     const free = atom.data.valence - bc;
     if (atoms.length > 1 || bonds.length > 0) {
-      ctx.font = "bold 9px Inter, sans-serif";
+      ctx.font = "bold 8px Inter, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       if (over) {
         ctx.fillStyle = "#ef476f";
-        ctx.fillText("!" + bc + "/" + atom.data.valence, atom.x, atom.y + r + 11);
+        ctx.fillText("!" + bc + "/" + atom.data.valence, atom.x, atom.y + r + 10);
       } else if (free === 0) {
         ctx.fillStyle = "#06d6a0";
-        ctx.fillText("\u2713", atom.x, atom.y + r + 11);
+        ctx.fillText("\u2713", atom.x, atom.y + r + 10);
       } else {
-        ctx.fillStyle = "rgba(100,100,100,0.5)";
-        ctx.fillText(free + " free", atom.x, atom.y + r + 11);
+        ctx.fillStyle = "rgba(100,100,100,0.45)";
+        ctx.fillText(free + " free", atom.x, atom.y + r + 10);
       }
     }
   }
 
   function lighten(hex, amt) {
     const n = parseInt(hex.replace("#", ""), 16);
-    const r = Math.min(255, ((n >> 16) & 0xff) + amt);
-    const g = Math.min(255, ((n >> 8) & 0xff) + amt);
-    const b = Math.min(255, (n & 0xff) + amt);
-    return `rgb(${r},${g},${b})`;
+    return `rgb(${Math.min(255, ((n >> 16) & 0xff) + amt)},${Math.min(255, ((n >> 8) & 0xff) + amt)},${Math.min(255, (n & 0xff) + amt)})`;
   }
 
   function darken(hex, amt) {
     const n = parseInt(hex.replace("#", ""), 16);
-    const r = Math.max(0, ((n >> 16) & 0xff) - amt);
-    const g = Math.max(0, ((n >> 8) & 0xff) - amt);
-    const b = Math.max(0, (n & 0xff) - amt);
-    return `rgb(${r},${g},${b})`;
+    return `rgb(${Math.max(0, ((n >> 16) & 0xff) - amt)},${Math.max(0, ((n >> 8) & 0xff) - amt)},${Math.max(0, (n & 0xff) - amt)})`;
   }
 
   /* ===== Info panel ===== */
   function updateInfo() {
+    const mols = getMolecules();
+
     if (atoms.length === 0) {
-      infoFormula.textContent = "—";
-      infoMass.textContent = "—";
-      infoBonds.textContent = "—";
+      infoFormula.textContent = "\u2014";
+      infoMass.textContent = "\u2014";
+      infoBonds.textContent = "\u2014";
       infoWarnings.textContent = "None";
       infoWarnings.style.color = "";
-      infoAtoms.textContent = "—";
-      if (infoGeometry) infoGeometry.textContent = "—";
+      infoAtoms.textContent = "\u2014";
+      if (infoGeometry) infoGeometry.textContent = "\u2014";
+      if (infoMolCount) infoMolCount.textContent = "\u2014";
       return;
     }
 
-    // Formula – Hill system
-    const counts = {};
-    atoms.forEach(a => counts[a.symbol] = (counts[a.symbol] || 0) + 1);
-    const order = [];
-    if (counts.C) { order.push("C"); if (counts.H) order.push("H"); }
-    Object.keys(counts).sort().forEach(s => { if (!order.includes(s)) order.push(s); });
-    infoFormula.textContent = order.map(s => s + (counts[s] > 1 ? subscript(counts[s]) : "")).join("");
+    // Molecule count
+    if (infoMolCount) {
+      infoMolCount.textContent = mols.length + (mols.length === 1 ? " molecule" : " molecules") +
+        " (" + atoms.length + " atoms)";
+    }
 
-    // Mass
+    // Per-molecule formulas
+    const formulas = mols.map(mol => {
+      const counts = {};
+      mol.forEach(id => {
+        const a = atomById(id);
+        if (a) counts[a.symbol] = (counts[a.symbol] || 0) + 1;
+      });
+      const order = [];
+      if (counts.C) { order.push("C"); if (counts.H) order.push("H"); }
+      Object.keys(counts).sort().forEach(s => { if (!order.includes(s)) order.push(s); });
+      return order.map(s => s + (counts[s] > 1 ? subscript(counts[s]) : "")).join("");
+    });
+    infoFormula.textContent = formulas.join(" + ");
+
+    // Total mass
     let mass = 0;
     atoms.forEach(a => mass += a.data.mass);
     infoMass.textContent = mass.toFixed(3) + " g/mol";
 
     // Bond summary
-    let totalOrder = 0;
-    bonds.forEach(b => totalOrder += b.order);
     const singles = bonds.filter(b => b.order === 1).length;
     const doubles = bonds.filter(b => b.order === 2).length;
     const triples = bonds.filter(b => b.order === 3).length;
-    let bondStr = bonds.length + " bonds";
     const parts = [];
-    if (singles) parts.push(singles + " single");
-    if (doubles) parts.push(doubles + " double");
-    if (triples) parts.push(triples + " triple");
-    if (parts.length) bondStr += " (" + parts.join(", ") + ")";
-    infoBonds.textContent = bondStr;
+    if (singles) parts.push(singles + "\u00d71");
+    if (doubles) parts.push(doubles + "\u00d72");
+    if (triples) parts.push(triples + "\u00d73");
+    infoBonds.textContent = bonds.length + " bonds" + (parts.length ? " (" + parts.join(", ") + ")" : "");
 
     // Warnings
     const warnings = [];
     atoms.forEach(a => {
       const bc = bondOrderSum(a.id);
-      if (bc > a.data.valence) {
-        warnings.push(a.symbol + "#" + a.id + ": " + bc + "/" + a.data.valence + " exceeded");
-      }
+      if (bc > a.data.valence) warnings.push(a.symbol + "#" + a.id);
     });
-    infoWarnings.textContent = warnings.length ? warnings.join("; ") : "None";
+    infoWarnings.textContent = warnings.length ? warnings.length + " over-valence: " + warnings.join(", ") : "None";
     infoWarnings.style.color = warnings.length ? "var(--color-danger)" : "var(--color-success)";
 
-    // Atom list with geometry
-    const atomInfo = atoms.filter(a => neighbours(a.id).length >= 2).map(a => {
-      const geo = geometryLabel(a);
-      return geo ? a.symbol + "#" + a.id + ": " + geo : null;
-    }).filter(Boolean);
-    infoAtoms.textContent = atomInfo.length ? atomInfo.join(", ") : "All terminal/single-bond";
-
-    // Geometry summary
+    // Geometry
     if (infoGeometry) {
-      const centralAtoms = atoms.filter(a => neighbours(a.id).length >= 2);
-      if (centralAtoms.length === 0) {
-        infoGeometry.textContent = "—";
-      } else {
-        infoGeometry.textContent = centralAtoms.map(a => {
+      const central = atoms.filter(a => neighbours(a.id).length >= 2);
+      infoGeometry.textContent = central.length === 0 ? "\u2014" :
+        central.map(a => {
           const lp = computeLonePairs(a);
           const bn = neighbours(a.id).length;
-          return a.symbol + ": " + geometryLabel(a) +
-            " (" + bn + " bonds" + (lp ? ", " + lp + " lp" : "") + ")";
+          return a.symbol + "#" + a.id + ": " + geometryLabel(a) +
+            " (" + bn + "b" + (lp ? "+" + lp + "lp" : "") + ")";
         }).join("\n");
-      }
     }
+
+    // Atom list
+    infoAtoms.textContent = atoms.filter(a => neighbours(a.id).length >= 2).map(a => {
+      return a.symbol + "#" + a.id + ": " + geometryLabel(a);
+    }).filter(Boolean).join(", ") || "All terminal";
   }
 
   function subscript(n) {
@@ -958,17 +1114,32 @@
     return String(n).split("").map(d => subs[parseInt(d)]).join("");
   }
 
-  /* ===== Presets with correct geometry ===== */
+  /* ===== Presets (ADD to canvas, don't replace) ===== */
+  function findOpenPosition() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width / dpr, h = canvas.height / dpr;
+    // Try to find a position not overlapping existing atoms
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const cx = 100 + Math.random() * (w - 200);
+      const cy = 80 + Math.random() * (h - 160);
+      let tooClose = false;
+      for (const a of atoms) {
+        if (Math.hypot(a.x - cx, a.y - cy) < 120) { tooClose = true; break; }
+      }
+      if (!tooClose) return { cx, cy };
+    }
+    return { cx: w / 2, cy: h / 2 };
+  }
+
   const PRESETS = [
     {
       name: "Water (H\u2082O)",
       build(cx, cy) {
-        // O-H bond angle: 104.5°
         const o = addAtom(ATOMS[3], cx, cy);
-        const halfAngle = 104.5 / 2 * Math.PI / 180;
+        const ha = 104.5 / 2 * Math.PI / 180;
         const len = bondLength(ATOMS[3], ATOMS[0]);
-        const h1 = addAtom(ATOMS[0], cx - Math.sin(halfAngle) * len, cy + Math.cos(halfAngle) * len);
-        const h2 = addAtom(ATOMS[0], cx + Math.sin(halfAngle) * len, cy + Math.cos(halfAngle) * len);
+        const h1 = addAtom(ATOMS[0], cx - Math.sin(ha) * len, cy + Math.cos(ha) * len);
+        const h2 = addAtom(ATOMS[0], cx + Math.sin(ha) * len, cy + Math.cos(ha) * len);
         bonds.push({ from: o.id, to: h1.id, order: 1, stereo: "none" });
         bonds.push({ from: o.id, to: h2.id, order: 1, stereo: "none" });
       }
@@ -976,15 +1147,11 @@
     {
       name: "Methane (CH\u2084)",
       build(cx, cy) {
-        // Tetrahedral 2D projection: two in-plane, one wedge up, one dash back
         const c = addAtom(ATOMS[1], cx, cy);
         const len = bondLength(ATOMS[1], ATOMS[0]);
-        // Two in-plane at ~109.5° separation
         const h1 = addAtom(ATOMS[0], cx - len * Math.sin(Math.PI / 6), cy + len * Math.cos(Math.PI / 6));
         const h2 = addAtom(ATOMS[0], cx + len * Math.sin(Math.PI / 6), cy + len * Math.cos(Math.PI / 6));
-        // One going up (wedge)
         const h3 = addAtom(ATOMS[0], cx, cy - len);
-        // One going back (dash) — slightly offset for visibility
         const h4 = addAtom(ATOMS[0], cx, cy + len * 0.4);
         bonds.push({ from: c.id, to: h1.id, order: 1, stereo: "none" });
         bonds.push({ from: c.id, to: h2.id, order: 1, stereo: "none" });
@@ -995,7 +1162,6 @@
     {
       name: "CO\u2082",
       build(cx, cy) {
-        // Linear: 180°
         const c = addAtom(ATOMS[1], cx, cy);
         const len = bondLength(ATOMS[1], ATOMS[3]);
         const o1 = addAtom(ATOMS[3], cx - len, cy);
@@ -1005,36 +1171,39 @@
       }
     },
     {
+      name: "Ammonia (NH\u2083)",
+      build(cx, cy) {
+        const n = addAtom(ATOMS[2], cx, cy);
+        const len = bondLength(ATOMS[2], ATOMS[0]);
+        const sep = 107 * Math.PI / 180;
+        const start = Math.PI / 2 + sep / 2;
+        for (let i = 0; i < 3; i++) {
+          const angle = start + (i - 1) * sep;
+          const h = addAtom(ATOMS[0], cx + Math.cos(angle) * len, cy + Math.sin(angle) * len);
+          bonds.push({ from: n.id, to: h.id, order: 1, stereo: "none" });
+        }
+      }
+    },
+    {
       name: "Ethanol (C\u2082H\u2085OH)",
       build(cx, cy) {
-        const len_cc = bondLength(ATOMS[1], ATOMS[1]);
-        const len_co = bondLength(ATOMS[1], ATOMS[3]);
-        const len_ch = bondLength(ATOMS[1], ATOMS[0]);
-        const len_oh = bondLength(ATOMS[3], ATOMS[0]);
-
-        // Backbone: C-C-O zigzag
-        const c1 = addAtom(ATOMS[1], cx - len_cc * 0.5, cy);
-        const c2 = addAtom(ATOMS[1], cx + len_cc * 0.5, cy);
-        const o = addAtom(ATOMS[3], cx + len_cc * 0.5 + len_co * Math.cos(-Math.PI / 6), cy + len_co * Math.sin(-Math.PI / 6));
-
+        const lcc = bondLength(ATOMS[1], ATOMS[1]);
+        const lco = bondLength(ATOMS[1], ATOMS[3]);
+        const lch = bondLength(ATOMS[1], ATOMS[0]);
+        const loh = bondLength(ATOMS[3], ATOMS[0]);
+        const c1 = addAtom(ATOMS[1], cx - lcc * 0.5, cy);
+        const c2 = addAtom(ATOMS[1], cx + lcc * 0.5, cy);
+        const o = addAtom(ATOMS[3], c2.x + lco * Math.cos(-Math.PI / 6), cy + lco * Math.sin(-Math.PI / 6));
         bonds.push({ from: c1.id, to: c2.id, order: 1, stereo: "none" });
         bonds.push({ from: c2.id, to: o.id, order: 1, stereo: "none" });
-
-        // H on O
-        const oh = addAtom(ATOMS[0], o.x + len_oh * Math.cos(Math.PI / 4), o.y + len_oh * Math.sin(Math.PI / 4));
+        const oh = addAtom(ATOMS[0], o.x + loh * Math.cos(Math.PI / 4), o.y + loh * Math.sin(Math.PI / 4));
         bonds.push({ from: o.id, to: oh.id, order: 1, stereo: "none" });
-
-        // 3 H on C1 (tetrahedral-ish)
-        const angles1 = [Math.PI, -Math.PI / 2, Math.PI + Math.PI / 3];
-        for (const ang of angles1) {
-          const h = addAtom(ATOMS[0], c1.x + Math.cos(ang) * len_ch, c1.y + Math.sin(ang) * len_ch);
+        for (const ang of [Math.PI, -Math.PI / 2, Math.PI + Math.PI / 3]) {
+          const h = addAtom(ATOMS[0], c1.x + Math.cos(ang) * lch, c1.y + Math.sin(ang) * lch);
           bonds.push({ from: c1.id, to: h.id, order: 1, stereo: "none" });
         }
-
-        // 2 H on C2
-        const angles2 = [-Math.PI / 2, Math.PI / 2 + Math.PI / 6];
-        for (const ang of angles2) {
-          const h = addAtom(ATOMS[0], c2.x + Math.cos(ang) * len_ch, c2.y + Math.sin(ang) * len_ch);
+        for (const ang of [-Math.PI / 2, Math.PI / 2 + Math.PI / 6]) {
+          const h = addAtom(ATOMS[0], c2.x + Math.cos(ang) * lch, c2.y + Math.sin(ang) * lch);
           bonds.push({ from: c2.id, to: h.id, order: 1, stereo: "none" });
         }
       }
@@ -1049,38 +1218,21 @@
       }
     },
     {
-      name: "Ammonia (NH\u2083)",
-      build(cx, cy) {
-        // Trigonal pyramidal: 107° angles (2D projection)
-        const n = addAtom(ATOMS[2], cx, cy);
-        const len = bondLength(ATOMS[2], ATOMS[0]);
-        const sep = 107 * Math.PI / 180;
-        const start = Math.PI / 2 + sep / 2; // splay downward
-        for (let i = 0; i < 3; i++) {
-          const angle = start + (i - 1) * sep;
-          const h = addAtom(ATOMS[0], cx + Math.cos(angle) * len, cy + Math.sin(angle) * len);
-          bonds.push({ from: n.id, to: h.id, order: 1, stereo: "none" });
-        }
-      }
-    },
-    {
       name: "Benzene (C\u2086H\u2086)",
       build(cx, cy) {
-        const ringR = 65;
+        const ringR = 55;
         const cs = [];
         for (let i = 0; i < 6; i++) {
           const angle = -Math.PI / 2 + i * Math.PI / 3;
           cs.push(addAtom(ATOMS[1], cx + Math.cos(angle) * ringR, cy + Math.sin(angle) * ringR));
         }
         for (let i = 0; i < 6; i++) {
-          const order = (i % 2 === 0) ? 2 : 1; // alternating
-          bonds.push({ from: cs[i].id, to: cs[(i + 1) % 6].id, order, stereo: "none" });
+          bonds.push({ from: cs[i].id, to: cs[(i + 1) % 6].id, order: (i % 2 === 0) ? 2 : 1, stereo: "none" });
         }
-        // Hydrogens
-        const len_ch = bondLength(ATOMS[1], ATOMS[0]);
+        const lch = bondLength(ATOMS[1], ATOMS[0]);
         for (let i = 0; i < 6; i++) {
           const angle = -Math.PI / 2 + i * Math.PI / 3;
-          const h = addAtom(ATOMS[0], cx + Math.cos(angle) * (ringR + len_ch), cy + Math.sin(angle) * (ringR + len_ch));
+          const h = addAtom(ATOMS[0], cx + Math.cos(angle) * (ringR + lch), cy + Math.sin(angle) * (ringR + lch));
           bonds.push({ from: cs[i].id, to: h.id, order: 1, stereo: "none" });
         }
       }
@@ -1088,24 +1240,19 @@
     {
       name: "Ethene (C\u2082H\u2084)",
       build(cx, cy) {
-        const len_cc = bondLength(ATOMS[1], ATOMS[1]);
-        const len_ch = bondLength(ATOMS[1], ATOMS[0]);
-        // Trigonal planar: 120° around each C
-        const c1 = addAtom(ATOMS[1], cx - len_cc / 2, cy);
-        const c2 = addAtom(ATOMS[1], cx + len_cc / 2, cy);
+        const lcc = bondLength(ATOMS[1], ATOMS[1]);
+        const lch = bondLength(ATOMS[1], ATOMS[0]);
+        const c1 = addAtom(ATOMS[1], cx - lcc / 2, cy);
+        const c2 = addAtom(ATOMS[1], cx + lcc / 2, cy);
         bonds.push({ from: c1.id, to: c2.id, order: 2, stereo: "none" });
-
-        // H on C1 at ±120° from the C-C bond direction (pointing left)
-        const h1a = addAtom(ATOMS[0], c1.x + Math.cos(Math.PI - Math.PI / 3) * len_ch, c1.y + Math.sin(Math.PI - Math.PI / 3) * len_ch);
-        const h1b = addAtom(ATOMS[0], c1.x + Math.cos(Math.PI + Math.PI / 3) * len_ch, c1.y + Math.sin(Math.PI + Math.PI / 3) * len_ch);
-        bonds.push({ from: c1.id, to: h1a.id, order: 1, stereo: "none" });
-        bonds.push({ from: c1.id, to: h1b.id, order: 1, stereo: "none" });
-
-        // H on C2 at ±120° from C-C bond direction (pointing right)
-        const h2a = addAtom(ATOMS[0], c2.x + Math.cos(-Math.PI / 3) * len_ch, c2.y + Math.sin(-Math.PI / 3) * len_ch);
-        const h2b = addAtom(ATOMS[0], c2.x + Math.cos(Math.PI / 3) * len_ch, c2.y + Math.sin(Math.PI / 3) * len_ch);
-        bonds.push({ from: c2.id, to: h2a.id, order: 1, stereo: "none" });
-        bonds.push({ from: c2.id, to: h2b.id, order: 1, stereo: "none" });
+        for (const a of [Math.PI - Math.PI / 3, Math.PI + Math.PI / 3]) {
+          const h = addAtom(ATOMS[0], c1.x + Math.cos(a) * lch, c1.y + Math.sin(a) * lch);
+          bonds.push({ from: c1.id, to: h.id, order: 1, stereo: "none" });
+        }
+        for (const a of [-Math.PI / 3, Math.PI / 3]) {
+          const h = addAtom(ATOMS[0], c2.x + Math.cos(a) * lch, c2.y + Math.sin(a) * lch);
+          bonds.push({ from: c2.id, to: h.id, order: 1, stereo: "none" });
+        }
       }
     },
   ];
@@ -1115,10 +1262,13 @@
     btn.className = "preset-btn";
     btn.textContent = p.name;
     btn.addEventListener("click", () => {
-      atoms = []; bonds = []; nextId = 1;
-      const dpr = window.devicePixelRatio || 1;
-      const cx = (canvas.width / dpr) / 2;
-      const cy = (canvas.height / dpr) / 2;
+      // Check molecule limit
+      const currentMols = getMolecules().length;
+      if (currentMols >= 20) {
+        alert("Maximum 20 molecules on canvas. Clear some to add more.");
+        return;
+      }
+      const { cx, cy } = findOpenPosition();
       p.build(cx, cy);
       updateInfo(); draw();
     });
@@ -1128,6 +1278,13 @@
   /* ===== Keyboard shortcuts ===== */
   document.addEventListener("keydown", e => {
     if (e.key === "Delete" || e.key === "Backspace") {
+      if (selected.size > 0) {
+        atoms = atoms.filter(a => !selected.has(a.id));
+        bonds = bonds.filter(b => !selected.has(b.from) && !selected.has(b.to));
+        selected.clear();
+        updateInfo(); draw();
+        return;
+      }
       if (hoveredAtom) {
         atoms = atoms.filter(a => a.id !== hoveredAtom.id);
         bonds = bonds.filter(b => b.from !== hoveredAtom.id && b.to !== hoveredAtom.id);
@@ -1141,22 +1298,39 @@
       return;
     }
 
-    if (e.key === "1") { selectedBondOrder = 1; syncBondButtons(); }
-    if (e.key === "2") { selectedBondOrder = 2; syncBondButtons(); }
-    if (e.key === "3") { selectedBondOrder = 3; syncBondButtons(); }
+    if (e.key === "1") { selectedBondOrder = 1; syncBondBtns(); }
+    if (e.key === "2") { selectedBondOrder = 2; syncBondBtns(); }
+    if (e.key === "3") { selectedBondOrder = 3; syncBondBtns(); }
 
     if (e.key === "b" || e.key === "B") setMode(MODE.BOND);
     if (e.key === "v" || e.key === "V") setMode(MODE.MOVE);
     if (e.key === "x" || e.key === "X") setMode(MODE.DELETE);
+    if (e.key === "r" || e.key === "R") setMode(MODE.ROTATE);
 
     if ((e.key === "h" || e.key === "H") && !e.ctrlKey && !e.metaKey) {
-      // Fill all atoms with H
-      atoms.filter(a => freeValence(a) > 0).forEach(a => autoFillH(a));
+      const targets = selected.size > 0
+        ? atoms.filter(a => selected.has(a.id) && freeValence(a) > 0)
+        : atoms.filter(a => freeValence(a) > 0);
+      targets.forEach(a => autoFillH(a));
       updateInfo(); draw();
     }
 
     if (e.key === "l" || e.key === "L") {
-      cleanGeometry(); draw();
+      if (selected.size > 0) cleanGeometrySubset(selected);
+      else cleanGeometryAll();
+      draw();
+    }
+
+    if ((e.key === "a" || e.key === "A") && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      selected.clear();
+      atoms.forEach(a => selected.add(a.id));
+      draw();
+    }
+
+    if (e.key === "Escape") {
+      selected.clear();
+      draw();
     }
   });
 
@@ -1165,7 +1339,7 @@
     document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
   }
 
-  function syncBondButtons() {
+  function syncBondBtns() {
     document.querySelectorAll(".bond-btn").forEach(b => {
       b.classList.toggle("active", parseInt(b.dataset.bond) === selectedBondOrder);
     });

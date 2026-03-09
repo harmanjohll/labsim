@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Johll">
+  <title>3D Molecular Viewer – SciSim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/design-system.css?v=5">
+  <link rel="stylesheet" href="viewer.css?v=1">
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="../../index.html" class="topbar-brand" style="text-decoration:none;">Sci<span>Sim</span></a>
+    <span class="topbar-breadcrumb">
+      <a href="../index.html">Interactives</a> &rsaquo; 3D Molecular Viewer
+    </span>
+    <div class="topbar-actions">
+      <span id="dark-mode-toggle"></span>
+    </div>
+  </nav>
+
+  <main class="viewer-layout">
+
+    <!-- Controls -->
+    <aside class="controls" id="controls">
+      <h2 class="ctrl-title">Molecule</h2>
+      <div class="ctrl-group">
+        <label class="ctrl-label">Preset</label>
+        <div class="preset-list" id="preset-list"></div>
+      </div>
+
+      <h2 class="ctrl-title" style="margin-top:var(--sp-4);">Display</h2>
+      <div class="ctrl-group">
+        <label class="ctrl-label">Render Style</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="style" value="ball-stick" checked> Ball &amp; Stick</label>
+          <label class="radio-label"><input type="radio" name="style" value="space-fill"> Space-filling</label>
+          <label class="radio-label"><input type="radio" name="style" value="stick"> Stick only</label>
+        </div>
+      </div>
+
+      <div class="ctrl-group">
+        <label class="ctrl-label">Show Labels</label>
+        <label class="toggle-label">
+          <input type="checkbox" id="toggle-labels" checked> Element symbols
+        </label>
+      </div>
+
+      <div class="ctrl-group">
+        <label class="ctrl-label">Auto-Rotate</label>
+        <label class="toggle-label">
+          <input type="checkbox" id="toggle-spin"> Spin slowly
+        </label>
+      </div>
+
+      <div class="ctrl-group">
+        <label class="ctrl-label">Background</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="bg" value="dark" checked> Dark</label>
+          <label class="radio-label"><input type="radio" name="bg" value="light"> Light</label>
+        </div>
+      </div>
+
+      <div class="ctrl-buttons">
+        <button class="btn btn-outline" id="btn-reset-view">Reset View</button>
+      </div>
+
+      <h2 class="ctrl-title" style="margin-top:var(--sp-4);">Interaction</h2>
+      <div class="help-text">
+        <strong>Drag</strong> to rotate<br>
+        <strong>Scroll</strong> to zoom<br>
+        <strong>Shift+drag</strong> to pan
+      </div>
+
+      <h2 class="ctrl-title" style="margin-top:var(--sp-4);">Molecule Info</h2>
+      <div class="info-section">
+        <label class="info-label">Name</label>
+        <div class="info-value" id="info-name">&mdash;</div>
+      </div>
+      <div class="info-section">
+        <label class="info-label">Formula</label>
+        <div class="info-value" id="info-formula">&mdash;</div>
+      </div>
+      <div class="info-section">
+        <label class="info-label">Atoms</label>
+        <div class="info-value" id="info-atoms">&mdash;</div>
+      </div>
+      <div class="info-section">
+        <label class="info-label">Bonds</label>
+        <div class="info-value" id="info-bonds">&mdash;</div>
+      </div>
+    </aside>
+
+    <!-- 3D Canvas -->
+    <div class="viewer-area">
+      <canvas id="mol3d-canvas"></canvas>
+      <div class="viewer-hint" id="viewer-hint">
+        Select a molecule from the left panel to view it in 3D.<br>
+        Drag to rotate. Scroll to zoom.
+      </div>
+    </div>
+
+  </main>
+
+  <script src="../../shared/dark-mode.js?v=5"></script>
+  <script src="viewer.js?v=1"></script>
+
+</body>
+</html>

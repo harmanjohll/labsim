@@ -194,7 +194,7 @@
     }
 
     // Assign small random velocities (vibration)
-    const vibAmp = speedFromTemp() * 0.15;
+    const vibAmp = speedFromTemp() * 0.05;
     const result = [];
     for (let i = 0; i < positions.length; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -242,7 +242,7 @@
     const targetSpeed = speedFromTemp();
 
     // Thermostat coupling depends on phase
-    const coupling = phase === "gas" ? 0.04 : phase === "liquid" ? 0.015 : 0.008;
+    const coupling = phase === "gas" ? 0.04 : phase === "liquid" ? 0.015 : 0.03;
 
     // Reset accelerations
     for (let i = 0; i < particles.length; i++) {
@@ -282,11 +282,17 @@
 
     // Solid lattice anchor force: harmonic spring to equilibrium position
     if (phase === "solid") {
-      const kSpring = 0.005 * eps;
+      const kSpring = 0.15 * eps;
+      const damping = 0.92;
       for (const p of particles) {
         if (p.eqX !== undefined) {
-          p.ax += kSpring * (p.eqX - p.x) / s.mass;
-          p.ay += kSpring * (p.eqY - p.y) / s.mass;
+          const dx = p.eqX - p.x;
+          const dy = p.eqY - p.y;
+          p.ax += kSpring * dx / s.mass;
+          p.ay += kSpring * dy / s.mass;
+          // Damping to prevent oscillation runaway
+          p.vx *= damping;
+          p.vy *= damping;
         }
       }
     }
@@ -313,7 +319,7 @@
 
       // Limit max speed in solid to prevent lattice breakup
       if (phase === "solid") {
-        const maxSolidSpeed = targetSpeed * 3;
+        const maxSolidSpeed = targetSpeed * 1.5;
         const sp = Math.hypot(p.vx, p.vy);
         if (sp > maxSolidSpeed) {
           p.vx *= maxSolidSpeed / sp;
